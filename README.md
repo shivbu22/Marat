@@ -97,8 +97,8 @@ Clone and install dependencies via `pip` or `uv`:
 
 ```bash
 # Clone the repository
-git clone https://github.com/shivbu22/Mara.git
-cd Mara
+git clone https://github.com/shivbu22/Marat.git
+cd Marat
 
 # Create virtual environment
 python -m venv .venv
