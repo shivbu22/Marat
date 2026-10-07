@@ -1,0 +1,46 @@
+[project]
+name = "marat"
+version = "1.0.0"
+description = "MARAT — Multi-Agent Research Assistant Technology featuring Mara 🐾"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2.0",
+    "langchain>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-ollama>=0.2.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-dotenv>=1.0",
+    "httpx>=0.27",
+    "tenacity>=8.0",
+    "duckduckgo-search>=6.0",
+    "ddgs>=9.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "sse-starlette>=2.0",
+    "rich>=13.0",
+    "typer>=0.12",
+]
+
+[project.scripts]
+marat = "src.cli:app"
+research = "src.cli:app"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
