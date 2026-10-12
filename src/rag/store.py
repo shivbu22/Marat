@@ -44,26 +44,27 @@ class ResearchRAG:
             # 2. sentence-transformers if available
             # 3. Deterministic hash fallback
             self._embeddings = None
-            if self.settings.llm_provider == "ollama" or "localhost" in self.settings.llm_base_url:
-                try:
-                    from langchain_ollama import OllamaEmbeddings
+            if self.settings.embedding_model != "fallback":
+                if self.settings.llm_provider == "ollama" or "localhost" in self.settings.llm_base_url:
+                    try:
+                        from langchain_ollama import OllamaEmbeddings
 
-                    emb_model = self.settings.embedding_model or "nomic-embed-text"
-                    base_url = self.settings.llm_base_url.removesuffix("/v1")
-                    self._embeddings = OllamaEmbeddings(
-                        model=emb_model,
-                        base_url=base_url,
-                    )
-                except Exception:
-                    self._embeddings = None
+                        emb_model = self.settings.embedding_model or "nomic-embed-text"
+                        base_url = self.settings.llm_base_url.removesuffix("/v1")
+                        self._embeddings = OllamaEmbeddings(
+                            model=emb_model,
+                            base_url=base_url,
+                        )
+                    except Exception:
+                        self._embeddings = None
 
-            if self._embeddings is None:
-                try:
-                    from sentence_transformers import SentenceTransformer
+                if self._embeddings is None:
+                    try:
+                        from sentence_transformers import SentenceTransformer
 
-                    self._embeddings = SentenceTransformer("all-MiniLM-L6-v2")
-                except Exception:
-                    self._embeddings = None
+                        self._embeddings = SentenceTransformer("all-MiniLM-L6-v2")
+                    except Exception:
+                        self._embeddings = None
             self._ready = True
             return True
         except Exception as e:

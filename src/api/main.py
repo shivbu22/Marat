@@ -34,7 +34,21 @@ app.add_middleware(
 class ResearchRequest(BaseModel):
     topic: str = Field(..., min_length=3, max_length=500)
     focus_mode: str = Field(default="broad", pattern="^(broad|deep|verify)$")
+    video_url: str = Field(default="", description="Optional lecture video URL or audio recording path")
     stream: bool = False
+
+
+class VideoIngestRequest(BaseModel):
+    source: str = Field(..., description="YouTube URL or local audio/video file path")
+    title: str = Field(default="", description="Optional title for lecture")
+
+
+class VideoIngestResponse(BaseModel):
+    title: str
+    url: str
+    source_type: str
+    segments_count: int
+    indexed_chunks: int
 
 
 class ResearchResponse(BaseModel):
@@ -63,6 +77,7 @@ async def research(req: ResearchRequest):
     initial: dict = {
         "topic": req.topic,
         "focus_mode": req.focus_mode,
+        "video_url": req.video_url,
         "sub_questions": [],
         "findings": [],
         "raw_search_notes": [],
@@ -105,6 +120,25 @@ async def research(req: ResearchRequest):
     )
 
 
+@app.post("/ingest/video", response_model=VideoIngestResponse)
+async def ingest_video_endpoint(req: VideoIngestRequest):
+    """Transcribe a lecture video/audio and index into ChromaDB knowledge vault."""
+    from ..tools.video import index_lecture_in_rag, ingest_video
+
+    lecture = ingest_video(req.source, title=req.title)
+    if not lecture or not lecture.segments:
+        raise HTTPException(status_code=400, detail="Could not extract speech or captions from media source.")
+
+    chunks = index_lecture_in_rag(lecture)
+    return VideoIngestResponse(
+        title=lecture.title,
+        url=lecture.url,
+        source_type=lecture.source_type,
+        segments_count=len(lecture.segments),
+        indexed_chunks=chunks,
+    )
+
+
 @app.post("/research/stream")
 async def research_stream(req: ResearchRequest):
     """Stream progress events + final report (SSE)."""
@@ -113,6 +147,7 @@ async def research_stream(req: ResearchRequest):
     initial: dict = {
         "topic": req.topic,
         "focus_mode": req.focus_mode,
+        "video_url": req.video_url,
         "sub_questions": [],
         "findings": [],
         "raw_search_notes": [],

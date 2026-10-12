@@ -34,6 +34,7 @@ class ResearchState(TypedDict):
     # Input
     topic: str
     focus_mode: str  # broad | deep | verify
+    video_url: str  # optional video lecture or audio recording URL/path
 
     # Planning
     sub_questions: list[dict]  # serialized SubQuestion

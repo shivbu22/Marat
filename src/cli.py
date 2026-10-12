@@ -4,7 +4,19 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import time
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 import typer
 from rich.console import Console
@@ -22,13 +34,13 @@ MARAT_BANNER = """[bold cyan]
 | |  | |/ ___ \\|  _ <  / ___ \\| |  
 |_|  |_/_/   \\_\\_| \\_\\/_/   \\_\\_|  
 [/bold cyan]
-[bold bright_magenta]🐾 MARAT — Multi-Agent Research Assistant Technology[/bold bright_magenta]
+[bold bright_magenta]MARAT — Multi-Agent Research Assistant Technology[/bold bright_magenta]
 [dim italic]Featuring Mara, your intelligent research companion[/dim italic]
 """
 
 app = typer.Typer(
     add_completion=False,
-    help="MARAT — Multi-Agent Research Assistant Technology featuring Mara 🐾",
+    help="MARAT — Multi-Agent Research Assistant Technology featuring Mara",
 )
 console = Console()
 
@@ -37,14 +49,16 @@ console = Console()
 def research(
     topic: str = typer.Argument(..., help="Research topic or question"),
     focus: str = typer.Option("broad", help="Focus mode: broad | deep | verify"),
+    video: str = typer.Option("", "--video", "-v", help="Optional YouTube lecture URL or audio/video file path"),
     save: bool = typer.Option(True, help="Save report to disk"),
 ):
     """Run a full multi-agent research pipeline on a topic."""
     s = get_settings()
     console.print(MARAT_BANNER)
+    video_line = f"\n[bold yellow]Video Ingest:[/] {video}" if video else ""
     console.print(
         Panel.fit(
-            f"[bold cyan]Topic:[/] {topic}\n[bold magenta]Focus:[/] {focus}\n[dim]Companion: Mara 🐾[/dim]",
+            f"[bold cyan]Topic:[/] {topic}\n[bold magenta]Focus:[/] {focus}{video_line}\n[dim]Companion: Mara 🐾[/dim]",
             title="🐾 MARAT Mission Dispatch",
             border_style="cyan",
         )
@@ -54,6 +68,7 @@ def research(
     initial = {
         "topic": topic,
         "focus_mode": focus,
+        "video_url": video,
         "sub_questions": [],
         "findings": [],
         "raw_search_notes": [],
@@ -141,6 +156,41 @@ def research(
         path = out_dir / f"{int(time.time())}_{safe}.md"
         path.write_text(report, encoding="utf-8")
         console.print(f"[green]Saved → {path}[/]")
+
+
+@app.command("ingest-video")
+def ingest_video_cmd(
+    source: str = typer.Argument(..., help="YouTube video URL or local audio/video file path"),
+    title: str = typer.Option("", help="Optional title for the lecture or talk"),
+):
+    """Transcribe and index a video lecture into the ChromaDB Knowledge Vault."""
+    from .tools.video import index_lecture_in_rag, ingest_video
+
+    console.print(MARAT_BANNER)
+    console.print(f"[bold cyan]Transcribing & indexing media:[/] {source}")
+
+    with console.status("[bold green]Extracting speech & generating timestamps…[/]"):
+        lecture = ingest_video(source, title=title)
+
+    if not lecture or not lecture.segments:
+        console.print("[red]Failed to transcribe media or no speech detected.[/]")
+        raise typer.Exit(1)
+
+    count = index_lecture_in_rag(lecture)
+    console.print(
+        Panel.fit(
+            f"[bold green]Title:[/] {lecture.title}\n"
+            f"[bold cyan]Source Type:[/] {lecture.source_type}\n"
+            f"[bold yellow]Segments:[/] {len(lecture.segments)} timestamped entries\n"
+            f"[bold magenta]Indexed Chunks in Vault:[/] {count} blocks",
+            title="🐾 Video Lecture Ingested",
+            border_style="green",
+        )
+    )
+    if lecture.segments:
+        console.print("\n[bold]Preview (First 3 Segments):[/]")
+        for seg in lecture.segments[:3]:
+            console.print(f"  [cyan]{seg.timestamp}[/] {seg.text}")
 
 
 @app.command()

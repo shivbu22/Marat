@@ -22,6 +22,16 @@ chromadb>=0.5.0
 sentence-transformers>=3.0
 faiss-cpu>=1.8.0
 
+# Video & Audio intelligence (Multimodal Ingestion)
+yt-dlp>=2024.4.9
+pydub>=0.25.1
+ffmpeg-python>=0.2.0
+imageio-ffmpeg>=0.5.0
+openai-whisper>=20231117
+torch>=2.2.0
+torchaudio>=2.2.0
+youtube-transcript-api>=0.6.2
+
 # API & serving
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0

@@ -135,13 +135,45 @@ Produce the sub-questions now."""
             }
         ]
 
+    video_src = (state.get("video_url") or "").strip()
+    if not video_src:
+        from ..tools.video import extract_youtube_id
+
+        yt_id = extract_youtube_id(state["topic"])
+        if yt_id:
+            video_src = f"https://www.youtube.com/watch?v={yt_id}"
+
+    video_sources: list[str] = []
+    video_findings: list[dict] = []
+    if video_src:
+        try:
+            from ..tools.video import index_lecture_in_rag, ingest_video
+
+            lecture = ingest_video(video_src, whisper_model=s.whisper_model)
+            if lecture and lecture.segments:
+                index_lecture_in_rag(lecture)
+                video_sources.append(lecture.url)
+                # Seed top lecture segments as verified spoken findings
+                for seg in lecture.segments[:3]:
+                    video_findings.append(
+                        {
+                            "sub_question_id": "q1",
+                            "claim": f"[Timestamp {seg.timestamp}] {seg.text}",
+                            "evidence": f"Spoken lecture recording from {lecture.title} at {seg.timestamp}",
+                            "sources": [lecture.url],
+                            "confidence": 0.9,
+                        }
+                    )
+        except Exception:
+            pass
+
     return {
         "sub_questions": sub_qs,
         "status": "researching",
         "review_count": 0,
-        "findings": [],
+        "findings": video_findings,
         "raw_search_notes": [],
-        "sources_used": [],
+        "sources_used": video_sources,
     }
 
 
@@ -158,15 +190,19 @@ async def _research_one(sq: dict) -> tuple[list[dict], list[str], list[str]]:
     sources = [r.url for r in results if r.url]
     notes = "\n\n".join(f"Source: {r.title}\nURL: {r.url}\n{r.snippet}" for r in results)
 
-    # 2. Optional RAG context
+    # 2. Optional RAG context (documents and video transcripts)
     rag_context = ""
     try:
         rag = get_rag()
-        hits = rag.search(query, k=3)
+        hits = rag.search(query, k=4)
         if hits:
-            rag_context = "\n\n--- From local knowledge vault ---\n" + "\n".join(
-                h["text"][:400] for h in hits
-            )
+            lines = []
+            for h in hits:
+                meta = h.get("metadata") or {}
+                ts = meta.get("timestamp")
+                prefix = f"[{ts}] " if ts else ""
+                lines.append(f"{prefix}{h['text'][:400]}")
+            rag_context = "\n\n--- From Knowledge Vault (Docs & Transcribed Talks) ---\n" + "\n".join(lines)
     except Exception:
         pass
 
@@ -413,6 +449,7 @@ Numbered list of unique URLs used.
 
 Rules:
 - Every non-obvious claim must have a citation.
+- When citing spoken evidence from lecture videos or recordings, include the exact timestamp (e.g. [12:45]).
 - Prefer VERIFIED and PARTIALLY_VERIFIED claims; note UNVERIFIED ones carefully.
 - Neutral, professional tone.
 - If review feedback is provided, address it thoroughly.

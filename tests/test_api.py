@@ -1,6 +1,6 @@
 """Unit tests for FastAPI endpoints."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from starlette.testclient import TestClient
 
@@ -76,3 +76,23 @@ def test_research_stream_endpoint():
         assert "started" in text
         assert "node_update" in text
         assert "completed" in text
+
+
+def test_ingest_video_api_endpoint():
+    mock_lecture = MagicMock()
+    mock_lecture.title = "Neural Networks 101"
+    mock_lecture.url = "https://youtube.com/watch?v=mock123"
+    mock_lecture.source_type = "youtube_captions"
+    mock_lecture.segments = [MagicMock()]
+
+    with patch("src.tools.video.ingest_video", return_value=mock_lecture):
+        with patch("src.tools.video.index_lecture_in_rag", return_value=3):
+            resp = client.post(
+                "/ingest/video",
+                json={"source": "https://youtube.com/watch?v=mock123", "title": "Neural Networks 101"},
+            )
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["title"] == "Neural Networks 101"
+            assert data["segments_count"] == 1
+            assert data["indexed_chunks"] == 3

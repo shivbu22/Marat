@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     parallel_researchers: bool = True
     require_sources: bool = True
 
+    # Video & Multimodal
+    whisper_model: str = "base"
+    video_window_seconds: float = 60.0
+
     # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000
