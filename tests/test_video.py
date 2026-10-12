@@ -77,3 +77,23 @@ def test_index_lecture_in_rag():
         count = index_lecture_in_rag(lecture)
         assert count == 2
         mock_rag.add_texts.assert_called_once()
+
+
+def test_ingest_local_audio_file(tmp_path):
+    import wave
+
+    audio_file = tmp_path / "sample.wav"
+    with wave.open(str(audio_file), "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(16000)
+        wav.writeframes(b"\x00\x00" * 16000)
+
+    lecture = ingest_video(str(audio_file), title="Local Audio Test", whisper_model="tiny")
+    assert lecture is not None
+    assert lecture.title == "Local Audio Test"
+    assert lecture.source_type == "local_file"
+
+
+def test_invalid_video_source():
+    assert ingest_video("https://not-a-real-website.example.org/fake") is None

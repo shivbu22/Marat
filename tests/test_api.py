@@ -96,3 +96,18 @@ def test_ingest_video_api_endpoint():
             assert data["title"] == "Neural Networks 101"
             assert data["segments_count"] == 1
             assert data["indexed_chunks"] == 3
+
+
+def test_ingest_video_api_error_response():
+    with patch("src.tools.video.ingest_video", return_value=None):
+        resp = client.post(
+            "/ingest/video",
+            json={"source": "https://invalid-video.com"},
+        )
+        assert resp.status_code == 400
+        assert "Could not extract speech" in resp.json()["detail"]
+
+
+def test_ingest_video_validation_failure():
+    resp = client.post("/ingest/video", json={})
+    assert resp.status_code == 422

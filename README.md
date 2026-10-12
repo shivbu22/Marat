@@ -13,7 +13,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-Cyclic_State_Machine-FF6F00?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Ollama](https://img.shields.io/badge/Ollama-Local_Inference-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com)
-[![Tests](https://img.shields.io/badge/Tests-33%20Passed-44CC11?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-37%20Passed-44CC11?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 [![Ruff](https://img.shields.io/badge/Code_Style-Ruff_Clean-4682B4?style=for-the-badge)](https://astral.sh/ruff)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
