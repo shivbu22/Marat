@@ -117,6 +117,8 @@ def test_index_dashboard_endpoint():
     resp = client.get("/")
     assert resp.status_code == 200
     assert "MARAT" in resp.text
+    assert "gremlins" in resp.text
+
 
 
 def test_system_status_endpoint():
