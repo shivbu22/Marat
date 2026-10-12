@@ -9,9 +9,7 @@ from .config import get_settings
 
 
 def _resolve_ollama_model(base_url: str, requested: str) -> str:
-    """Resolve model name against locally installed Ollama tags (e.g. llama3.2 -> llama3.2:3b)."""
-    if ":" in requested:
-        return requested
+    """Resolve model name against locally installed Ollama tags (e.g. llama3.2 -> llama3.2:1b)."""
     try:
         import httpx
 
@@ -19,11 +17,17 @@ def _resolve_ollama_model(base_url: str, requested: str) -> str:
         resp = httpx.get(f"{root_url}/api/tags", timeout=1.5)
         if resp.status_code == 200:
             models = [m.get("name", "") for m in resp.json().get("models", [])]
+            if not models:
+                return requested
             if requested in models:
                 return requested
+            # Exact family match (e.g., requested llama3.2:3b -> found llama3.2:1b)
+            prefix = requested.split(":")[0]
             for m in models:
-                if m.startswith(f"{requested}:"):
+                if m == prefix or m.startswith(f"{prefix}:"):
                     return m
+            # If requested model not found anywhere, pick first installed local model
+            return models[0]
     except Exception:
         pass
     return requested

@@ -60,11 +60,16 @@ class ResearchRAG:
 
                 if self._embeddings is None:
                     try:
-                        from sentence_transformers import SentenceTransformer
+                        from chromadb.utils import embedding_functions
 
-                        self._embeddings = SentenceTransformer("all-MiniLM-L6-v2")
+                        self._embeddings = embedding_functions.DefaultEmbeddingFunction()
                     except Exception:
-                        self._embeddings = None
+                        try:
+                            from sentence_transformers import SentenceTransformer
+
+                            self._embeddings = SentenceTransformer("all-MiniLM-L6-v2")
+                        except Exception:
+                            self._embeddings = None
             self._ready = True
             return True
         except Exception as e:
@@ -78,11 +83,14 @@ class ResearchRAG:
                     return self._embeddings.embed_documents(texts)
                 if hasattr(self._embeddings, "encode"):
                     return self._embeddings.encode(texts).tolist()
+                if callable(self._embeddings):
+                    res = self._embeddings(texts)
+                    return [list(map(float, vec)) for vec in res]
             except Exception:
                 pass
-        # Deterministic fallback embedding (not semantic, but keeps system running)
+        # Deterministic 384-dim fallback embedding (matches standard Chroma vector space)
         return [
-            [((hashlib.md5((t + str(i)).encode()).digest()[j % 16]) / 255.0) for j in range(32)]
+            [((hashlib.md5((t + str(i) + str(j)).encode()).digest()[j % 16]) / 255.0) for j in range(384)]
             for i, t in enumerate(texts)
         ]
 
@@ -117,6 +125,14 @@ class ResearchRAG:
             metadatas=metadatas_to_upsert,
         )
         return len(docs)
+
+    def count(self) -> int:
+        if not self._ensure() or self._collection is None:
+            return 0
+        try:
+            return self._collection.count()
+        except Exception:
+            return 0
 
     def search(self, query: str, k: int = 5) -> list[dict[str, Any]]:
         if not self._ensure() or self._collection is None:

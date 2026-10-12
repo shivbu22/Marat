@@ -111,3 +111,24 @@ def test_ingest_video_api_error_response():
 def test_ingest_video_validation_failure():
     resp = client.post("/ingest/video", json={})
     assert resp.status_code == 422
+
+
+def test_index_dashboard_endpoint():
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert "MARAT" in resp.text
+
+
+def test_system_status_endpoint():
+    resp = client.get("/system/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert "vault_documents" in data
+
+
+def test_rag_query_endpoint():
+    resp = client.get("/rag/query?q=agent")
+    assert resp.status_code == 200
+    assert "results" in resp.json()
+

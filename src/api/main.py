@@ -6,10 +6,11 @@ import asyncio
 import json
 import time
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..config import get_settings
@@ -63,9 +64,44 @@ class ResearchResponse(BaseModel):
     elapsed_seconds: float
 
 
+STATIC_INDEX = Path(__file__).parent / "static" / "index.html"
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    """Serve the MARAT web dashboard."""
+    if STATIC_INDEX.exists():
+        return HTMLResponse(content=STATIC_INDEX.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>MARAT API is running</h1><p>Visit <a href='/docs'>/docs</a> for Swagger UI.</p>")
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "provider": s.llm_provider, "model": s.llm_model}
+
+
+@app.get("/system/status")
+async def system_status():
+    from ..rag.store import ResearchRAG
+
+    rag = ResearchRAG()
+    return {
+        "status": "ok",
+        "provider": s.llm_provider,
+        "model": s.llm_model,
+        "rag_enabled": s.rag_enabled,
+        "vault_documents": rag.count(),
+    }
+
+
+@app.get("/rag/query")
+async def query_rag(q: str = ""):
+    from ..rag.store import ResearchRAG
+
+    if not q:
+        return {"results": []}
+    rag = ResearchRAG()
+    return {"results": rag.search(q, k=5)}
 
 
 @app.post("/research", response_model=ResearchResponse)

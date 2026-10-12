@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARAT — Multi-Agent Research Assistant Technology</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #090d16;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(51, 65, 85, 0.6);
+            --border-hover: rgba(99, 102, 241, 0.5);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-error: #ef4444;
+            --node-inactive: #1e293b;
+            --node-active: #4f46e5;
+            --node-done: #059669;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 40%);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+            background: rgba(9, 13, 22, 0.85);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-badge {
+            font-size: 1.75rem;
+            line-height: 1;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-success);
+            box-shadow: 0 0 8px var(--accent-success);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tabs */
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: #818cf8;
+            border-bottom-color: #818cf8;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Grid Layout */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #cbd5e1;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .preset-tag {
+            font-size: 0.72rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            background: rgba(51, 65, 85, 0.5);
+            color: #cbd5e1;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .preset-tag:hover {
+            border-color: var(--accent-primary);
+            color: #fff;
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.85rem 1.5rem;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Pipeline Visualizer */
+        .pipeline-container {
+            margin-bottom: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .pipeline-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nodes-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .node-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .node-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--node-inactive);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .node-step.active .node-circle {
+            background: var(--node-active);
+            border-color: #a5b4fc;
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.8);
+            animation: pulse 1.5s infinite;
+        }
+
+        .node-step.completed .node-circle {
+            background: var(--node-done);
+            border-color: #34d399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .node-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .node-step.active .node-label {
+            color: #818cf8;
+        }
+
+        .node-step.completed .node-label {
+            color: #34d399;
+        }
+
+        .node-arrow {
+            color: var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        /* Live Terminal Telemetry */
+        .terminal-box {
+            background: #020617;
+            border: 1px solid rgba(51, 65, 85, 0.4);
+            border-radius: 8px;
+            padding: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            height: 140px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.3rem;
+            line-height: 1.4;
+        }
+
+        .log-time {
+            color: #475569;
+        }
+
+        .log-node {
+            color: #818cf8;
+            font-weight: 600;
+        }
+
+        .log-msg {
+            color: #cbd5e1;
+        }
+
+        /* Report Output Area */
+        .report-panel {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            min-height: 500px;
+        }
+
+        .report-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-color);
+            color: #cbd5e1;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.8);
+            color: white;
+        }
+
+        .empty-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Rendered Markdown Styling */
+        .markdown-body {
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            color: #fff;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.6rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.3rem;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1rem;
+        }
+
+        .markdown-body ul, .markdown-body ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 1rem;
+            color: #94a3b8;
+            margin: 1rem 0;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 0 6px 6px 0;
+            padding: 0.75rem 1rem;
+        }
+
+        .markdown-body pre {
+            background: #020617;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .markdown-body code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(51, 65, 85, 0.5);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-body th, .markdown-body td {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background: rgba(30, 41, 59, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <span class="brand-badge">🐾</span>
+            <div>
+                <div class="brand-title">MARAT</div>
+                <div class="brand-subtitle">Multi-Agent Research Assistant Technology featuring Mara</div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="badge" title="Local LLM Engine">
+                <span class="dot"></span>
+                <span id="badge-llm">Ollama (llama3.2:1b)</span>
+            </div>
+            <div class="badge" title="Neural Transcription">
+                <span class="dot"></span>
+                <span>Whisper ASR</span>
+            </div>
+            <div class="badge" title="Vector Database">
+                <span class="dot"></span>
+                <span id="badge-rag">ChromaDB Vault</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Navigation Tabs -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('tab-research')">
+                <span>🔬</span> Research Studio
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-video')">
+                <span>🎥</span> Lecture Video Ingest
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-vault')">
+                <span>🗄️</span> ChromaDB Vault Explorer
+            </button>
+        </nav>
+
+        <!-- TAB 1: RESEARCH STUDIO -->
+        <div id="tab-research" class="tab-content active">
+            <div class="layout-grid">
+                <!-- Controls & Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><span>🧭</span> Research Mission</div>
+                        <div class="card-desc">Configure the autonomous multi-agent pipeline.</div>
+                    </div>
+
+                    <form id="research-form" onsubmit="startResearch(event)">
+                        <div class="form-group">
+                            <label for="topic-input">Research Topic</label>
+                            <input type="text" id="topic-input" placeholder="e.g., Quantum Computing in Cryptography" required minlength="3">
+                            <div class="presets">
+                                <span class="preset-tag" onclick="setTopic('Autonomous Multi-Agent AI Architectures')">Multi-Agent Systems</span>
+                                <span class="preset-tag" onclick="setTopic('Post-Quantum Cryptography & Lattice Encryption')">Quantum Cryptography</span>
+                                <span class="preset-tag" onclick="setTopic('Neuromorphic Computing & Spiking Neural Networks')">Neuromorphic AI</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="video-input">Lecture / Video URL (Optional)</label>
+                            <input type="text" id="video-input" placeholder="YouTube URL or local audio/video path">
+                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.3rem;">
+                                If supplied, Whisper will transcribe timestamps & index into RAG before research.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mode-select">Investigation Mode</label>
+                            <select id="mode-select">
+                                <option value="broad">Broad Investigation (Survey & Landscape)</option>
+                                <option value="deep">Deep Investigation (Technical Rigor)</option>
+                                <option value="verify">Fact-Check & Verification Priority</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="btn-primary">
+                            <span>🚀</span> Launch Multi-Agent Swarm
+                        </button>
+                    </form>
+
+                    <!-- Live Telemetry Terminal -->
+                    <div class="terminal-box" id="telemetry-box">
+                        <div class="log-entry">
+                            <span class="log-time">[READY]</span> System initialized. Local Ollama & ChromaDB connected.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Pipeline Visualizer + Report Output -->
+                <div>
+                    <!-- Pipeline Flowchart -->
+                    <div class="pipeline-container">
+                        <div class="pipeline-title">
+                            <span>Autonomous Agent Graph Topology</span>
+                            <span id="pipeline-status-text" style="color: #64748b;">Idle</span>
+                        </div>
+                        <div class="nodes-flow">
+                            <div class="node-step" id="node-planner">
+                                <div class="node-circle">📋</div>
+                                <div class="node-label">Planner</div>
+                            </div>
+                            <div class="node-arrow">➜</div>
+                            <div class="node-step" id="node-researcher">
+                                <div class="node-circle">🔍</div>
+                                <div class="node-label">Researcher</div>
+                            </div>
+                            <div class="node-arrow">➜</div>
+                            <div class="node-step" id="node-fact_checker">
+                                <div class="node-circle">⚖️</div>
+                                <div class="node-label">Fact-Checker</div>
+                            </div>
+                            <div class="node-arrow">➜</div>
+                            <div class="node-step" id="node-writer">
+                                <div class="node-circle">✍️</div>
+                                <div class="node-label">Writer</div>
+                            </div>
+                            <div class="node-arrow">➜</div>
+                            <div class="node-step" id="node-reviewer">
+                                <div class="node-circle">🧐</div>
+                                <div class="node-label">Reviewer</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Panel -->
+                    <div class="report-panel">
+                        <div class="report-actions" id="report-actions" style="display: none;">
+                            <button class="btn-secondary" onclick="copyReport()">📋 Copy Markdown</button>
+                            <button class="btn-secondary" onclick="downloadReport()">💾 Download .md</button>
+                        </div>
+
+                        <div id="report-content" class="markdown-body">
+                            <div class="empty-placeholder">
+                                <div class="empty-icon">🐾</div>
+                                <h3 style="color: #cbd5e1; margin-bottom: 0.5rem;">Mara is ready to investigate</h3>
+                                <p style="max-width: 400px; font-size: 0.85rem;">
+                                    Enter a research topic on the left to activate the autonomous multi-agent LangGraph workflow.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: VIDEO INGEST -->
+        <div id="tab-video" class="tab-content">
+            <div class="card" style="max-width: 650px; margin: 0 auto;">
+                <div class="card-header">
+                    <div class="card-title"><span>🎥</span> Ingest Lecture Video / Audio</div>
+                    <div class="card-desc">Transcribe with OpenAI Whisper & index timestamped segments into ChromaDB.</div>
+                </div>
+
+                <form onsubmit="ingestVideo(event)">
+                    <div class="form-group">
+                        <label for="video-source-input">Media Source (YouTube URL or Local File Path)</label>
+                        <input type="text" id="video-source-input" placeholder="https://www.youtube.com/watch?v=... or path/to/lecture.mp3" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="video-title-input">Lecture Title (Optional)</label>
+                        <input type="text" id="video-title-input" placeholder="e.g., MIT 6.006 Lecture 1">
+                    </div>
+
+                    <button type="submit" id="video-btn" class="btn-primary">
+                        <span>⚡</span> Process & Index in Vault
+                    </button>
+                </form>
+
+                <div id="video-result" style="margin-top: 1.5rem; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: VAULT EXPLORER -->
+        <div id="tab-vault" class="tab-content">
+            <div class="card" style="max-width: 750px; margin: 0 auto;">
+                <div class="card-header">
+                    <div class="card-title"><span>🗄️</span> ChromaDB RAG Knowledge Vault</div>
+                    <div class="card-desc">Search and verify semantically indexed lecture segments and reports.</div>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <input type="text" id="vault-query" placeholder="Search vector store...">
+                    <button class="btn-primary" style="width: auto; padding: 0.75rem 1.5rem;" onclick="searchVault()">Search</button>
+                </div>
+
+                <div id="vault-results">
+                    <div style="text-align: center; color: #64748b; padding: 2rem;">
+                        Enter a search query to inspect matching chunks and cosine similarity scores.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentReportText = "";
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function setTopic(text) {
+            document.getElementById('topic-input').value = text;
+        }
+
+        function logTelemetry(node, msg) {
+            const box = document.getElementById('telemetry-box');
+            const now = new Date().toTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `<span class="log-time">[${now}]</span> <span class="log-node">[${node}]</span> <span class="log-msg">${msg}</span>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function setNodeState(nodeName, state) {
+            const el = document.getElementById(`node-${nodeName}`);
+            if (!el) return;
+            el.classList.remove('active', 'completed');
+            if (state === 'active') el.classList.add('active');
+            if (state === 'completed') el.classList.add('completed');
+        }
+
+        function resetNodes() {
+            ['planner', 'researcher', 'fact_checker', 'writer', 'reviewer'].forEach(name => {
+                setNodeState(name, 'idle');
+            });
+        }
+
+        // Live Research via SSE
+        async function startResearch(e) {
+            e.preventDefault();
+            const topic = document.getElementById('topic-input').value.trim();
+            const videoUrl = document.getElementById('video-input').value.trim();
+            const focusMode = document.getElementById('mode-select').value;
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (!topic) return;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳</span> Investigating...';
+            resetNodes();
+            document.getElementById('pipeline-status-text').innerText = 'Initializing...';
+            document.getElementById('report-actions').style.display = 'none';
+            document.getElementById('report-content').innerHTML = `
+                <div class="empty-placeholder">
+                    <div class="empty-icon" style="animation: pulse 1.5s infinite;">🧠</div>
+                    <h3 style="color: #cbd5e1;">Multi-Agent Pipeline in Progress...</h3>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.5rem;">
+                        Autonomous agents are decomposing questions, scouring the web, and synthesizing findings.
+                    </p>
+                </div>
+            `;
+
+            logTelemetry('SYSTEM', `Dispatched research topic: "${topic}" (mode: ${focusMode})`);
+
+            try {
+                const response = await fetch('/research/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: topic,
+                        video_url: videoUrl,
+                        focus_mode: focusMode,
+                        stream: true
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned status ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let activeNode = null;
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = JSON.parse(line.replace('data: ', ''));
+
+                            if (data.event === 'started') {
+                                logTelemetry('GRAPH', 'LangGraph state machine started.');
+                            } else if (data.event === 'node_update') {
+                                if (activeNode && activeNode !== data.node) {
+                                    setNodeState(activeNode, 'completed');
+                                }
+                                activeNode = data.node;
+                                setNodeState(data.node, 'active');
+                                document.getElementById('pipeline-status-text').innerText = `Active: ${data.node}`;
+                                
+                                let extra = '';
+                                if (data.sub_questions) extra = ` Formulated ${data.sub_questions.length} sub-queries.`;
+                                if (data.findings_added) extra = ` Gathered ${data.findings_added} findings.`;
+                                if (data.review_count) extra = ` Review cycle #${data.review_count}.`;
+
+                                logTelemetry(data.node.toUpperCase(), `Finished step with status: ${data.status}.${extra}`);
+                            } else if (data.event === 'completed') {
+                                if (activeNode) setNodeState(activeNode, 'completed');
+                                document.getElementById('pipeline-status-text').innerText = 'Completed';
+                                currentReportText = data.report || '';
+                                renderReport(currentReportText);
+                                logTelemetry('COMPLETE', 'Synthesis report compiled successfully.');
+                            } else if (data.event === 'error') {
+                                logTelemetry('ERROR', data.detail);
+                                alert('Error during research: ' + data.detail);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                logTelemetry('ERROR', err.message);
+                alert('Connection error: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🚀</span> Launch Multi-Agent Swarm';
+            }
+        }
+
+        function renderReport(md) {
+            document.getElementById('report-actions').style.display = 'flex';
+            if (window.marked) {
+                document.getElementById('report-content').innerHTML = marked.parse(md);
+            } else {
+                document.getElementById('report-content').innerText = md;
+            }
+        }
+
+        function copyReport() {
+            navigator.clipboard.writeText(currentReportText);
+            alert('Report copied to clipboard!');
+        }
+
+        function downloadReport() {
+            const blob = new Blob([currentReportText], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MARAT_Research_Report.md`;
+            a.click();
+        }
+
+        // Ingest Video
+        async function ingestVideo(e) {
+            e.preventDefault();
+            const source = document.getElementById('video-source-input').value.trim();
+            const title = document.getElementById('video-title-input').value.trim();
+            const btn = document.getElementById('video-btn');
+            const resultBox = document.getElementById('video-result');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Transcribing & Indexing...';
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '<div style="color: #818cf8;">Processing audio stream and extracting timestamped chunks...</div>';
+
+            try {
+                const resp = await fetch('/ingest/video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ source, title })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Ingestion failed');
+
+                resultBox.innerHTML = `
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 1rem;">
+                        <h4 style="color: #34d399; margin-bottom: 0.5rem;">✅ Ingestion Successful</h4>
+                        <div style="font-size: 0.85rem; color: #cbd5e1;">
+                            <p><strong>Title:</strong> ${data.title}</p>
+                            <p><strong>Source:</strong> ${data.source_type}</p>
+                            <p><strong>Segments Transcribed:</strong> ${data.segments_count}</p>
+                            <p><strong>ChromaDB Chunks Indexed:</strong> ${data.indexed_chunks}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                resultBox.innerHTML = `
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; color: #fca5a5;">
+                        ❌ Error: ${err.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>⚡</span> Process & Index in Vault';
+            }
+        }
+
+        // Vault Search
+        async function searchVault() {
+            const q = document.getElementById('vault-query').value.trim();
+            const container = document.getElementById('vault-results');
+            if (!q) return;
+
+            container.innerHTML = '<div style="color: #818cf8; padding: 1rem;">Querying ChromaDB vector space...</div>';
+
+            try {
+                const resp = await fetch(`/rag/query?q=${encodeURIComponent(q)}`);
+                const data = await resp.json();
+                if (!data.results || data.results.length === 0) {
+                    container.innerHTML = '<div style="color: #64748b; padding: 1rem;">No matching vector chunks found.</div>';
+                    return;
+                }
+
+                container.innerHTML = data.results.map((r, i) => `
+                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #818cf8; margin-bottom: 0.4rem;">
+                            <span>Chunk #${i + 1}</span>
+                            <span>Distance: ${r.distance !== null ? r.distance.toFixed(4) : 'N/A'}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.5;">${r.text}</div>
+                        <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.4rem;">
+                            Source: ${r.metadata.source || 'vault'} ${r.metadata.timestamp ? '| Timestamp: ' + r.metadata.timestamp : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<div style="color: #ef4444; padding: 1rem;">Query failed: ${err.message}</div>`;
+            }
+        }
+
+        // System info badge updater
+        async function updateStatus() {
+            try {
+                const resp = await fetch('/health');
+                const data = await resp.json();
+                if (data.model) {
+                    document.getElementById('badge-llm').innerText = `${data.provider} (${data.model})`;
+                }
+            } catch(e) {}
+        }
+        updateStatus();
+    </script>
+</body>
+</html>
