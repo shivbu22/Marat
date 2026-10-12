@@ -89,21 +89,16 @@ def fetch_youtube_captions(video_id: str) -> list[TranscriptSegment] | None:
         else:
             raw = []
 
-        segments = []
-        for entry in raw:
-            start = float(entry.get("start", 0.0))
-            dur = float(entry.get("duration", 0.0))
-            text = (entry.get("text") or "").strip()
-            if text:
-                segments.append(
-                    TranscriptSegment(
-                        start=start,
-                        end=start + dur,
-                        timestamp=_format_timestamp(start),
-                        text=text,
-                    )
-                )
-        return segments if segments else None
+        return [
+            TranscriptSegment(
+                start=float(entry.get("start", 0.0)),
+                end=float(entry.get("start", 0.0)) + float(entry.get("duration", 0.0)),
+                timestamp=_format_timestamp(float(entry.get("start", 0.0))),
+                text=entry["text"].strip(),
+            )
+            for entry in raw
+            if entry.get("text", "").strip()
+        ] or None
     except Exception:
         return None
 
@@ -156,21 +151,16 @@ def transcribe_local_audio(
 
         model = whisper.load_model(model_size)
         result = model.transcribe(str(audio_path), fp16=False)
-        segments = []
-        for seg in result.get("segments", []):
-            start = float(seg.get("start", 0.0))
-            end = float(seg.get("end", 0.0))
-            text = (seg.get("text") or "").strip()
-            if text:
-                segments.append(
-                    TranscriptSegment(
-                        start=start,
-                        end=end,
-                        timestamp=_format_timestamp(start),
-                        text=text,
-                    )
-                )
-        return segments
+        return [
+            TranscriptSegment(
+                start=float(seg.get("start", 0.0)),
+                end=float(seg.get("end", 0.0)),
+                timestamp=_format_timestamp(float(seg.get("start", 0.0))),
+                text=seg["text"].strip(),
+            )
+            for seg in result.get("segments", [])
+            if seg.get("text", "").strip()
+        ]
     except Exception as e:
         print(f"[VideoIngest] Whisper error: {e}")
         return []

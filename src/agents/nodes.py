@@ -153,17 +153,16 @@ Produce the sub-questions now."""
             if lecture and lecture.segments:
                 index_lecture_in_rag(lecture)
                 video_sources.append(lecture.url)
-                # Seed top lecture segments as verified spoken findings
-                for seg in lecture.segments[:3]:
-                    video_findings.append(
-                        {
-                            "sub_question_id": "q1",
-                            "claim": f"[Timestamp {seg.timestamp}] {seg.text}",
-                            "evidence": f"Spoken lecture recording from {lecture.title} at {seg.timestamp}",
-                            "sources": [lecture.url],
-                            "confidence": 0.9,
-                        }
-                    )
+                video_findings = [
+                    {
+                        "sub_question_id": "q1",
+                        "claim": f"[Timestamp {seg.timestamp}] {seg.text}",
+                        "evidence": f"Spoken lecture recording from {lecture.title} at {seg.timestamp}",
+                        "sources": [lecture.url],
+                        "confidence": 0.9,
+                    }
+                    for seg in lecture.segments[:3]
+                ]
         except Exception:
             pass
 
