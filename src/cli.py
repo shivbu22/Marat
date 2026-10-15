@@ -360,10 +360,11 @@ def serve(
 ):
     """Start the MARAT FastAPI server."""
     import uvicorn
+    from .api.main import app as fastapi_app
 
     s = get_settings()
     uvicorn.run(
-        "src.api.main:app",
+        fastapi_app,
         host=host or s.api_host,
         port=port or s.api_port,
         reload=False,

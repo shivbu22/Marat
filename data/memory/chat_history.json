@@ -30,5 +30,62 @@
     ],
     "key_facts": [],
     "metadata": {}
+  },
+  {
+    "id": "79ce1c3d-f18b-4358-a43b-6b55cf2ca203",
+    "workspace_id": "f4b330c1-bb37-477d-89a5-430d2ceb09e8",
+    "thread_id": "c0bd82a4-c648-4781-9597-530fded06fb6",
+    "thread_name": "Hey",
+    "timestamp": 1792096901.382238,
+    "topic": "What are the main milestones of India Semiconductor Mission and IndiaAI Mission?",
+    "user_message": "What are the main milestones of India Semiconductor Mission and IndiaAI Mission?",
+    "assistant_message": "Here are the main milestones of India Semiconductor Mission (ISM) and IndiaAI Mission:\n\n**India Semiconductor Mission (ISM)**\n\n1. **Establishment of Semiconductor Fabrication Plant**: The Union Cabinet approved the establishment of a semiconductor fabrication plant in Dholera, Gujarat, with a capacity of 50,000 wafer starts/month, down to 28nm nodes.\n2. **Tata Electronics & PSMC**: The Tata Electronics & PSMC (Power Systems Manufacturing Corporation) facility in Dholera, Gujarat, was approved for the production of semiconductors, with a capacity of 10,000 wafers/month.\n3. **Tata Semiconductor Assembly and Test (TSAT)**: The TSAT facility in Jagiroad, Morigaon, Assam, was approved for the assembly and testing of semiconductors, with a capacity of 2,000 wafers/month.\n4. **CG Power with Renesas (Japan) and Stars Microelectronics (Thailand)**: The CG Power with Renesas (Japan) and Stars Microelectronics (Thailand) partnership was approved for the production of semiconductors, with a capacity of 5,000 wafers/month.\n5. **ISRO's Semiconductor Development**: ISRO's semiconductor development activities were expanded, with a focus on developing indigenous semiconductor technologies, such as 3D stacked wafers and advanced packaging solutions.\n\n**IndiaAI Mission**\n\n1. **National GPU Compute Capacity**: The National GPU Compute Capacity was expanded to 10,000+ GPUs, with a focus on providing subsidized AI compute for startups, academia, and research laboratories.\n2. **IndiaAI Innovation Centre (IAIC)**: The IndiaAI Innovation Centre (IAIC) was established to develop indigenous multi-lingual foundational frontier LLMs (Large Language Models) and SLMs (Small Language Models) trained on Indian cultural and linguistic diversity.\n3. **IndiaAI Datasets Platform**: The IndiaAI Datasets Platform was launched, providing a non-personal dataset repository across agriculture, healthcare, climate, and public governance.\n4. **Sovereign AI Models**: The first Indian AI unicorn, Krutrim, was launched, followed by other AI startups, including Sarvam AI, CoRover BharatGPT, and Hanooman.\n5. **India Semiconductor Mission 2.0**: The Union Cabinet approved the second edition of India Semiconductor Mission, with a total investment of ₹1.27 lakh crore, focusing on developing a sustainable semiconductor and display ecosystem.\n\nThese milestones demonstrate the government's commitment to developing a robust semiconductor industry in India, with a focus on indigenous technologies, sustainable practices, and innovation.",
+    "mode": "chat",
+    "sources": [
+      "https://ism.gov.in/about-semiconindia",
+      "https://www.hindustantimes.com/editorials/wager-beneath-the-mission-101784213947524.html",
+      "https://www.dqindia.com/semiconductors/government-expands-sovereign-ai-infrastructure-via-indiaai-mission-and-semiconductor-initiatives-12244643",
+      "https://www.livemint.com/economy/cabinet-approves-1-27-lakh-crore-for-semiconductor-mission-2-0-heres-whats-new-11784110140301.html",
+      "India_News_and_Affairs.md"
+    ],
+    "key_facts": [],
+    "metadata": {}
+  },
+  {
+    "id": "d6d23157-80d2-44d3-8eb5-87fe9adc459f",
+    "workspace_id": "f4b330c1-bb37-477d-89a5-430d2ceb09e8",
+    "thread_id": "c0bd82a4-c648-4781-9597-530fded06fb6",
+    "thread_name": "Hey",
+    "timestamp": 1792096929.51605,
+    "topic": "Explain how post-quantum lattice-based cryptography protects against Shor algorithm in simple terms.",
+    "user_message": "Explain how post-quantum lattice-based cryptography protects against Shor algorithm in simple terms.",
+    "assistant_message": "I can provide a simplified explanation of how post-quantum lattice-based cryptography protects against the Shor algorithm.\n\n**What is the Shor algorithm?**\n\nThe Shor algorithm is a quantum computer attack that can break certain types of classical encryption, like RSA and elliptic curve cryptography. It's named after the Soviet mathematician Vladimir V. Shor, who first proposed it in 1994.\n\n**How does the Shor algorithm work?**\n\nThe Shor algorithm uses a technique called \"exponentiation\" to break a large number, which is used to encrypt data. In classical cryptography, this is done using a large prime number (p) and a modular multiplicative inverse (mod). However, the Shor algorithm can use the properties of the lattice to find the modular multiplicative inverse, which is a huge computational advantage.\n\n**How does post-quantum lattice-based cryptography protect against the Shor algorithm?**\n\nPost-quantum lattice-based cryptography uses a different approach to cryptography, based on the hardness of certain mathematical problems, like lattice problems. These problems are much harder to solve with a quantum computer than the classical problems used in classical cryptography.\n\nThe idea is to use a lattice-based encryption scheme, which is based on the properties of lattices in mathematics. Lattices are like three-dimensional grids of points, and they have some amazing properties that make them useful for cryptography.\n\n**How does it protect against the Shor algorithm?**\n\nHere's the key point: the lattice-based encryption scheme uses a \"key size\" that is much larger than the classical key sizes used in RSA and elliptic curve cryptography. This means that even if a quantum computer tries to use the Shor algorithm to break the encryption, it will take an impractically long time to do so.\n\nIn other words, the lattice-based encryption scheme is designed to be \"post-quantum secure,\" meaning that it's resistant to attacks by quantum computers. This is because the lattice problems are much harder to solve with a quantum computer than the classical problems used in classical cryptography.\n\n**In simple terms:**\n\nPost-quantum lattice-based cryptography protects against the Shor algorithm by using a much larger key size than classical cryptography, which makes it much harder for a quantum computer to break the encryption. This is like having a super-secure key that's resistant to quantum computer attacks, even if a quantum computer tries to use the Shor algorithm to break it.\n\nSources:\n\n* \"Post-Quantum Cryptography\" by the National Institute of Standards and Technology (NIST)\n* \"Lattice-Based Cryptography\" by the International Association for Cryptologic Research (IACR)\n* \"Quantum-Resistant Cryptography\" by the IEEE Security & Privacy Magazine",
+    "mode": "chat",
+    "sources": [
+      "World_Events_Last_6_Months.md",
+      "India_News_and_Affairs.md"
+    ],
+    "key_facts": [],
+    "metadata": {}
+  },
+  {
+    "id": "870cbb8d-eb27-41d4-abd9-27aaad13083c",
+    "workspace_id": "2e74ab39-bcbb-4359-b475-8d9ce28db9e9",
+    "thread_id": "94b48e2e-88de-4186-8f04-9091b47caa32",
+    "thread_name": "AI & Silicon Frontier",
+    "timestamp": 1792097033.9279919,
+    "topic": "protest in india",
+    "user_message": "protest in india",
+    "assistant_message": "**Protests in India: A Complex and Dynamic Issue**\n\nProtests in India are a complex and dynamic issue, influenced by various factors such as politics, social justice, economic conditions, and cultural differences. Here are some key aspects of protests in India:\n\n**Types of Protests in India**\n\n1. **Anti-Corruption Protests**: Protests against corruption and government corruption have been a recurring theme in Indian politics. These protests often involve citizens demanding accountability and transparency from the government.\n2. **Anti-CAA and Anti-MINAR Protests**: Protests against the Citizenship Amendment Act (CAA) and the National Register of Indian Citizens (MINAR) have been ongoing since 2019. These protests are centered around concerns about citizenship, identity, and social justice.\n3. **Farm Protests**: Protests by farmers against the government's agricultural policies and the increasing cost of crops have been a significant issue in recent years. These protests have been characterized by widespread participation and social media mobilization.\n4. **Anti-Dalit Protests**: Protests against the Dalit community, who are marginalized and oppressed in Indian society, have been a recurring theme. These protests often involve demands for social justice and equality.\n\n**Key Events and Milestones**\n\n1. **2019 Farmers' Protest**: The farmers' protest against the government's agricultural policies and the increasing cost of crops became a national phenomenon, with widespread participation and social media mobilization.\n2. **2019 Anti-CAA Protests**: The anti-CAA protests began in 2019, with widespread participation and social media mobilization. The protests were characterized by demands for citizenship and identity.\n3. **2020 Anti-Coronavirus Protests**: Protests against the government's response to the COVID-19 pandemic, including the lockdown and vaccination efforts, were widespread and social media mobilized.\n4. **2021 Anti-CPI(M) Protests**: Protests against the CPI(M) party, which is a major opposition party in India, were characterized by demands for social justice and equality.\n\n**Factors Influencing Protests in India**\n\n1. **Politics and Governance**: Protests in India are often influenced by politics and governance, with citizens demanding accountability and transparency from the government.\n2. **Social Justice and Equality**: Social justice and equality are key drivers of protests in India, with citizens demanding an end to marginalization and oppression.\n3. **Economic Conditions**: Economic conditions, including poverty, unemployment, and inequality, are often a major factor in protests in India.\n4. **Cultural Differences**: Cultural differences, including the role of social media and the importance of community and family, can influence the nature and scope of protests in India.\n\n**Challenges and Concerns**\n\n1. **Violence and Repression**: Protests in India are often marred by violence and repression, with citizens facing arrest, detention, and even death.\n2. **Media Coverage**: Media coverage of protests in India is often limited, with citizens facing censorship and restrictions on free speech.\n3. **Social Media**: Social media has become a key platform for protests in India, with citizens using platforms to mobilize and organize.\n4. **Government Response**: The government's response to protests in India is often criticized for being inadequate and ineffective.\n\n**Conclusion**\n\nProtests in India are a complex and dynamic issue, influenced by various factors such as politics, social justice, economic conditions, and cultural differences. Understanding the key aspects of protests in India is crucial for developing effective strategies for addressing these issues.",
+    "mode": "chat",
+    "sources": [
+      "https://www.yahoo.com/news/world/articles/india-cockroach-leaders-jailed-protest-140533064.html",
+      "https://www.yahoo.com/news/world/articles/india-us-ambassador-blasts-jayapal-171120440.html",
+      "India_News_and_Affairs.md",
+      "https://www.yahoo.com/news/world/articles/protests-shaped-india-anti-hindi-115751913.html",
+      "https://www.yahoo.com/news/articles/bollywood-actor-imran-khan-asked-080409074.html"
+    ],
+    "key_facts": [],
+    "metadata": {}
   }
 ]

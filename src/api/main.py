@@ -123,7 +123,23 @@ class YouTubeSummarizeRequest(BaseModel):
     workspace_id: str = Field(default="default")
 
 
-STATIC_INDEX = Path(__file__).parent / "static" / "index.html"
+def _resolve_static_index() -> Path:
+    candidates = [
+        Path(__file__).parent / "static" / "index.html",
+        Path(__file__).resolve().parent / "static" / "index.html",
+    ]
+    import sys
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        meipass = Path(sys._MEIPASS)
+        candidates.insert(0, meipass / "src" / "api" / "static" / "index.html")
+        candidates.insert(1, meipass / "static" / "index.html")
+    for c in candidates:
+        if c.exists():
+            return c
+    return candidates[0]
+
+
+STATIC_INDEX = _resolve_static_index()
 
 
 # ---------------------------------------------------------------------------
@@ -132,8 +148,9 @@ STATIC_INDEX = Path(__file__).parent / "static" / "index.html"
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """Serve the MARAT web dashboard."""
-    if STATIC_INDEX.exists():
-        return HTMLResponse(content=STATIC_INDEX.read_text(encoding="utf-8"))
+    p = _resolve_static_index()
+    if p.exists():
+        return HTMLResponse(content=p.read_text(encoding="utf-8"))
     return HTMLResponse("<h1>MARAT API is running</h1><p>Visit <a href='/docs'>/docs</a> for Swagger UI.</p>")
 
 
