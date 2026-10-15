@@ -1210,6 +1210,8 @@
                     </div>
 
                     <div class="chat-top-actions">
+                        <button class="quick-action-pill" id="india-news-pill">🇮🇳 India News</button>
+                        <button class="quick-action-pill" id="youtube-summary-pill">📺 YouTube Summary</button>
                         <button class="quick-action-pill" id="summarize-doc-pill">Summarize this doc</button>
                         <button class="icon-btn" id="open-workspace-drawer-btn" title="Workspace Vault Documents">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
@@ -1224,6 +1226,12 @@
                 <div class="chat-input-wrapper">
                     <!-- Tools Popover -->
                     <div class="tools-popover" id="tools-popover">
+                        <div class="popover-item" id="tool-opt-yt">
+                            <span>📺</span> Summarize YouTube Video
+                        </div>
+                        <div class="popover-item" id="tool-opt-india">
+                            <span>🇮🇳</span> India News & Affairs Digest
+                        </div>
                         <div class="popover-item" id="tool-opt-re">
                             <span>🔬</span> Reverse Engineer Binary / Code
                         </div>
@@ -1248,7 +1256,7 @@
                         id="chat-textarea" 
                         class="chat-textarea" 
                         rows="1" 
-                        placeholder="Send a message... (or @agent for research, /re to reverse engineer)"
+                        placeholder="Ask general questions, paste a YouTube link for instant summary, /india for live news..."
                     ></textarea>
 
                     <div class="chat-input-bottom-bar">
@@ -1304,6 +1312,61 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('memory-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: YouTube Video Summarizer -->
+    <div class="modal-overlay" id="yt-modal">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>📺</span> YouTube Video Summarizer</div>
+                <button class="icon-btn" onclick="closeModal('yt-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+                    Paste any public YouTube video link. Marat extracts captions/transcripts, generates timestamped chapters, highlights core concepts, and indexes the entire video into your workspace memory.
+                </p>
+                <div class="form-group">
+                    <label class="form-label">YouTube Video URL</label>
+                    <input type="text" id="yt-video-url" class="form-input" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." />
+                </div>
+                <div class="form-group" style="margin-top: 8px;">
+                    <label class="form-label">Custom Focus / Question (Optional)</label>
+                    <input type="text" id="yt-video-focus" class="form-input" placeholder="e.g. Focus on technical architecture, equations, or key conclusions" />
+                </div>
+                <div id="yt-status-area" style="display: none; margin-top: 10px; font-size: 12px; color: var(--text-secondary); padding: 8px 10px; background: #fbfbfa; border: 1px solid var(--border-subtle); border-radius: 6px;">
+                    <span id="yt-status-text">Fetching transcript and synthesizing summary...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('yt-modal')">Cancel</button>
+                <button class="btn btn-primary" id="start-yt-summarize-btn">Summarize Video</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: India News & National Affairs -->
+    <div class="modal-overlay" id="india-news-modal">
+        <div class="modal-card" style="max-width: 660px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>🇮🇳</span> India News & Current Affairs</div>
+                <button class="icon-btn" onclick="closeModal('india-news-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px;">
+                    Live national, economic, technological, and governance intelligence from India.
+                </p>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button class="btn btn-secondary" id="refresh-india-news-btn">🔄 Refresh Breaking News</button>
+                    <button class="btn btn-secondary" id="send-india-digest-btn">💬 Send Briefing to Chat</button>
+                </div>
+                <div id="india-news-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto;">
+                    <p style="font-size: 12px; color: var(--text-light);">Loading latest India headlines...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('india-news-modal')">Close</button>
             </div>
         </div>
     </div>
@@ -1805,15 +1868,17 @@
             });
 
             // Tools popover
+            document.getElementById('tool-opt-yt').addEventListener('click', () => openModal('yt-modal'));
+            document.getElementById('tool-opt-india').addEventListener('click', () => {
+                openModal('india-news-modal');
+                loadIndiaNews();
+            });
             document.getElementById('tool-opt-re').addEventListener('click', () => openModal('re-modal'));
             document.getElementById('tool-opt-agent').addEventListener('click', () => {
                 chatTextarea.value = '@agent ';
                 chatTextarea.focus();
             });
-            document.getElementById('tool-opt-video').addEventListener('click', () => {
-                const url = prompt('YouTube or lecture audio link:');
-                if (url) sendMessage(`Ingest lecture: ${url}`, 'research');
-            });
+            document.getElementById('tool-opt-video').addEventListener('click', () => openModal('yt-modal'));
             document.getElementById('tool-opt-mcp').addEventListener('click', () => {
                 openModal('mcp-modal');
                 loadMcpServers();
@@ -1827,7 +1892,12 @@
                 loadWorkspaceDocs();
             });
 
-            // Topbar
+            // Topbar Actions
+            document.getElementById('india-news-pill').addEventListener('click', () => {
+                openModal('india-news-modal');
+                loadIndiaNews();
+            });
+            document.getElementById('youtube-summary-pill').addEventListener('click', () => openModal('yt-modal'));
             document.getElementById('summarize-doc-pill').addEventListener('click', () => {
                 sendMessage('Summarize this doc');
             });
@@ -1839,6 +1909,51 @@
             topMemoryBadge.addEventListener('click', () => {
                 openModal('memory-modal');
                 renderMemoryRecords();
+            });
+
+            // YouTube Summarizer Modal Actions
+            document.getElementById('start-yt-summarize-btn').addEventListener('click', async () => {
+                const url = document.getElementById('yt-video-url').value.trim();
+                const focus = document.getElementById('yt-video-focus').value.trim();
+                if (!url) return alert('Please enter a YouTube video URL');
+
+                const statusArea = document.getElementById('yt-status-area');
+                const statusText = document.getElementById('yt-status-text');
+                const btn = document.getElementById('start-yt-summarize-btn');
+
+                statusArea.style.display = 'block';
+                statusText.textContent = 'Extracting captions/audio & synthesizing summary...';
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch('/api/video/summarize', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: url, focus: focus, workspace_id: activeWorkspace ? activeWorkspace.id : 'default' })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        closeModal('yt-modal');
+                        document.getElementById('yt-video-url').value = '';
+                        document.getElementById('yt-video-focus').value = '';
+                        // Send query into active thread to register in chat history
+                        await sendMessage(`Summarize YouTube Video: ${url}`);
+                    } else {
+                        alert('Summarization failed: ' + (data.detail || data.message || JSON.stringify(data)));
+                    }
+                } catch (err) {
+                    alert('Request error: ' + err);
+                } finally {
+                    statusArea.style.display = 'none';
+                    btn.disabled = false;
+                }
+            });
+
+            // India News Modal Actions
+            document.getElementById('refresh-india-news-btn').addEventListener('click', () => loadIndiaNews());
+            document.getElementById('send-india-digest-btn').addEventListener('click', () => {
+                closeModal('india-news-modal');
+                sendMessage('Provide a comprehensive briefing on breaking news, economy, technology (IndiaAI/semiconductors), and governance in India.');
             });
 
             // Sidebar Controls
@@ -2047,6 +2162,36 @@
                 });
             } catch (e) {
                 list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to load memory: ${e}</p>`;
+            }
+        }
+
+        async function loadIndiaNews() {
+            const list = document.getElementById('india-news-list');
+            list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">Fetching live Indian headlines & intelligence...</p>';
+            try {
+                const res = await fetch('/api/news/india');
+                const data = await res.json();
+                list.innerHTML = '';
+                if (!data.articles || data.articles.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">No news articles returned.</p>';
+                    return;
+                }
+                data.articles.forEach(art => {
+                    const card = document.createElement('div');
+                    card.style.background = '#fbfbfa';
+                    card.style.border = '1px solid var(--border-subtle)';
+                    card.style.borderRadius = '6px';
+                    card.style.padding = '8px 10px';
+                    card.innerHTML = `
+                        <div style="font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 2px;">
+                            <a href="${escapeHtml(art.url)}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">${escapeHtml(art.title)}</a>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 11.5px; line-height: 1.4;">${escapeHtml(art.snippet)}</div>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (e) {
+                list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to load India news: ${e}</p>`;
             }
         }
 

@@ -27,7 +27,22 @@ def _is_recent_query(query: str) -> bool:
     return any(k in lowered for k in recent_keywords)
 
 
-def _ddg_search(query: str, max_results: int, timelimit: str | None = None) -> list[SearchResult]:
+def _is_india_query(query: str) -> bool:
+    """Check if the query is related to India, its national news, institutions, or affairs."""
+    lowered = query.lower()
+    india_keywords = [
+        "india", "indian", "delhi", "mumbai", "bengaluru", "bangalore", "hyderabad",
+        "chennai", "kolkata", "modi", "isro", "upi", "rbi", "nifty", "sensex",
+        "lok sabha", "rajya sabha", "pib", "vande bharat", "gaganyaan", "aditya-l1",
+        "bharat", "drdo", "brics", "rupee", "ayodhya", "kerala", "tamil nadu",
+        "maharashtra", "uttar pradesh", "gujarat", "punjab", "karnataka"
+    ]
+    return any(k in lowered for k in india_keywords)
+
+
+def _ddg_search(
+    query: str, max_results: int, timelimit: str | None = None, region: str | None = None
+) -> list[SearchResult]:
     DDGS_cls = None
     try:
         from ddgs import DDGS as DDGS_cls
@@ -43,14 +58,19 @@ def _ddg_search(query: str, max_results: int, timelimit: str | None = None) -> l
     results: list[SearchResult] = []
     seen_urls: set[str] = set()
 
-    should_fetch_news = timelimit is not None or _is_recent_query(query)
+    is_india = _is_india_query(query)
+    effective_region = region or ("in-en" if is_india else None)
+    should_fetch_news = timelimit is not None or _is_recent_query(query) or is_india
 
     try:
         with DDGS_cls() as ddgs:
             # 1. Fetch live news if recent context is requested
             if should_fetch_news and hasattr(ddgs, "news"):
                 try:
-                    news_raw = list(ddgs.news(query, max_results=max_results))
+                    news_kwargs = {"max_results": max_results}
+                    if effective_region:
+                        news_kwargs["region"] = effective_region
+                    news_raw = list(ddgs.news(query, **news_kwargs))
                     for r in news_raw:
                         u = r.get("href", r.get("link", r.get("url", "")))
                         if u and u not in seen_urls:
@@ -74,6 +94,8 @@ def _ddg_search(query: str, max_results: int, timelimit: str | None = None) -> l
                 kwargs = {"max_results": needed + 2}
                 if tl:
                     kwargs["timelimit"] = tl
+                if effective_region:
+                    kwargs["region"] = effective_region
                 try:
                     text_raw = list(ddgs.text(query, **kwargs))
                 except Exception:
@@ -95,6 +117,11 @@ def _ddg_search(query: str, max_results: int, timelimit: str | None = None) -> l
         return results
 
     return results[:max_results]
+
+
+def search_india_news(query: str = "India top news today", max_results: int = 6) -> list[SearchResult]:
+    """Fetch live breaking and national headlines from India."""
+    return _ddg_search(query, max_results=max_results, timelimit="d", region="in-en")
 
 
 

@@ -257,7 +257,7 @@ def chunk_transcript_with_timestamps(
     return chunks
 
 
-def index_lecture_in_rag(lecture: VideoLecture) -> int:
+def index_lecture_in_rag(lecture: VideoLecture, collection_name: str = "research_vault") -> int:
     """Index timestamped video lecture blocks into ChromaDB vault."""
     from ..rag.store import get_rag
 
@@ -276,4 +276,112 @@ def index_lecture_in_rag(lecture: VideoLecture) -> int:
         }
         for b in blocks
     ]
-    return rag.add_texts(texts=texts, metadatas=metadatas)
+    return rag.add_texts(texts=texts, metadatas=metadatas, collection_name=collection_name)
+
+
+def generate_fallback_summary(lecture: VideoLecture, focus: str = "") -> str:
+    """Generate structured extractive summary if LLM call is offline or unavailable."""
+    blocks = chunk_transcript_with_timestamps(lecture, window_seconds=90.0)
+    dur_str = _format_timestamp(lecture.duration_seconds)
+    
+    # Key timestamp chapters (sample evenly up to 6 chapters)
+    step = max(1, len(blocks) // 6)
+    chapter_highlights = blocks[::step][:6]
+    
+    chapters_md = "\n".join(
+        f"- **`{ts}`** {text[len(ts)+3:len(ts)+160].strip()}..."
+        for ts, text in chapter_highlights
+    )
+
+    overview = lecture.full_text[:600].strip() + "..." if len(lecture.full_text) > 600 else lecture.full_text
+
+    return (
+        f"## 📺 Video Summary: {lecture.title}\n\n"
+        f"**Source:** [{lecture.url}]({lecture.url}) · **Duration:** {dur_str} · **Transcription:** `{lecture.source_type}`\n\n"
+        f"### 📌 Executive Overview\n"
+        f"{overview}\n\n"
+        f"### ⏱️ Timestamped Chapters & Highlights\n"
+        f"{chapters_md or '- Continuous lecture without explicit segment boundaries.'}\n\n"
+        f"### 💡 Key Takeaways\n"
+        f"- Complete transcript extracted and indexed into Marat's vector memory ({len(blocks)} chunks).\n"
+        f"- You can ask specific follow-up questions about any concept or timestamp in this video directly in this chat!"
+    )
+
+
+async def summarize_youtube_video(
+    url: str, focus: str = "", workspace_id: str = "default"
+) -> dict[str, Any]:
+    """Ingest, index, and synthesize an executive summary of any YouTube video."""
+    lecture = ingest_video(url)
+    if not lecture:
+        return {
+            "status": "error",
+            "message": f"Could not extract transcript or audio from YouTube URL: {url}. Please ensure the video is public and has captions or downloadable audio.",
+        }
+
+    # 1. Index into global RAG vault
+    indexed_chunks = index_lecture_in_rag(lecture, collection_name="research_vault")
+
+    # 2. Also index into workspace vault if workspace specified
+    if workspace_id:
+        try:
+            from ..workspaces.manager import get_workspace_manager
+            from ..rag.store import get_rag
+            mgr = get_workspace_manager()
+            rag = get_rag()
+            ws = mgr.get_workspace(workspace_id)
+            if ws and ws.vector_collection:
+                doc_name = f"YouTube_{lecture.title[:40].replace(' ', '_')}.txt"
+                doc, chunks = mgr.add_document(
+                    workspace_id,
+                    doc_name,
+                    lecture.full_text.encode("utf-8"),
+                    extra_metadata={"url": lecture.url, "source": "youtube", "type": "video_lecture"},
+                )
+                rag.add_chunks(chunks, collection_name=ws.vector_collection)
+        except Exception:
+            pass
+
+    # 3. Generate summary via LLM if available, else fallback
+    summary_text = ""
+    try:
+        from ..llm import get_llm
+        from langchain_core.messages import HumanMessage, SystemMessage
+        
+        llm = get_llm(temperature=0.2)
+        sample_transcript = lecture.full_text[:7000]
+        dur_str = _format_timestamp(lecture.duration_seconds)
+        
+        blocks = chunk_transcript_with_timestamps(lecture, window_seconds=75.0)
+        sample_timestamps = "\n".join(f"{ts}: {txt[:120]}..." for ts, txt in blocks[:8])
+
+        prompt = (
+            f"You are Marat, an elite multimedia intelligence assistant.\n"
+            f"Summarize the following YouTube video transcript.\n\n"
+            f"Video Title: {lecture.title}\n"
+            f"Duration: {dur_str}\n"
+            f"URL: {lecture.url}\n"
+            f"{'User Focus: ' + focus if focus else ''}\n\n"
+            f"Sample Timestamped Moments:\n{sample_timestamps}\n\n"
+            f"Transcript Content:\n{sample_transcript}\n\n"
+            f"Provide a structured, engaging Markdown summary with:\n"
+            f"1. Executive Overview (2-3 concise paragraphs)\n"
+            f"2. Core Concepts & Takeaways (bulleted, clear)\n"
+            f"3. Timestamped Chapter Breakdown\n"
+            f"4. Discussion & Follow-up questions the user can ask."
+        )
+        res = await llm.ainvoke([SystemMessage(content="You are an expert research assistant."), HumanMessage(content=prompt)])
+        summary_text = res.content if hasattr(res, "content") else str(res)
+    except Exception:
+        summary_text = generate_fallback_summary(lecture, focus=focus)
+
+    return {
+        "status": "success",
+        "title": lecture.title,
+        "url": lecture.url,
+        "duration_seconds": lecture.duration_seconds,
+        "duration_formatted": _format_timestamp(lecture.duration_seconds),
+        "source_type": lecture.source_type,
+        "indexed_chunks": indexed_chunks,
+        "summary": summary_text,
+    }

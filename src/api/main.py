@@ -117,6 +117,11 @@ class ChatMessageRequest(BaseModel):
     tools: list[str] = Field(default_factory=list)
 
 
+class YouTubeSummarizeRequest(BaseModel):
+    url: str = Field(..., description="YouTube video URL or video ID")
+    focus: str = Field(default="", description="Optional custom focus area or prompt")
+    workspace_id: str = Field(default="default")
+
 
 STATIC_INDEX = Path(__file__).parent / "static" / "index.html"
 
@@ -364,7 +369,46 @@ async def send_chat_message(req: ChatMessageRequest):
             "recalled_memories_count": len(recalled_memories),
         }
 
-    # 2. Multi-Agent Autonomous Research Mode
+    # 2. Built-in YouTube Video Summarization
+    from ..tools.video import extract_youtube_id, summarize_youtube_video
+    yt_id = extract_youtube_id(clean_msg)
+    if yt_id and ("youtube.com" in clean_msg.lower() or "youtu.be" in clean_msg.lower() or clean_msg.lower().startswith("/yt") or "summarize" in clean_msg.lower()):
+        video_url = f"https://www.youtube.com/watch?v={yt_id}"
+        sum_res = await summarize_youtube_video(video_url, workspace_id=ws.id)
+        if sum_res.get("status") == "success":
+            content = sum_res["summary"]
+            yt_sources = [f"YouTube: {sum_res.get('title', 'Video')}"]
+            asst_msg = mgr.add_message(
+                thread_id,
+                req.workspace_id,
+                "assistant",
+                content,
+                metadata={
+                    "type": "youtube_summary",
+                    "sources": yt_sources,
+                    "duration": sum_res.get("duration_formatted"),
+                    "title": sum_res.get("title"),
+                    "indexed_chunks": sum_res.get("indexed_chunks", 0),
+                },
+            )
+            chat_memory.append_turn(
+                workspace_id=ws.id,
+                thread_id=thread_id,
+                user_message=clean_msg,
+                assistant_message=content,
+                thread_name=thread_name,
+                mode="youtube_summary",
+                sources=yt_sources,
+            )
+            return {
+                "thread_id": thread_id,
+                "user_message": user_msg,
+                "assistant_message": asst_msg,
+                "mode": "youtube_summary",
+                "recalled_memories_count": 0,
+            }
+
+    # 3. Multi-Agent Autonomous Research Mode
     if is_agent:
         topic = clean_msg.replace("@agent", "").replace("/research", "").strip() or clean_msg
         graph = get_graph()
@@ -420,7 +464,7 @@ async def send_chat_message(req: ChatMessageRequest):
             "recalled_memories_count": len(recalled_memories),
         }
 
-    # 3. Direct Workspace RAG Chat
+    # 4. Direct Workspace RAG & Live Knowledge Search Chat
     rag_context = ""
     sources = []
     if ws.vector_collection:
@@ -434,14 +478,38 @@ async def send_chat_message(req: ChatMessageRequest):
         except Exception:
             pass
 
+    # Live India / Recent News Integration
+    live_news_context = ""
+    from ..tools.search import _is_india_query, _is_recent_query, web_search_async
+    if _is_india_query(clean_msg) or _is_recent_query(clean_msg) or clean_msg.lower().startswith("/news") or clean_msg.lower().startswith("/india"):
+        try:
+            search_query = clean_msg.replace("/news", "").replace("/india", "").strip() or "India top news today"
+            search_hits = await web_search_async(search_query, timelimit="w")
+            if search_hits:
+                snippets = []
+                for h in search_hits[:4]:
+                    snippets.append(f"- **{h.title}**: {h.snippet} ({h.url})")
+                    sources.append(h.url)
+                live_news_context = "\n\nLive Search & Current News Headlines:\n" + "\n".join(snippets)
+        except Exception:
+            pass
+
     try:
         from langchain_core.messages import HumanMessage, SystemMessage
         llm = get_llm(temperature=ws.temperature)
-        system_content = f"{ws.system_prompt}\n\nYou are in the '{ws.name}' workspace in Marat. Answer helpfully, accurately, and concisely."
+        system_content = (
+            f"{ws.system_prompt}\n\n"
+            f"You are Marat, an elite intelligence assistant with comprehensive built-in awareness of Indian national news, "
+            f"governance, space missions (ISRO), digital public infrastructure (UPI/DPI), economy, technology (IndiaAI, semiconductors), "
+            f"multimedia summaries, and general questions across science, code, history, and reasoning. "
+            f"Provide insightful, well-structured, authoritative answers with markdown formatting and citations."
+        )
         if memory_context:
             system_content += memory_context
         if rag_context:
             system_content += f"\n{rag_context}"
+        if live_news_context:
+            system_content += f"\n{live_news_context}"
         response = await llm.ainvoke([SystemMessage(content=system_content), HumanMessage(content=clean_msg)])
         answer = response.content if hasattr(response, "content") else str(response)
     except Exception as e:
@@ -517,6 +585,35 @@ async def test_memory_recall(q: str = ""):
     mem = get_chat_memory()
     hits = mem.recall_topic_memory(q, k=5)
     return {"query": q, "count": len(hits), "recalled_memories": hits}
+
+
+# ---------------------------------------------------------------------------
+# YouTube Summaries & Live India News Endpoints
+# ---------------------------------------------------------------------------
+@app.post("/api/video/summarize")
+async def summarize_video_endpoint(req: YouTubeSummarizeRequest):
+    """Summarize any YouTube video, index it, and return structured markdown."""
+    from ..tools.video import summarize_youtube_video
+
+    res = await summarize_youtube_video(req.url, focus=req.focus, workspace_id=req.workspace_id)
+    if res.get("status") == "error":
+        raise HTTPException(status_code=400, detail=res.get("message", "Video summarization failed"))
+    return res
+
+
+@app.get("/api/news/india")
+async def get_india_news_endpoint(q: str = "India top news today", limit: int = 8):
+    """Retrieve live breaking national, economic, and technological headlines from India."""
+    from ..tools.search import search_india_news
+
+    loop = asyncio.get_running_loop()
+    results = await loop.run_in_executor(None, lambda: search_india_news(q, max_results=limit))
+    return {
+        "status": "ok",
+        "query": q,
+        "count": len(results),
+        "articles": [r.model_dump() for r in results],
+    }
 
 
 
