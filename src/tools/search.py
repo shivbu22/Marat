@@ -17,7 +17,17 @@ class SearchResult(BaseModel):
     source: str = "web"
 
 
-def _ddg_search(query: str, max_results: int) -> list[SearchResult]:
+def _is_recent_query(query: str) -> bool:
+    """Check if the query is seeking current, breaking, or recent 6 months info."""
+    lowered = query.lower()
+    recent_keywords = [
+        "recent", "latest", "last", "months", "what happen", "news", "today",
+        "breaking", "current", "update", "2024", "2025", "2026", "new", "released", "announced"
+    ]
+    return any(k in lowered for k in recent_keywords)
+
+
+def _ddg_search(query: str, max_results: int, timelimit: str | None = None) -> list[SearchResult]:
     DDGS_cls = None
     try:
         from ddgs import DDGS as DDGS_cls
@@ -30,24 +40,62 @@ def _ddg_search(query: str, max_results: int) -> list[SearchResult]:
     if DDGS_cls is None:
         return []
 
-    results = []
+    results: list[SearchResult] = []
+    seen_urls: set[str] = set()
+
+    should_fetch_news = timelimit is not None or _is_recent_query(query)
+
     try:
         with DDGS_cls() as ddgs:
-            raw = list(ddgs.text(query, max_results=max_results))
-            if not raw and hasattr(ddgs, "news"):
-                raw = list(ddgs.news(query, max_results=max_results))
-            for r in raw:
-                results.append(
-                    SearchResult(
-                        title=r.get("title", ""),
-                        url=r.get("href", r.get("link", r.get("url", ""))),
-                        snippet=r.get("body", r.get("snippet", "")),
-                        source="duckduckgo",
-                    )
-                )
+            # 1. Fetch live news if recent context is requested
+            if should_fetch_news and hasattr(ddgs, "news"):
+                try:
+                    news_raw = list(ddgs.news(query, max_results=max_results))
+                    for r in news_raw:
+                        u = r.get("href", r.get("link", r.get("url", "")))
+                        if u and u not in seen_urls:
+                            seen_urls.add(u)
+                            date_str = f" [{r.get('date', '')}]" if r.get("date") else ""
+                            results.append(
+                                SearchResult(
+                                    title=f"{r.get('title', '')}{date_str}",
+                                    url=u,
+                                    snippet=r.get("body", r.get("snippet", "")),
+                                    source="duckduckgo_news",
+                                )
+                            )
+                except Exception:
+                    pass
+
+            # 2. Fetch general web results (with timelimit if requested)
+            needed = max_results - len(results)
+            if needed > 0:
+                tl = timelimit or ("m" if _is_recent_query(query) else None)
+                kwargs = {"max_results": needed + 2}
+                if tl:
+                    kwargs["timelimit"] = tl
+                try:
+                    text_raw = list(ddgs.text(query, **kwargs))
+                except Exception:
+                    text_raw = list(ddgs.text(query, max_results=needed))
+
+                for r in text_raw:
+                    u = r.get("href", r.get("link", r.get("url", "")))
+                    if u and u not in seen_urls:
+                        seen_urls.add(u)
+                        results.append(
+                            SearchResult(
+                                title=r.get("title", ""),
+                                url=u,
+                                snippet=r.get("body", r.get("snippet", "")),
+                                source="duckduckgo",
+                            )
+                        )
     except Exception:
         return results
-    return results
+
+    return results[:max_results]
+
 
 
 def _tavily_search(query: str, max_results: int, depth: str) -> list[SearchResult]:
@@ -101,7 +149,7 @@ def web_search(query: str) -> str:
     return "\n".join(lines)
 
 
-async def web_search_async(query: str) -> list[SearchResult]:
+async def web_search_async(query: str, timelimit: str | None = None) -> list[SearchResult]:
     """Async-friendly version used by researcher agents."""
     s = get_settings()
     try:
@@ -114,4 +162,7 @@ async def web_search_async(query: str) -> list[SearchResult]:
         )
         if results:
             return results
-    return await loop.run_in_executor(None, lambda: _ddg_search(query, s.search_max_results))
+    return await loop.run_in_executor(
+        None, lambda: _ddg_search(query, s.search_max_results, timelimit=timelimit)
+    )
+

@@ -335,6 +335,24 @@ def ingest_video_cmd(
             console.print(f"  [cyan]{seg.timestamp}[/] {seg.text}")
 
 
+@app.command("ingest-world-knowledge")
+def ingest_world_knowledge_cmd():
+    """Ingest curated global developments (AI, Space, Quantum, Geopolitics) from the last 6 months into workspaces."""
+    import subprocess
+    console.print(MARAT_BANNER)
+    console.print("[bold cyan]Ingesting World Knowledge (Last 6 Months) into Vector Vaults…[/]")
+    script_path = Path("data/seed_world_knowledge.py")
+    if not script_path.exists():
+        console.print("[red]Seed script not found.[/]")
+        raise typer.Exit(1)
+    
+    with console.status("[bold green]Chunking and embedding global intelligence briefings…[/]"):
+        import runpy
+        runpy.run_path(str(script_path), run_name="__main__")
+    console.print("[bold green]✔ Ingested and embedded global knowledge across all workspaces![/]")
+
+
+
 @app.command()
 def serve(
     host: str = typer.Option(None, help="Host"),
