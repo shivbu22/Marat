@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     max_tokens: int = 4096
     max_tool_turns: int = 12
 
-    # Workspaces & Storage (AnythingLLM architecture)
+    # MARAT Workspaces & Storage Architecture
     workspaces_db: Path = Path("./data/workspaces.db")
     mcp_config_path: Path = Path("./configs/mcp_servers.json")
 

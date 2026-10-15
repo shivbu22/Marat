@@ -1,4 +1,4 @@
-"""Document Collector engine inspired by AnythingLLM.
+"""MARAT Document Collector engine.
 
 Parses diverse data formats:
 - Plain text & Markdown (.txt, .md, .rst)

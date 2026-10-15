@@ -4,7 +4,7 @@
 
 # 🐾 MARAT
 ### Multi-Agent Research & Reverse Engineering Platform
-*Autonomous cyclic deep-research, full-stack software & binary reverse engineering, isolated AnythingLLM-style Workspaces, and Model Context Protocol (MCP) tool execution.*  
+*Autonomous cyclic deep-research, full-stack software & binary reverse engineering, isolated MARAT Workspaces, and Model Context Protocol (MCP) tool execution.*  
 *Guided by **Mara**, your clever, scholarly red panda companion.*
 
 <br/>
@@ -12,7 +12,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.14-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Cyclic_State_Machine-FF6F00?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![AnythingLLM Workspaces](https://img.shields.io/badge/AnythingLLM-Isolated_Vaults-6366F1?style=for-the-badge)](https://anythingllm.com)
+[![MARAT Workspaces](https://img.shields.io/badge/MARAT-Isolated_Vaults-6366F1?style=for-the-badge)](#-marat-workspaces--document-collector)
 [![Reverse Engineering](https://img.shields.io/badge/REA-Binary_%26_Code_Analysis-EF4444?style=for-the-badge)](https://github.com/morluto/rea)
 [![MCP](https://img.shields.io/badge/MCP-Hypervisor-10B981?style=for-the-badge)](https://modelcontextprotocol.io)
 [![Tests](https://img.shields.io/badge/Tests-48%20Passed-44CC11?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
@@ -20,7 +20,7 @@
 
 <br/>
 
-[**Overview**](#-overview) • [**Architecture**](#-architecture) • [**Reverse Engineering (REA)**](#-reverse-engineer-anything-rea) • [**Workspaces Vault**](#-anythingllm-workspaces--document-collector) • [**MCP Hypervisor**](#-model-context-protocol-mcp-hypervisor) • [**Agent Matrix**](#-agent-matrix) • [**CLI Guide**](#-cli-usage) • [**Web Studio & API**](#-web-studio--rest-api)
+[**Overview**](#-overview) • [**Architecture**](#-architecture) • [**Reverse Engineering (REA)**](#-reverse-engineer-anything-rea) • [**Workspaces Vault**](#-marat-workspaces--document-collector) • [**MCP Hypervisor**](#-model-context-protocol-mcp-hypervisor) • [**Agent Matrix**](#-agent-matrix) • [**CLI Guide**](#-cli-usage) • [**Web Studio & API**](#-web-studio--rest-api)
 
 </div>
 
@@ -30,7 +30,7 @@
 
 **Marat** combines two worlds into a unified intelligence workstation:
 1. **Marat Multi-Agent Cyclic Intelligence**: A LangGraph-orchestrated team of autonomous agents driven by **Mara** (our scholar red panda mascot), performing deep multi-step research, Whisper video/lecture transcription RAG, web fact-checking, and peer review.
-2. **AnythingLLM Architecture**: Isolated multi-tenant workspaces, multi-document ingestion collector (PDF, Markdown, Code, CSV, Text), and an integrated Model Context Protocol (MCP) Hypervisor for dynamic stdio tool execution.
+2. **MARAT Workspaces Architecture**: Isolated multi-tenant workspaces, multi-document ingestion collector (PDF, Markdown, Code, CSV, Text), and an integrated Model Context Protocol (MCP) Hypervisor for dynamic stdio tool execution.
 3. **Reverse-Engineer-Anything (REA) Engine**: Pure-Python zero-hallucination static binary and code reverse-engineering suite (PE, ELF, Mach-O, Chromium Electron ASAR archives, Android APKs, WebAssembly WASM, Go buildinfo, and API/IPC boundary extraction) with an optional bridge to upstream `rea-agents` MCP servers.
 
 ---
@@ -107,9 +107,9 @@ Inspired by the `/reverse-engineer-anything` skill and `morluto/rea`, Marat inco
 
 ---
 
-## 📁 AnythingLLM Workspaces & Document Collector
+## 📁 MARAT Workspaces & Document Collector
 
-Marat mirrors AnythingLLM's isolated modular workspaces for true departmental or project privacy:
+Marat features isolated modular workspaces for true departmental or project privacy:
 
 * **Isolated Vector Stores**: Every workspace maintains its own isolated ChromaDB collection. Documents indexed in "Workspace A" never bleed into queries made in "Workspace B".
 * **Multi-Format Document Collector**:
@@ -196,7 +196,7 @@ marat research "Analyze architecture and security posture" --target ./src
 # 4. Multimodal Research with Video Lecture Ingestion
 marat research "Attention mechanisms" --video "https://www.youtube.com/watch?v=kCc8FmEb1nY"
 
-# 5. Manage AnythingLLM Workspaces
+# 5. Manage MARAT Workspaces
 marat workspaces
 marat workspaces create "security-audit" --desc "Target analysis vault"
 marat workspaces upload <workspace-id> ./whitepaper.pdf

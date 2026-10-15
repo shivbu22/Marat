@@ -1,6 +1,6 @@
 """MCP Hypervisor - manages external Model Context Protocol servers and dynamic tools.
 
-Inspired by AnythingLLM's MCPHypervisor architecture:
+MARAT MCP Hypervisor architecture:
 - Loads MCP server definitions from configs/mcp_servers.json
 - Communicates with servers via standard JSON-RPC 2.0 over stdio
 - Discovers advertised tools and translates them to agent-callable tools

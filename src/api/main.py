@@ -211,7 +211,7 @@ async def query_rag(q: str = ""):
 
 
 # ---------------------------------------------------------------------------
-# Workspaces Endpoints (AnythingLLM Feature)
+# MARAT Workspaces Endpoints
 # ---------------------------------------------------------------------------
 @app.get("/api/workspaces")
 async def list_workspaces():
@@ -313,7 +313,7 @@ async def search_workspace_documents(workspace_id: str, req: WorkspaceSearchRequ
 
 
 # ---------------------------------------------------------------------------
-# Threads & Chat Endpoints (AnythingLLM Feature)
+# MARAT Threads & Chat Endpoints
 # ---------------------------------------------------------------------------
 @app.get("/api/workspaces/{workspace_id}/threads")
 async def list_workspace_threads(workspace_id: str):
@@ -795,7 +795,7 @@ async def upload_and_analyze(file: UploadFile = File(...), workspace_id: str = "
 
 
 # ---------------------------------------------------------------------------
-# MCP Hypervisor Endpoints (AnythingLLM Feature)
+# MARAT MCP Hypervisor Endpoints
 # ---------------------------------------------------------------------------
 @app.get("/api/mcp/servers")
 async def list_mcp_servers():

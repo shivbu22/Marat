@@ -26,7 +26,7 @@
 ### Agentic Protocols, Standards & Software Frameworks
 * **Anthropic Model Context Protocol (MCP)**:
   * Open standard specifying JSON-RPC 2.0 protocol over stdio and SSE for connecting LLM interfaces and IDEs to local and remote data tools, database runners, and APIs.
-  * Rapid universal adoption by tools including Claude Desktop, Cursor, Zed, AnythingLLM, and MARAT.
+  * Rapid universal adoption by tools including Claude Desktop, Cursor, Zed, and MARAT.
 * **Agent Framework Consolidation**:
   * Mainstream adoption of cyclic state graph architectures (LangGraph, CrewAI) over brittle linear chains.
   * Integration of automated fact-checking, self-critique review loops, and multi-agent debate protocols to mitigate hallucination.
