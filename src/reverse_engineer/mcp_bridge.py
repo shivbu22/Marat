@@ -1,6 +1,6 @@
-"""Bridge to REA (Reverse Engineer Anything) MCP Server & CLI.
+"""Bridge to MARAT Reverse Engineering Extended Tools & MCP Servers.
 
-Enables invocation of upstream `rea-agents` or `morluto/rea` tools
+Enables invocation of external analysis and inspection tools
 via standard Model Context Protocol (stdio transport) or direct CLI.
 """
 
@@ -15,7 +15,7 @@ from typing import Any
 
 
 class ReaMcpBridge:
-    """Bridge for connecting to upstream `rea-agents` MCP server."""
+    """Bridge for connecting to external inspection MCP servers."""
 
     def __init__(self, command: str = "npx", args: list[str] | None = None):
         self.command = command
@@ -23,7 +23,7 @@ class ReaMcpBridge:
         self.is_available = shutil.which(self.command) is not None
 
     def execute_rea_cli(self, subcmd: str, target: str, extra_args: list[str] | None = None) -> dict[str, Any]:
-        """Execute a one-shot rea-agents CLI command with JSON output."""
+        """Execute a one-shot inspection CLI command with JSON output."""
         if not self.is_available:
             return {"error": "Node.js / npx not installed on system PATH"}
 

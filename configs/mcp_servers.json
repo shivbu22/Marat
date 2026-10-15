@@ -7,7 +7,7 @@
         "rea-agents@latest"
       ],
       "env": {},
-      "description": "Reverse Engineer Anything (REA) - binary and application inspection"
+      "description": "MARAT Reverse Engineering Extended Tools - binary and application inspection"
     },
     "filesystem": {
       "command": "npx",

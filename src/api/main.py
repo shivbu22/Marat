@@ -746,7 +746,7 @@ async def get_india_news_endpoint(q: str = "India top news today", limit: int = 
 
 
 # ---------------------------------------------------------------------------
-# Reverse Engineering Workbench (/reverse-engineer-anything)
+# MARAT Reverse Engineering Workbench (/api/reverse-engineer)
 # ---------------------------------------------------------------------------
 @app.post("/api/reverse-engineer/analyze")
 async def analyze_target(req: ReverseEngineerRequest):

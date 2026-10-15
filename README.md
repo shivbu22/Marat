@@ -13,14 +13,14 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-Cyclic_State_Machine-FF6F00?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![MARAT Workspaces](https://img.shields.io/badge/MARAT-Isolated_Vaults-6366F1?style=for-the-badge)](#-marat-workspaces--document-collector)
-[![Reverse Engineering](https://img.shields.io/badge/REA-Binary_%26_Code_Analysis-EF4444?style=for-the-badge)](https://github.com/morluto/rea)
+[![MARAT Reverse Engineering](https://img.shields.io/badge/MARAT_RE-Binary_%26_Code_Analysis-EF4444?style=for-the-badge)](#-marat-reverse-engineering-suite-mre)
 [![MCP](https://img.shields.io/badge/MCP-Hypervisor-10B981?style=for-the-badge)](https://modelcontextprotocol.io)
 [![Tests](https://img.shields.io/badge/Tests-48%20Passed-44CC11?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 <br/>
 
-[**Overview**](#-overview) • [**Architecture**](#-architecture) • [**Reverse Engineering (REA)**](#-reverse-engineer-anything-rea) • [**Workspaces Vault**](#-marat-workspaces--document-collector) • [**MCP Hypervisor**](#-model-context-protocol-mcp-hypervisor) • [**Agent Matrix**](#-agent-matrix) • [**CLI Guide**](#-cli-usage) • [**Web Studio & API**](#-web-studio--rest-api)
+[**Overview**](#-overview) • [**Architecture**](#-architecture) • [**Reverse Engineering (MRE)**](#-marat-reverse-engineering-suite-mre) • [**Workspaces Vault**](#-marat-workspaces--document-collector) • [**MCP Hypervisor**](#-model-context-protocol-mcp-hypervisor) • [**Agent Matrix**](#-agent-matrix) • [**CLI Guide**](#-cli-usage) • [**Web Studio & API**](#-web-studio--rest-api)
 
 </div>
 
@@ -28,10 +28,10 @@
 
 ## 🐾 Overview
 
-**Marat** combines two worlds into a unified intelligence workstation:
-1. **Marat Multi-Agent Cyclic Intelligence**: A LangGraph-orchestrated team of autonomous agents driven by **Mara** (our scholar red panda mascot), performing deep multi-step research, Whisper video/lecture transcription RAG, web fact-checking, and peer review.
-2. **MARAT Workspaces Architecture**: Isolated multi-tenant workspaces, multi-document ingestion collector (PDF, Markdown, Code, CSV, Text), and an integrated Model Context Protocol (MCP) Hypervisor for dynamic stdio tool execution.
-3. **Reverse-Engineer-Anything (REA) Engine**: Pure-Python zero-hallucination static binary and code reverse-engineering suite (PE, ELF, Mach-O, Chromium Electron ASAR archives, Android APKs, WebAssembly WASM, Go buildinfo, and API/IPC boundary extraction) with an optional bridge to upstream `rea-agents` MCP servers.
+**Marat** is an autonomous intelligence, deep research, and software reverse-engineering workstation engineered with proprietary MARAT core technologies:
+1. **MARAT Multi-Agent Cyclic Intelligence**: A LangGraph-orchestrated team of autonomous agents driven by **Mara** (our scholar red panda mascot), performing deep multi-step research, Whisper video/lecture transcription RAG, web fact-checking, and peer review.
+2. **MARAT Workspaces & Document Vault**: Isolated multi-tenant workspaces, multi-format document ingestion collector (PDF, Markdown, Code, CSV, Text), and an integrated Model Context Protocol (MCP) Hypervisor for dynamic stdio tool execution.
+3. **MARAT Reverse Engineering (MRE) Engine**: Pure-Python zero-hallucination static binary and code reverse-engineering suite (PE, ELF, Mach-O, Chromium Electron ASAR archives, Android APKs, WebAssembly WASM, Go buildinfo, and API/IPC boundary extraction) with native extensibility and MCP tool execution.
 
 ---
 
@@ -51,7 +51,7 @@ flowchart TD
         REAgent --> JSAn[JavaScript / ASAR / IPC / Routes]
         REAgent --> APKAn[Android APK / Manifest / DEX]
         REAgent --> WASMAn[WebAssembly Decoder]
-        REAgent --> MCPBridge[REA MCP Bridge]
+        REAgent --> MCPBridge[MARAT MCP Bridge]
     end
 
     subgraph Knowledge & Workspaces
@@ -81,9 +81,9 @@ flowchart TD
 
 ---
 
-## 🔬 Reverse-Engineer-Anything (REA)
+## 🔬 MARAT Reverse Engineering Suite (MRE)
 
-Inspired by the `/reverse-engineer-anything` skill and `morluto/rea`, Marat incorporates a native, high-speed static inspection suite with zero hallucinated telemetry:
+Marat incorporates a native, high-speed static inspection suite with zero hallucinated telemetry engineered directly into the core platform:
 
 * **Executable & Binary Analyzer (`binary_analyzer.py`)**:
   * Formats: Windows **PE32 / PE32+**, Linux **ELF32 / ELF64**, Apple **Mach-O** (32 & 64-bit), and MS-DOS executables.
@@ -102,8 +102,8 @@ Inspired by the `/reverse-engineer-anything` skill and `morluto/rea`, Marat inco
   * Decodes section IDs (Type, Import, Function, Table, Memory, Global, Export, Code, Data) with import/export counts.
 * **Go Build Information Extractor (`go_analyzer.py`)**:
   * Recovers Go runtime versions, module paths, and dependency hierarchies embedded in compiled binaries.
-* **REA MCP Bridge (`mcp_bridge.py`)**:
-  * Seamless stdio connection to upstream `rea-agents` servers when advanced Ghidra / radare2 MCP tools are available.
+* **MARAT MCP Tool Bridge (`mcp_bridge.py`)**:
+  * Seamless stdio connection to external decompiler and inspection servers when advanced Ghidra / radare2 MCP tools are available.
 
 ---
 

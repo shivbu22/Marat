@@ -1,4 +1,4 @@
-"""Unit tests for the Reverse Engineering Subsystem (REA)."""
+"""Unit tests for the MARAT Reverse Engineering Subsystem (MRE)."""
 
 import struct
 from pathlib import Path

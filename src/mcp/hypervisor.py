@@ -4,7 +4,7 @@ MARAT MCP Hypervisor architecture:
 - Loads MCP server definitions from configs/mcp_servers.json
 - Communicates with servers via standard JSON-RPC 2.0 over stdio
 - Discovers advertised tools and translates them to agent-callable tools
-- Pre-configured with REA (Reverse Engineer Anything), filesystem, and SQLite templates
+- Pre-configured with MARAT reverse engineering tools, filesystem, and SQLite templates
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ DEFAULT_MCP_CONFIG = {
             "command": "npx",
             "args": ["-y", "rea-agents@latest"],
             "env": {},
-            "description": "Reverse Engineer Anything (REA) - binary and application inspection",
+            "description": "MARAT Reverse Engineering Extended Tools - binary and application inspection",
         },
         "filesystem": {
             "command": "npx",
