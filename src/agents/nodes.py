@@ -454,6 +454,14 @@ Rules:
 - If review feedback is provided, address it thoroughly.
 """
 
+    re_block = ""
+    re_findings = state.get("re_findings") or []
+    if re_findings:
+        re_block = "\n\nReverse Engineering Inspection Evidence:\n" + "\n".join(
+            f"- Artifact: {rf.get('file_name')} ({rf.get('format')}) | {rf.get('summary')}"
+            for rf in re_findings
+        )
+
     user = f"""Topic: {state["topic"]}
 
 Sub-questions explored:
@@ -461,6 +469,7 @@ Sub-questions explored:
 
 Findings + fact-check status:
 {chr(10).join(claims_block)}
+{re_block}
 
 All sources collected:
 {chr(10).join(f"[{i}] {u}" for i, u in enumerate(state.get("sources_used") or [], 1))}

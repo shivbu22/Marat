@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "rea": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "rea-agents@latest"
+      ],
+      "env": {},
+      "description": "Reverse Engineer Anything (REA) - binary and application inspection"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "./data"
+      ],
+      "env": {},
+      "description": "Local filesystem access for document and artifact storage"
+    }
+  }
+}

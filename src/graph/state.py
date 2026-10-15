@@ -1,4 +1,4 @@
-"""Shared state for the research multi-agent graph."""
+"""Shared state for the MARAT multi-agent graph with Reverse Engineering & Workspaces."""
 
 from __future__ import annotations
 
@@ -33,15 +33,19 @@ class FactCheckResult(BaseModel):
 class ResearchState(TypedDict):
     # Input
     topic: str
-    focus_mode: str  # broad | deep | verify
+    focus_mode: str  # broad | deep | verify | reverse_engineer
     video_url: str  # optional video lecture or audio recording URL/path
+    target_path: str  # optional binary, ASAR, APK, WASM, or source code path to reverse-engineer
+    workspace_id: str  # active workspace ID
 
     # Planning
     sub_questions: list[dict]  # serialized SubQuestion
 
-    # Research
+    # Research & Reverse Engineering
     findings: Annotated[list[dict], operator.add]  # list of Finding dicts
     raw_search_notes: Annotated[list[str], operator.add]
+    re_findings: Annotated[list[dict], operator.add]  # reverse engineering inspection results
+    mcp_tools_used: Annotated[list[dict], operator.add]  # traces of MCP tool calls
 
     # Fact-checking
     fact_checks: list[dict]
@@ -53,6 +57,6 @@ class ResearchState(TypedDict):
     # Control
     review_count: int
     review_feedback: str
-    status: str  # planning | researching | fact_checking | writing | reviewing | done | error
+    status: str  # planning | researching | reverse_engineering | fact_checking | writing | reviewing | done | error
     error: str
     sources_used: Annotated[list[str], operator.add]

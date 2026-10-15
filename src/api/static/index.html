@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MARAT — Multi-Agent Research Assistant Technology</title>
+    <title>MARAT v2 — Multi-Agent Research & Reverse Engineering Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg-primary: #090d16;
-            --bg-secondary: #0f172a;
-            --bg-card: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(51, 65, 85, 0.6);
-            --border-hover: rgba(99, 102, 241, 0.5);
+            --bg-primary: #070a12;
+            --bg-secondary: #0d1322;
+            --bg-card: rgba(20, 30, 50, 0.7);
+            --border-color: rgba(60, 80, 115, 0.5);
+            --border-hover: rgba(99, 102, 241, 0.6);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --accent-primary: #6366f1;
             --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+            --re-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #8b5cf6 100%);
             --accent-success: #10b981;
             --accent-warning: #f59e0b;
             --accent-error: #ef4444;
-            --node-inactive: #1e293b;
+            --node-inactive: #131b2e;
             --node-active: #4f46e5;
             --node-done: #059669;
         }
@@ -40,8 +41,9 @@
             min-height: 100vh;
             line-height: 1.5;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 40%);
+                radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.04) 0%, transparent 50%);
         }
 
         header {
@@ -49,9 +51,9 @@
             top: 0;
             z-index: 50;
             backdrop-filter: blur(16px);
-            background: rgba(9, 13, 22, 0.85);
+            background: rgba(7, 10, 18, 0.88);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
+            padding: 0.85rem 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -60,12 +62,13 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.85rem;
         }
 
         .brand-badge {
-            font-size: 1.75rem;
+            font-size: 2rem;
             line-height: 1;
+            filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.4));
         }
 
         .brand-title {
@@ -83,6 +86,47 @@
             font-weight: 500;
         }
 
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(13, 19, 34, 0.8);
+            padding: 0.3rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-tab {
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .nav-tab.active.re-tab {
+            background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+            box-shadow: 0 0 14px rgba(244, 63, 94, 0.4);
+        }
+
         .status-bar {
             display: flex;
             align-items: center;
@@ -98,11 +142,10 @@
             border-radius: 9999px;
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-weight: 500;
+            color: #cbd5e1;
         }
 
-        .dot {
+        .badge-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
@@ -110,42 +153,10 @@
             box-shadow: 0 0 8px var(--accent-success);
         }
 
-        .container {
-            max-width: 1300px;
+        main {
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Tabs */
-        .tab-nav {
-            display: flex;
-            gap: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            padding: 0.75rem 1.25rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tab-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .tab-btn.active {
-            color: #818cf8;
-            border-bottom-color: #818cf8;
+            padding: 1.5rem 2rem;
         }
 
         .tab-content {
@@ -154,14 +165,18 @@
 
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.25s ease-in-out;
         }
 
-        /* Grid Layout */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .layout-grid {
             display: grid;
-            grid-template-columns: 420px 1fr;
-            gap: 1.5rem;
-            align-items: start;
+            grid-template-columns: 460px 1fr;
+            gap: 1.75rem;
         }
 
         @media (max-width: 1024px) {
@@ -173,162 +188,166 @@
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 1.5rem;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            margin-bottom: 1.5rem;
         }
 
         .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .card-desc {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
-        }
-
-        /* Form Elements */
-        .form-group {
+        /* Companion Widget */
+        .companion-box {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(244, 63, 94, 0.08) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
             margin-bottom: 1.25rem;
         }
 
-        label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-            color: #cbd5e1;
+        .companion-avatar {
+            font-size: 2.75rem;
+            line-height: 1;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
         }
 
-        input[type="text"], select, textarea {
+        .companion-text {
+            flex: 1;
+        }
+
+        .companion-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .companion-speech {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-input, .form-textarea, .form-select {
             width: 100%;
-            padding: 0.75rem 1rem;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(9, 13, 22, 0.9);
             border: 1px solid var(--border-color);
             border-radius: 8px;
+            padding: 0.65rem 0.85rem;
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 0.9rem;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        .presets {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.5rem;
-        }
-
-        .preset-tag {
-            font-size: 0.72rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 6px;
-            background: rgba(51, 65, 85, 0.5);
-            color: #cbd5e1;
-            cursor: pointer;
-            border: 1px solid transparent;
+            font-size: 0.85rem;
             transition: all 0.2s;
         }
 
-        .preset-tag:hover {
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
             border-color: var(--accent-primary);
-            color: #fff;
-            background: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
         }
 
         .btn-primary {
             width: 100%;
-            padding: 0.85rem 1.5rem;
             background: var(--accent-gradient);
             border: none;
             border-radius: 8px;
+            padding: 0.75rem 1.25rem;
             color: white;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
-        .btn-primary:hover:not(:disabled) {
+        .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
         }
 
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .btn-re {
+            background: var(--re-gradient);
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
         }
 
-        /* Pipeline Visualizer */
-        .pipeline-container {
-            margin-bottom: 1.5rem;
-            background: rgba(15, 23, 42, 0.6);
+        .btn-re:hover {
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.5);
+        }
+
+        /* Flow Graph Visualization */
+        .flow-container {
+            background: rgba(13, 19, 34, 0.7);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.25rem;
-        }
-
-        .pipeline-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .nodes-flow {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: relative;
             gap: 0.5rem;
             overflow-x: auto;
-            padding: 0.5rem 0;
         }
 
         .node-step {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
             flex: 1;
-            min-width: 80px;
+            min-width: 75px;
         }
 
         .node-circle {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--node-inactive);
             border: 2px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all 0.3s;
         }
 
@@ -346,23 +365,15 @@
         }
 
         .node-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-align: center;
         }
 
-        .node-step.active .node-label {
-            color: #818cf8;
-        }
-
-        .node-step.completed .node-label {
-            color: #34d399;
-        }
-
         .node-arrow {
             color: var(--border-color);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         @keyframes pulse {
@@ -371,7 +382,7 @@
             100% { transform: scale(1); }
         }
 
-        /* Live Terminal Telemetry */
+        /* Live Terminal */
         .terminal-box {
             background: #020617;
             border: 1px solid rgba(51, 65, 85, 0.4);
@@ -380,151 +391,99 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.75rem;
             color: #94a3b8;
-            height: 140px;
+            height: 150px;
             overflow-y: auto;
-            margin-top: 1rem;
         }
 
-        .log-entry {
-            margin-bottom: 0.3rem;
-            line-height: 1.4;
-        }
+        .log-entry { margin-bottom: 0.3rem; }
+        .log-node { color: #818cf8; font-weight: 600; }
+        .log-msg { color: #cbd5e1; }
 
-        .log-time {
-            color: #475569;
-        }
-
-        .log-node {
-            color: #818cf8;
-            font-weight: 600;
-        }
-
-        .log-msg {
-            color: #cbd5e1;
-        }
-
-        /* Report Output Area */
+        /* Report & Output Viewer */
         .report-panel {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(13, 19, 34, 0.85);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 2rem;
-            min-height: 500px;
+            min-height: 550px;
         }
 
-        .report-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
+        .markdown-body h1 { font-size: 1.7rem; font-weight: 800; margin-bottom: 1rem; color: #fff; }
+        .markdown-body h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #60a5fa; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 0.4rem; }
+        .markdown-body h3 { font-size: 1.05rem; font-weight: 600; margin-top: 1.2rem; color: #e2e8f0; }
+        .markdown-body p { margin-bottom: 0.9rem; color: #cbd5e1; font-size: 0.9rem; }
+        .markdown-body ul, .markdown-body ol { margin-left: 1.4rem; margin-bottom: 1rem; color: #cbd5e1; font-size: 0.9rem; }
+        .markdown-body li { margin-bottom: 0.3rem; }
+        .markdown-body pre { background: #030712; padding: 1rem; border-radius: 8px; border: 1px solid #1e293b; overflow-x: auto; margin-bottom: 1rem; }
+        .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #38bdf8; }
 
-        .btn-secondary {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid var(--border-color);
-            color: #cbd5e1;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(51, 65, 85, 0.8);
-            color: white;
-        }
-
-        .empty-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 400px;
-            text-align: center;
-            color: #64748b;
-        }
-
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Rendered Markdown Styling */
-        .markdown-body {
-            color: #e2e8f0;
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
-
-        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
-            color: #fff;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 700;
-        }
-
-        .markdown-body h1 {
-            font-size: 1.6rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .markdown-body h2 {
-            font-size: 1.3rem;
-        }
-
-        .markdown-body p {
-            margin-bottom: 1rem;
-        }
-
-        .markdown-body ul, .markdown-body ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .markdown-body blockquote {
-            border-left: 4px solid var(--accent-primary);
-            padding-left: 1rem;
-            color: #94a3b8;
-            margin: 1rem 0;
-            background: rgba(30, 41, 59, 0.3);
-            border-radius: 0 6px 6px 0;
-            padding: 0.75rem 1rem;
-        }
-
-        .markdown-body pre {
-            background: #020617;
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(51, 65, 85, 0.5);
-        }
-
-        .markdown-body code {
-            font-family: 'JetBrains Mono', monospace;
-            background: rgba(51, 65, 85, 0.5);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.85em;
-        }
-
-        .markdown-body table {
+        /* Data Tables */
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 1rem;
+            font-size: 0.82rem;
+            margin-top: 1rem;
         }
 
-        .markdown-body th, .markdown-body td {
-            border: 1px solid var(--border-color);
-            padding: 0.6rem 0.8rem;
+        .data-table th, .data-table td {
+            padding: 0.65rem 0.85rem;
             text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .markdown-body th {
-            background: rgba(30, 41, 59, 0.8);
+        .data-table th {
+            color: #94a3b8;
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pill-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .pill-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .pill-purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .pill-cyan { background: rgba(6, 182, 212, 0.2); color: #38bdf8; }
+
+        /* Dropzone */
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(9, 13, 22, 0.5);
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .dropzone-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .dropzone-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .dropzone-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -534,510 +493,788 @@
         <div class="brand">
             <span class="brand-badge">🐾</span>
             <div>
-                <div class="brand-title">MARAT</div>
-                <div class="brand-subtitle">Multi-Agent Research Assistant Technology featuring Mara</div>
+                <div class="brand-title">MARAT v2</div>
+                <div class="brand-subtitle">Multi-Agent Research & Reverse Engineering Platform • No gremlins allowed!</div>
             </div>
         </div>
 
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('research')">🔬 Research Studio</button>
+            <button class="nav-tab re-tab" onclick="switchTab('reverse-engineer')">🛠️ Reverse Engineering Lab</button>
+            <button class="nav-tab" onclick="switchTab('workspaces')">📁 Workspaces & Vault</button>
+            <button class="nav-tab" onclick="switchTab('mcp')">⚡ MCP Hypervisor</button>
+            <button class="nav-tab" onclick="switchTab('settings')">⚙️ Settings</button>
+        </nav>
+
         <div class="status-bar">
-            <div class="badge" title="Local LLM Engine">
-                <span class="dot"></span>
-                <span id="badge-llm">Ollama (llama3.2:1b)</span>
+            <div class="badge">
+                <span class="badge-dot"></span>
+                <span id="headerStatus">Mara Online</span>
             </div>
-            <div class="badge" title="Neural Transcription">
-                <span class="dot"></span>
-                <span>Whisper ASR</span>
+            <div class="badge" id="headerProviderBadge">
+                <span>🤖 <span id="headerProvider">ollama</span></span>
             </div>
-            <div class="badge" title="Vector Database">
-                <span class="dot"></span>
-                <span id="badge-rag">ChromaDB Vault</span>
-            </div>
-            <button class="btn-secondary" onclick="runGremlinsStressTest()" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 9999px; background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc;" title="Run Gremlins.js Chaos Monkey Stress Test">
-                <span>👾</span> <span>Gremlins.js Chaos Test</span>
-            </button>
         </div>
     </header>
 
-    <div class="container">
-        <!-- Navigation Tabs -->
-        <nav class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab('tab-research')">
-                <span>🔬</span> Research Studio
-            </button>
-            <button class="tab-btn" onclick="switchTab('tab-video')">
-                <span>🎥</span> Lecture Video Ingest
-            </button>
-            <button class="tab-btn" onclick="switchTab('tab-vault')">
-                <span>🗄️</span> ChromaDB Vault Explorer
-            </button>
-        </nav>
-
+    <main>
         <!-- TAB 1: RESEARCH STUDIO -->
-        <div id="tab-research" class="tab-content active">
+        <section id="tab-research" class="tab-content active">
             <div class="layout-grid">
-                <!-- Controls & Form -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title"><span>🧭</span> Research Mission</div>
-                        <div class="card-desc">Configure the autonomous multi-agent pipeline.</div>
+                <div>
+                    <!-- Mara Companion Box -->
+                    <div class="companion-box">
+                        <div class="companion-avatar">🐾</div>
+                        <div class="companion-text">
+                            <div class="companion-name">Mara <span class="pill pill-green">Active Guide</span></div>
+                            <div class="companion-speech" id="maraSpeech">"Ready to decompose your research topic and fact-check every claim!"</div>
+                        </div>
                     </div>
 
-                    <form id="research-form" onsubmit="startResearch(event)">
-                        <div class="form-group">
-                            <label for="topic-input">Research Topic</label>
-                            <input type="text" id="topic-input" placeholder="e.g., Quantum Computing in Cryptography" required minlength="3">
-                            <div class="presets">
-                                <span class="preset-tag" onclick="setTopic('Autonomous Multi-Agent AI Architectures')">Multi-Agent Systems</span>
-                                <span class="preset-tag" onclick="setTopic('Post-Quantum Cryptography & Lattice Encryption')">Quantum Cryptography</span>
-                                <span class="preset-tag" onclick="setTopic('Neuromorphic Computing & Spiking Neural Networks')">Neuromorphic AI</span>
-                            </div>
+                    <!-- Research Dispatch Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">🚀 Dispatch Multi-Agent Investigation</h2>
                         </div>
 
                         <div class="form-group">
-                            <label for="video-input">Lecture / Video URL (Optional)</label>
-                            <input type="text" id="video-input" placeholder="YouTube URL or local audio/video path">
-                            <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.3rem;">
-                                If supplied, Whisper will transcribe timestamps & index into RAG before research.
-                            </div>
+                            <label class="form-label">Research Topic or Goal</label>
+                            <textarea id="researchTopic" class="form-textarea" rows="3" placeholder="e.g. Compare Post-Quantum Cryptography algorithms with real-world NIST standardization milestones"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="mode-select">Investigation Mode</label>
-                            <select id="mode-select">
-                                <option value="broad">Broad Investigation (Survey & Landscape)</option>
-                                <option value="deep">Deep Investigation (Technical Rigor)</option>
-                                <option value="verify">Fact-Check & Verification Priority</option>
+                            <label class="form-label">Focus Mode</label>
+                            <select id="researchFocus" class="form-select">
+                                <option value="broad">Broad Overview (Multiple Themes)</option>
+                                <option value="deep">Deep Investigation (Technical & Empirical)</option>
+                                <option value="verify">Strict Fact-Check Verification</option>
+                                <option value="reverse_engineer">Reverse Engineering Architecture</option>
                             </select>
                         </div>
 
-                        <button type="submit" id="submit-btn" class="btn-primary">
-                            <span>🚀</span> Launch Multi-Agent Swarm
+                        <div class="form-group">
+                            <label class="form-label">Active Workspace</label>
+                            <select id="researchWorkspaceSelect" class="form-select">
+                                <option value="default">Default Workspace</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Multimodal Video / Audio Ingest (Optional)</label>
+                            <input type="text" id="researchVideo" class="form-input" placeholder="YouTube URL or local recording path">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Binary / Code Target Path (Optional)</label>
+                            <input type="text" id="researchTarget" class="form-input" placeholder="Path to .exe, .asar, .apk, .wasm, or code folder">
+                        </div>
+
+                        <button id="btnDispatchResearch" class="btn-primary" onclick="startResearch()">
+                            <span>🐾 Launch Multi-Agent Workflow</span>
                         </button>
-                    </form>
-
-                    <!-- Live Telemetry Terminal -->
-                    <div class="terminal-box" id="telemetry-box">
-                        <div class="log-entry">
-                            <span class="log-time">[READY]</span> System initialized. Local Ollama & ChromaDB connected.
-                        </div>
                     </div>
-                </div>
 
-                <!-- Right Side: Pipeline Visualizer + Report Output -->
-                <div>
-                    <!-- Pipeline Flowchart -->
-                    <div class="pipeline-container">
-                        <div class="pipeline-title">
-                            <span>Autonomous Agent Graph Topology</span>
-                            <span id="pipeline-status-text" style="color: #64748b;">Idle</span>
-                        </div>
+                    <!-- Flow Visualizer -->
+                    <div class="flow-container">
                         <div class="nodes-flow">
-                            <div class="node-step" id="node-planner">
-                                <div class="node-circle">📋</div>
-                                <div class="node-label">Planner</div>
+                            <div class="node-step" id="nodePlanner">
+                                <div class="node-circle">🧭</div>
+                                <span class="node-label">Planner</span>
                             </div>
-                            <div class="node-arrow">➜</div>
-                            <div class="node-step" id="node-researcher">
+                            <span class="node-arrow">→</span>
+                            <div class="node-step" id="nodeRE">
+                                <div class="node-circle">🛠️</div>
+                                <span class="node-label">Rev Eng</span>
+                            </div>
+                            <span class="node-arrow">→</span>
+                            <div class="node-step" id="nodeResearcher">
                                 <div class="node-circle">🔍</div>
-                                <div class="node-label">Researcher</div>
+                                <span class="node-label">Research</span>
                             </div>
-                            <div class="node-arrow">➜</div>
-                            <div class="node-step" id="node-fact_checker">
+                            <span class="node-arrow">→</span>
+                            <div class="node-step" id="nodeFactChecker">
                                 <div class="node-circle">⚖️</div>
-                                <div class="node-label">Fact-Checker</div>
+                                <span class="node-label">Fact Check</span>
                             </div>
-                            <div class="node-arrow">➜</div>
-                            <div class="node-step" id="node-writer">
+                            <span class="node-arrow">→</span>
+                            <div class="node-step" id="nodeWriter">
                                 <div class="node-circle">✍️</div>
-                                <div class="node-label">Writer</div>
+                                <span class="node-label">Writer</span>
                             </div>
-                            <div class="node-arrow">➜</div>
-                            <div class="node-step" id="node-reviewer">
+                            <span class="node-arrow">→</span>
+                            <div class="node-step" id="nodeReviewer">
                                 <div class="node-circle">🧐</div>
-                                <div class="node-label">Reviewer</div>
+                                <span class="node-label">Reviewer</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Report Panel -->
-                    <div class="report-panel">
-                        <div class="report-actions" id="report-actions" style="display: none;">
-                            <button class="btn-secondary" onclick="copyReport()">📋 Copy Markdown</button>
-                            <button class="btn-secondary" onclick="downloadReport()">💾 Download .md</button>
+                    <!-- Telemetry Terminal -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-header" style="margin-bottom: 0.5rem; padding-bottom: 0.4rem;">
+                            <h3 class="card-title" style="font-size: 0.85rem;">📡 Live Pipeline Telemetry</h3>
                         </div>
+                        <div class="terminal-box" id="telemetryLog">
+                            <div class="log-entry"><span class="log-node">[System]</span> <span class="log-msg">MARAT v2 ready. Awaiting dispatch.</span></div>
+                        </div>
+                    </div>
+                </div>
 
-                        <div id="report-content" class="markdown-body">
-                            <div class="empty-placeholder">
-                                <div class="empty-icon">🐾</div>
-                                <h3 style="color: #cbd5e1; margin-bottom: 0.5rem;">Mara is ready to investigate</h3>
-                                <p style="max-width: 400px; font-size: 0.85rem;">
-                                    Enter a research topic on the left to activate the autonomous multi-agent LangGraph workflow.
-                                </p>
+                <!-- Report Output Area -->
+                <div>
+                    <div class="report-panel" id="reportViewer">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff;">📄 Investigation Report & Dossier</h2>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn-primary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="copyReport()">📋 Copy Markdown</button>
                             </div>
                         </div>
+                        <div id="reportContent" class="markdown-body">
+                            <p style="color: #64748b; font-style: italic;">No active investigation run. Fill in the dispatch mission on the left and click "Launch Multi-Agent Workflow".</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- TAB 2: VIDEO INGEST -->
-        <div id="tab-video" class="tab-content">
-            <div class="card" style="max-width: 650px; margin: 0 auto;">
+        <!-- TAB 2: REVERSE ENGINEERING LAB -->
+        <section id="tab-reverse-engineer" class="tab-content">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title" style="color: #f43f5e;">🛠️ REA Binary & Package Inspector</h2>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
+                            Decompile and inspect native PE/ELF binaries, Electron ASAR archives, Android APKs, WebAssembly, and JavaScript source trees.
+                        </p>
+
+                        <!-- File Dropzone -->
+                        <div class="dropzone" id="reDropzone" onclick="document.getElementById('reFileInput').click()">
+                            <input type="file" id="reFileInput" style="display: none;" onchange="handleFileUpload(event)">
+                            <div class="dropzone-icon">📦</div>
+                            <div class="dropzone-title">Click or Drop Binary / Package Here</div>
+                            <div class="dropzone-desc">Supports .exe, .dll, .so, .asar, .apk, .wasm, .js, .zip</div>
+                        </div>
+
+                        <div style="text-align: center; margin: 1rem 0; font-size: 0.75rem; color: #64748b;">— OR SPECIFY LOCAL PATH —</div>
+
+                        <div class="form-group">
+                            <label class="form-label">Absolute Target File/Directory Path</label>
+                            <input type="text" id="reLocalPath" class="form-input" placeholder="C:\path\to\target.exe or ./app.asar">
+                        </div>
+
+                        <button class="btn-primary btn-re" onclick="analyzeRePath()">
+                            <span>⚡ Execute Static Analysis</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Telemetry Card -->
+                    <div class="card" id="reSummaryCard" style="display: none;">
+                        <div class="card-header">
+                            <h3 class="card-title">📊 Binary Architecture Summary</h3>
+                        </div>
+                        <div id="reSummaryText" style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;"></div>
+                    </div>
+                </div>
+
+                <!-- RE Analysis Visualizer -->
+                <div>
+                    <div class="report-panel" id="reReportViewer">
+                        <div class="card-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1rem;">
+                            <h2 class="card-title" style="color: #f43f5e;">🔍 Decompiled Sections, IPC & Endpoints</h2>
+                        </div>
+                        <div id="reResultsContainer">
+                            <p style="color: #64748b; font-style: italic;">Select or upload an artifact to begin reverse-engineering inspection.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: WORKSPACES & DOCUMENT VAULT -->
+        <section id="tab-workspaces" class="tab-content">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">📁 Workspace Manager</h2>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
+                            Isolate your research documents, vector vaults, and reverse engineering dossiers into dedicated workspaces.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label">New Workspace Name</label>
+                            <input type="text" id="newWsName" class="form-input" placeholder="e.g. Malware Analysis Project">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" id="newWsDesc" class="form-input" placeholder="Purpose or scope of this workspace">
+                        </div>
+
+                        <button class="btn-primary" onclick="createWorkspace()">
+                            <span>➕ Create Workspace</span>
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">📑 Ingest Document into Workspace</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Target Workspace</label>
+                            <select id="uploadWsSelect" class="form-select"></select>
+                        </div>
+                        <div class="form-group">
+                            <input type="file" id="wsDocUpload" class="form-input">
+                        </div>
+                        <button class="btn-primary" onclick="uploadDocToWorkspace()">
+                            <span>📥 Ingest & Vectorize Document</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">🏢 Existing Workspaces</h2>
+                        </div>
+                        <div id="workspacesListContainer">Loading workspaces…</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: MCP HYPERVISOR -->
+        <section id="tab-mcp" class="tab-content">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">⚡ Register MCP Server</h2>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
+                            Connect standard Model Context Protocol servers to dynamically supply tools to your research agents.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label">Server Identifier</label>
+                            <input type="text" id="mcpServerName" class="form-input" placeholder="e.g. rea, sqlite, github">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Executable Command</label>
+                            <input type="text" id="mcpServerCmd" class="form-input" placeholder="e.g. npx, uvx, python">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Arguments (space separated)</label>
+                            <input type="text" id="mcpServerArgs" class="form-input" placeholder="-y rea-agents@latest">
+                        </div>
+
+                        <button class="btn-primary" onclick="registerMcpServer()">
+                            <span>🔌 Connect MCP Server</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">🔌 Active MCP Servers & Tools</h2>
+                        </div>
+                        <div id="mcpServersListContainer">Loading MCP servers…</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: SETTINGS -->
+        <section id="tab-settings" class="tab-content">
+            <div class="card" style="max-width: 700px; margin: 0 auto;">
                 <div class="card-header">
-                    <div class="card-title"><span>🎥</span> Ingest Lecture Video / Audio</div>
-                    <div class="card-desc">Transcribe with OpenAI Whisper & index timestamped segments into ChromaDB.</div>
+                    <h2 class="card-title">⚙️ Platform Architecture Settings</h2>
                 </div>
-
-                <form onsubmit="ingestVideo(event)">
-                    <div class="form-group">
-                        <label for="video-source-input">Media Source (YouTube URL or Local File Path)</label>
-                        <input type="text" id="video-source-input" placeholder="https://www.youtube.com/watch?v=... or path/to/lecture.mp3" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="video-title-input">Lecture Title (Optional)</label>
-                        <input type="text" id="video-title-input" placeholder="e.g., MIT 6.006 Lecture 1">
-                    </div>
-
-                    <button type="submit" id="video-btn" class="btn-primary">
-                        <span>⚡</span> Process & Index in Vault
-                    </button>
-                </form>
-
-                <div id="video-result" style="margin-top: 1.5rem; display: none;"></div>
-            </div>
-        </div>
-
-        <!-- TAB 3: VAULT EXPLORER -->
-        <div id="tab-vault" class="tab-content">
-            <div class="card" style="max-width: 750px; margin: 0 auto;">
-                <div class="card-header">
-                    <div class="card-title"><span>🗄️</span> ChromaDB RAG Knowledge Vault</div>
-                    <div class="card-desc">Search and verify semantically indexed lecture segments and reports.</div>
-                </div>
-
-                <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
-                    <input type="text" id="vault-query" placeholder="Search vector store...">
-                    <button class="btn-primary" style="width: auto; padding: 0.75rem 1.5rem;" onclick="searchVault()">Search</button>
-                </div>
-
-                <div id="vault-results">
-                    <div style="text-align: center; color: #64748b; padding: 2rem;">
-                        Enter a search query to inspect matching chunks and cosine similarity scores.
-                    </div>
+                <div id="settingsDetails" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.8;">
+                    Loading system status…
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script>
-        let currentReportText = "";
-
-        // Tab Switching
+        // Tab switching logic
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.currentTarget.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'workspaces') loadWorkspaces();
+            if (tabId === 'mcp') loadMcpServers();
+            if (tabId === 'settings') loadSettings();
         }
 
-        function setTopic(text) {
-            document.getElementById('topic-input').value = text;
+        // System status loader
+        async function checkStatus() {
+            try {
+                const res = await fetch('/system/status');
+                const data = await res.json();
+                document.getElementById('headerProvider').textContent = `${data.provider} (${data.model})`;
+            } catch (e) {
+                console.error(e);
+            }
         }
+        checkStatus();
 
-        function logTelemetry(node, msg) {
-            const box = document.getElementById('telemetry-box');
-            const now = new Date().toTimeString().split(' ')[0];
-            const div = document.createElement('div');
-            div.className = 'log-entry';
-            div.innerHTML = `<span class="log-time">[${now}]</span> <span class="log-node">[${node}]</span> <span class="log-msg">${msg}</span>`;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
+        // Multi-Agent Research Dispatch with SSE Stream
+        async function startResearch() {
+            const topic = document.getElementById('researchTopic').value.trim();
+            if (!topic) {
+                alert('Please enter a research topic.');
+                return;
+            }
 
-        function setNodeState(nodeName, state) {
-            const el = document.getElementById(`node-${nodeName}`);
-            if (!el) return;
-            el.classList.remove('active', 'completed');
-            if (state === 'active') el.classList.add('active');
-            if (state === 'completed') el.classList.add('completed');
-        }
+            const focus = document.getElementById('researchFocus').value;
+            const video = document.getElementById('researchVideo').value.trim();
+            const target = document.getElementById('researchTarget').value.trim();
+            const workspace = document.getElementById('researchWorkspaceSelect').value;
 
-        function resetNodes() {
-            ['planner', 'researcher', 'fact_checker', 'writer', 'reviewer'].forEach(name => {
-                setNodeState(name, 'idle');
-            });
-        }
+            // Reset UI
+            resetFlowNodes();
+            document.getElementById('nodePlanner').classList.add('active');
+            logTelemetry('System', `Mission dispatched: "${topic}"`);
+            document.getElementById('maraSpeech').textContent = `"I'm coordinating the team to investigate ${topic}!"`;
 
-        // Live Research via SSE
-        async function startResearch(e) {
-            e.preventDefault();
-            const topic = document.getElementById('topic-input').value.trim();
-            const videoUrl = document.getElementById('video-input').value.trim();
-            const focusMode = document.getElementById('mode-select').value;
-            const submitBtn = document.getElementById('submit-btn');
-
-            if (!topic) return;
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span>⏳</span> Investigating...';
-            resetNodes();
-            document.getElementById('pipeline-status-text').innerText = 'Initializing...';
-            document.getElementById('report-actions').style.display = 'none';
-            document.getElementById('report-content').innerHTML = `
-                <div class="empty-placeholder">
-                    <div class="empty-icon" style="animation: pulse 1.5s infinite;">🧠</div>
-                    <h3 style="color: #cbd5e1;">Multi-Agent Pipeline in Progress...</h3>
-                    <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.5rem;">
-                        Autonomous agents are decomposing questions, scouring the web, and synthesizing findings.
-                    </p>
-                </div>
-            `;
-
-            logTelemetry('SYSTEM', `Dispatched research topic: "${topic}" (mode: ${focusMode})`);
+            const btn = document.getElementById('btnDispatchResearch');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Investigating…</span>';
 
             try {
-                const response = await fetch('/research/stream', {
+                const response = await fetch('/api/research/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         topic: topic,
-                        video_url: videoUrl,
-                        focus_mode: focusMode,
+                        focus_mode: focus,
+                        video_url: video,
+                        target_path: target,
+                        workspace_id: workspace,
                         stream: true
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Server returned status ${response.status}`);
-                }
-
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                let activeNode = null;
+                let buffer = '';
 
                 while (true) {
                     const { value, done } = await reader.read();
                     if (done) break;
 
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n\n');
+                    buffer = lines.pop();
 
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
-                            const data = JSON.parse(line.replace('data: ', ''));
-
-                            if (data.event === 'started') {
-                                logTelemetry('GRAPH', 'LangGraph state machine started.');
-                            } else if (data.event === 'node_update') {
-                                if (activeNode && activeNode !== data.node) {
-                                    setNodeState(activeNode, 'completed');
-                                }
-                                activeNode = data.node;
-                                setNodeState(data.node, 'active');
-                                document.getElementById('pipeline-status-text').innerText = `Active: ${data.node}`;
-                                
-                                let extra = '';
-                                if (data.sub_questions) extra = ` Formulated ${data.sub_questions.length} sub-queries.`;
-                                if (data.findings_added) extra = ` Gathered ${data.findings_added} findings.`;
-                                if (data.review_count) extra = ` Review cycle #${data.review_count}.`;
-
-                                logTelemetry(data.node.toUpperCase(), `Finished step with status: ${data.status}.${extra}`);
-                            } else if (data.event === 'completed') {
-                                if (activeNode) setNodeState(activeNode, 'completed');
-                                document.getElementById('pipeline-status-text').innerText = 'Completed';
-                                currentReportText = data.report || '';
-                                renderReport(currentReportText);
-                                logTelemetry('COMPLETE', 'Synthesis report compiled successfully.');
-                            } else if (data.event === 'error') {
-                                logTelemetry('ERROR', data.detail);
-                                alert('Error during research: ' + data.detail);
-                            }
+                            try {
+                                const ev = JSON.parse(line.substring(6));
+                                handleResearchEvent(ev);
+                            } catch (e) {}
                         }
                     }
                 }
             } catch (err) {
-                logTelemetry('ERROR', err.message);
-                alert('Connection error: ' + err.message);
+                logTelemetry('Error', err.message);
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>🚀</span> Launch Multi-Agent Swarm';
+                btn.disabled = false;
+                btn.innerHTML = '<span>🐾 Launch Multi-Agent Workflow</span>';
             }
         }
 
-        function renderReport(md) {
-            document.getElementById('report-actions').style.display = 'flex';
-            if (window.marked) {
-                document.getElementById('report-content').innerHTML = marked.parse(md);
-            } else {
-                document.getElementById('report-content').innerText = md;
+        function handleResearchEvent(ev) {
+            if (ev.event === 'node_update' || ev.event === 'node_complete') {
+                const node = ev.node;
+                logTelemetry(node, `Finished step: status=${ev.status}`);
+
+                if (node === 'planner') {
+                    document.getElementById('nodePlanner').classList.remove('active');
+                    document.getElementById('nodePlanner').classList.add('completed');
+                    document.getElementById('nodeResearcher').classList.add('active');
+                    document.getElementById('maraSpeech').textContent = `"Planner decomposed ${ev.sub_questions ? ev.sub_questions.length : 0} angles to explore!"`;
+                } else if (node === 'reverse_engineer') {
+                    document.getElementById('nodeRE').classList.remove('active');
+                    document.getElementById('nodeRE').classList.add('completed');
+                    document.getElementById('maraSpeech').textContent = `"Reverse Engineer extracted binary layout and exposed endpoints!"`;
+                } else if (node === 'researcher') {
+                    document.getElementById('nodeResearcher').classList.remove('active');
+                    document.getElementById('nodeResearcher').classList.add('completed');
+                    document.getElementById('nodeFactChecker').classList.add('active');
+                    document.getElementById('maraSpeech').textContent = `"Researcher uncovered ${ev.findings_count} verified evidence items!"`;
+                } else if (node === 'fact_checker') {
+                    document.getElementById('nodeFactChecker').classList.remove('active');
+                    document.getElementById('nodeFactChecker').classList.add('completed');
+                    document.getElementById('nodeWriter').classList.add('active');
+                    document.getElementById('maraSpeech').textContent = `"Fact Checker cross-verified findings against ground truth!"`;
+                } else if (node === 'writer') {
+                    document.getElementById('nodeWriter').classList.remove('active');
+                    document.getElementById('nodeWriter').classList.add('completed');
+                    document.getElementById('nodeReviewer').classList.add('active');
+                } else if (node === 'reviewer') {
+                    document.getElementById('nodeReviewer').classList.remove('active');
+                    document.getElementById('nodeReviewer').classList.add('completed');
+                    document.getElementById('maraSpeech').textContent = `"Review complete! The dossier has been peer-reviewed and finalized."`;
+                }
+            } else if (ev.event === 'completed') {
+                logTelemetry('System', `Mission accomplished in ${ev.elapsed_seconds}s.`);
+                // Fetch final report from regular endpoint if needed
+                fetchLatestReport();
             }
+        }
+
+        async function fetchLatestReport() {
+            const topic = document.getElementById('researchTopic').value.trim();
+            const focus = document.getElementById('researchFocus').value;
+            const target = document.getElementById('researchTarget').value.trim();
+            const ws = document.getElementById('researchWorkspaceSelect').value;
+
+            try {
+                const res = await fetch('/api/research', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, focus_mode: focus, target_path: target, workspace_id: ws })
+                });
+                const data = await res.json();
+                if (data.final_report) {
+                    document.getElementById('reportContent').innerHTML = marked.parse(data.final_report);
+                }
+            } catch (e) {}
+        }
+
+        function resetFlowNodes() {
+            ['nodePlanner', 'nodeRE', 'nodeResearcher', 'nodeFactChecker', 'nodeWriter', 'nodeReviewer'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.remove('active'); el.classList.remove('completed'); }
+            });
+        }
+
+        function logTelemetry(node, msg) {
+            const box = document.getElementById('telemetryLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-node">[${node}]</span> <span class="log-msg">${msg}</span>`;
+            box.appendChild(entry);
+            box.scrollTop = box.scrollHeight;
         }
 
         function copyReport() {
-            navigator.clipboard.writeText(currentReportText);
-            alert('Report copied to clipboard!');
+            const text = document.getElementById('reportContent').innerText;
+            navigator.clipboard.writeText(text);
+            alert('Report markdown copied to clipboard!');
         }
 
-        function downloadReport() {
-            const blob = new Blob([currentReportText], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `MARAT_Research_Report.md`;
-            a.click();
-        }
-
-        // Ingest Video
-        async function ingestVideo(e) {
-            e.preventDefault();
-            const source = document.getElementById('video-source-input').value.trim();
-            const title = document.getElementById('video-title-input').value.trim();
-            const btn = document.getElementById('video-btn');
-            const resultBox = document.getElementById('video-result');
-
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳</span> Transcribing & Indexing...';
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = '<div style="color: #818cf8;">Processing audio stream and extracting timestamped chunks...</div>';
-
-            try {
-                const resp = await fetch('/ingest/video', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ source, title })
-                });
-                const data = await resp.json();
-                if (!resp.ok) throw new Error(data.detail || 'Ingestion failed');
-
-                resultBox.innerHTML = `
-                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 1rem;">
-                        <h4 style="color: #34d399; margin-bottom: 0.5rem;">✅ Ingestion Successful</h4>
-                        <div style="font-size: 0.85rem; color: #cbd5e1;">
-                            <p><strong>Title:</strong> ${data.title}</p>
-                            <p><strong>Source:</strong> ${data.source_type}</p>
-                            <p><strong>Segments Transcribed:</strong> ${data.segments_count}</p>
-                            <p><strong>ChromaDB Chunks Indexed:</strong> ${data.indexed_chunks}</p>
-                        </div>
-                    </div>
-                `;
-            } catch (err) {
-                resultBox.innerHTML = `
-                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; color: #fca5a5;">
-                        ❌ Error: ${err.message}
-                    </div>
-                `;
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>⚡</span> Process & Index in Vault';
-            }
-        }
-
-        // Vault Search
-        async function searchVault() {
-            const q = document.getElementById('vault-query').value.trim();
-            const container = document.getElementById('vault-results');
-            if (!q) return;
-
-            container.innerHTML = '<div style="color: #818cf8; padding: 1rem;">Querying ChromaDB vector space...</div>';
-
-            try {
-                const resp = await fetch(`/rag/query?q=${encodeURIComponent(q)}`);
-                const data = await resp.json();
-                if (!data.results || data.results.length === 0) {
-                    container.innerHTML = '<div style="color: #64748b; padding: 1rem;">No matching vector chunks found.</div>';
-                    return;
-                }
-
-                container.innerHTML = data.results.map((r, i) => `
-                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #818cf8; margin-bottom: 0.4rem;">
-                            <span>Chunk #${i + 1}</span>
-                            <span>Distance: ${r.distance !== null ? r.distance.toFixed(4) : 'N/A'}</span>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.5;">${r.text}</div>
-                        <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.4rem;">
-                            Source: ${r.metadata.source || 'vault'} ${r.metadata.timestamp ? '| Timestamp: ' + r.metadata.timestamp : ''}
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                container.innerHTML = `<div style="color: #ef4444; padding: 1rem;">Query failed: ${err.message}</div>`;
-            }
-        }
-
-        // System info badge updater
-        async function updateStatus() {
-            try {
-                const resp = await fetch('/health');
-                const data = await resp.json();
-                if (data.model) {
-                    document.getElementById('badge-llm').innerText = `${data.provider} (${data.model})`;
-                }
-            } catch(e) {}
-        }
-        updateStatus();
-
-        // Marmelab Gremlins.js Chaos Monkey Stress Test
-        let gremlinsRunning = false;
-        async function runGremlinsStressTest() {
-            if (gremlinsRunning) return;
-            gremlinsRunning = true;
-            logTelemetry('CHAOS', 'Initializing marmelab/gremlins.js monkey test...');
-
-            if (!window.gremlins) {
-                try {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://unpkg.com/gremlins.js';
-                        script.onload = resolve;
-                        script.onerror = () => reject(new Error('Failed to load gremlins.js from CDN'));
-                        document.head.appendChild(script);
-                    });
-                } catch(err) {
-                    logTelemetry('ERROR', 'Gremlins.js load failure: ' + err.message);
-                    alert('Could not load gremlins.js. Ensure internet connection to unpkg CDN.');
-                    gremlinsRunning = false;
-                    return;
-                }
-            }
-
-            if (!window.gremlins) {
-                gremlinsRunning = false;
+        // Reverse Engineering Analysis
+        async function analyzeRePath() {
+            const path = document.getElementById('reLocalPath').value.trim();
+            if (!path) {
+                alert('Please enter a target path.');
                 return;
             }
 
-            logTelemetry('CHAOS', '👾 Horde unleashed! Attacking MARAT dashboard with 500 chaotic events (clicks, inputs, scrolls)...');
-            let errorCount = 0;
-            const errListener = () => { errorCount++; };
-            window.addEventListener('error', errListener);
+            renderLoadingRE();
+            try {
+                const res = await fetch('/api/reverse-engineer/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target_path: path })
+                });
+                const data = await res.json();
+                renderReResults(data);
+            } catch (err) {
+                document.getElementById('reResultsContainer').innerHTML = `<p style="color: #ef4444;">Analysis failed: ${err.message}</p>`;
+            }
+        }
+
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            renderLoadingRE();
+            const formData = new FormData();
+            formData.append('file', file);
 
             try {
-                const horde = window.gremlins.createHorde({
-                    species: [
-                        window.gremlins.species.clicker({ clickTypes: ['click'] }),
-                        window.gremlins.species.formFiller(),
-                        window.gremlins.species.scroller(),
-                        window.gremlins.species.typer()
-                    ],
-                    strategies: [
-                        window.gremlins.strategies.distribution({
-                            delay: 15,
-                            nb: 500
-                        })
-                    ]
+                const res = await fetch('/api/reverse-engineer/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                renderReResults(data);
+            } catch (err) {
+                document.getElementById('reResultsContainer').innerHTML = `<p style="color: #ef4444;">Upload analysis failed: ${err.message}</p>`;
+            }
+        }
+
+        function renderLoadingRE() {
+            document.getElementById('reResultsContainer').innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; animation: pulse 1s infinite;">🔍</div>
+                    <div style="font-weight: 700; color: #fff;">Decompiling & Extracting Telemetry…</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">Analyzing headers, sections, IPC channels, and strings</div>
+                </div>
+            `;
+        }
+
+        function renderReResults(res) {
+            const data = res.data || {};
+            const container = document.getElementById('reResultsContainer');
+            document.getElementById('reSummaryCard').style.display = 'block';
+            document.getElementById('reSummaryText').textContent = res.summary || 'Analysis complete.';
+
+            let html = `
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <span class="pill pill-cyan">Format: ${res.format}</span>
+                    <span class="pill pill-purple">Evidence ID: ${res.evidence_id}</span>
+                    <span class="pill pill-green">Size: ${(data.file_size || data.total_size || 0).toLocaleString()} bytes</span>
+                    ${data.average_entropy ? `<span class="pill ${data.average_entropy > 7.1 ? 'pill-red' : 'pill-green'}">Entropy: ${data.average_entropy}</span>` : ''}
+                </div>
+            `;
+
+            // Sections Table
+            if (data.sections && data.sections.length > 0) {
+                html += `
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #60a5fa; margin-top: 1.25rem;">Executable Sections</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Section</th>
+                                <th>Virtual Size</th>
+                                <th>Raw Size</th>
+                                <th>Entropy</th>
+                                <th>Flags</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.sections.slice(0, 15).map(s => `
+                                <tr>
+                                    <td style="font-weight: 600;">${s.name}</td>
+                                    <td>${s.virtual_size.toLocaleString()}</td>
+                                    <td>${s.raw_size.toLocaleString()}</td>
+                                    <td style="color: ${s.entropy > 7.1 ? '#f87171' : '#34d399'}; font-weight: 600;">${s.entropy}</td>
+                                    <td><span class="pill pill-purple">${s.characteristics.join(', ') || 'NONE'}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            // IPC Channels (Electron)
+            if (data.ipc_channels && data.ipc_channels.length > 0) {
+                html += `
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #ec4899; margin-top: 1.5rem;">Electron Inter-Process Communication (IPC)</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Channel</th><th>Type</th><th>File</th></tr></thead>
+                        <tbody>
+                            ${data.ipc_channels.slice(0, 20).map(ch => `
+                                <tr>
+                                    <td style="font-weight: 600; color: #34d399;">${ch.channel}</td>
+                                    <td><span class="pill pill-cyan">${ch.type}</span></td>
+                                    <td style="font-size: 0.75rem; color: #94a3b8;">${ch.file}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            // API Endpoints
+            if (data.api_endpoints && data.api_endpoints.length > 0) {
+                html += `
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #38bdf8; margin-top: 1.5rem;">Discovered API Endpoints</h3>
+                    <ul style="margin: 0.75rem 0 1rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38bdf8;">
+                        ${data.api_endpoints.slice(0, 20).map(ep => `<li>${ep}</li>`).join('')}
+                    </ul>
+                `;
+            }
+
+            // Harvested Strings
+            if (data.interesting_strings && data.interesting_strings.length > 0) {
+                html += `
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #fbbf24; margin-top: 1.5rem;">Interesting Harvested Strings & URLs</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Offset</th><th>Kind</th><th>String Value</th></tr></thead>
+                        <tbody>
+                            ${data.interesting_strings.slice(0, 20).map(s => `
+                                <tr>
+                                    <td style="font-family: monospace; color: #64748b;">0x${s.offset.toString(16)}</td>
+                                    <td><span class="pill ${s.kind === 'url' ? 'pill-green' : 'pill-cyan'}">${s.kind}</span></td>
+                                    <td style="word-break: break-all; font-family: 'JetBrains Mono', monospace;">${s.value}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Workspaces Management
+        async function loadWorkspaces() {
+            try {
+                const res = await fetch('/api/workspaces');
+                const list = await res.json();
+
+                const select1 = document.getElementById('researchWorkspaceSelect');
+                const select2 = document.getElementById('uploadWsSelect');
+                select1.innerHTML = '';
+                select2.innerHTML = '';
+
+                list.forEach(ws => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = ws.id;
+                    opt1.textContent = `${ws.name} (${ws.documents_count} docs)`;
+                    select1.appendChild(opt1);
+
+                    const opt2 = document.createElement('option');
+                    opt2.value = ws.id;
+                    opt2.textContent = ws.name;
+                    select2.appendChild(opt2);
                 });
 
-                await horde.unleash();
-                logTelemetry('CHAOS', `✅ Gremlins monkey attack concluded! 500 chaotic events processed. Uncaught errors: ${errorCount}.`);
-                alert(`👾 Gremlins.js Chaos Monkey Test Passed!\n\nEvents Simulated: 500\nUncaught UI Exceptions: ${errorCount}\nResilience: 100% Stable`);
-            } catch(e) {
-                logTelemetry('ERROR', 'Gremlins execution error: ' + e.message);
-            } finally {
-                window.removeEventListener('error', errListener);
-                gremlinsRunning = false;
-            }
+                const container = document.getElementById('workspacesListContainer');
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead><tr><th>Name</th><th>Slug</th><th>Documents</th><th>Collection</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${list.map(w => `
+                                <tr>
+                                    <td style="font-weight: 600;">${w.name}</td>
+                                    <td style="color: #94a3b8;">${w.slug}</td>
+                                    <td><span class="pill pill-green">${w.documents_count} docs</span></td>
+                                    <td style="font-family: monospace; font-size: 0.75rem;">${w.vector_collection}</td>
+                                    <td><button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="deleteWorkspace('${w.id}')">Delete</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (e) {}
+        }
+
+        async function createWorkspace() {
+            const name = document.getElementById('newWsName').value.trim();
+            const desc = document.getElementById('newWsDesc').value.trim();
+            if (!name) return alert('Enter a workspace name.');
+
+            await fetch('/api/workspaces', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description: desc })
+            });
+            document.getElementById('newWsName').value = '';
+            document.getElementById('newWsDesc').value = '';
+            loadWorkspaces();
+        }
+
+        async function deleteWorkspace(id) {
+            if (!confirm('Delete this workspace and its documents?')) return;
+            await fetch(`/api/workspaces/${id}`, { method: 'DELETE' });
+            loadWorkspaces();
+        }
+
+        async function uploadDocToWorkspace() {
+            const wsId = document.getElementById('uploadWsSelect').value;
+            const fileInput = document.getElementById('wsDocUpload');
+            const file = fileInput.files[0];
+            if (!file) return alert('Select a file to upload.');
+
+            const fd = new FormData();
+            fd.append('file', file);
+            await fetch(`/api/workspaces/${wsId}/upload`, { method: 'POST', body: fd });
+            fileInput.value = '';
+            alert('Document ingested and vectorized successfully!');
+            loadWorkspaces();
+        }
+
+        // MCP Hypervisor Management
+        async function loadMcpServers() {
+            try {
+                const res = await fetch('/api/mcp/servers');
+                const list = await res.json();
+                const container = document.getElementById('mcpServersListContainer');
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead><tr><th>Server</th><th>Command</th><th>Args</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody>
+                            ${list.map(s => `
+                                <tr>
+                                    <td style="font-weight: 700; color: #38bdf8;">${s.name}</td>
+                                    <td style="font-family: monospace;">${s.command}</td>
+                                    <td style="font-size: 0.75rem; color: #94a3b8;">${(s.args || []).join(' ')}</td>
+                                    <td><span class="pill ${s.status === 'connected' ? 'pill-green' : 'pill-red'}">${s.status}</span></td>
+                                    <td>
+                                        <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.72rem;" onclick="testMcpServer('${s.name}')">Test</button>
+                                        <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.72rem; color: #ef4444;" onclick="removeMcpServer('${s.name}')">Remove</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (e) {}
+        }
+
+        async function registerMcpServer() {
+            const name = document.getElementById('mcpServerName').value.trim();
+            const cmd = document.getElementById('mcpServerCmd').value.trim();
+            const rawArgs = document.getElementById('mcpServerArgs').value.trim();
+            if (!name || !cmd) return alert('Enter server name and command.');
+
+            const args = rawArgs ? rawArgs.split(' ') : [];
+            await fetch('/api/mcp/servers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, command: cmd, args })
+            });
+            loadMcpServers();
+        }
+
+        async function testMcpServer(name) {
+            const res = await fetch(`/api/mcp/servers/${name}/test`, { method: 'POST' });
+            const data = await res.json();
+            alert(`Server ${name}: ${data.status} ${data.message || ''}`);
+            loadMcpServers();
+        }
+
+        async function removeMcpServer(name) {
+            await fetch(`/api/mcp/servers/${name}`, { method: 'DELETE' });
+            loadMcpServers();
+        }
+
+        // Settings Loader
+        async function loadSettings() {
+            try {
+                const res = await fetch('/system/status');
+                const data = await res.json();
+                document.getElementById('settingsDetails').innerHTML = `
+                    <p><strong>Platform:</strong> MARAT v2 (Multi-Agent Research & Reverse Engineering Platform)</p>
+                    <p><strong>Companion:</strong> Mara 🐾 (Clever Scholar Red Panda)</p>
+                    <p><strong>Active LLM Provider:</strong> <code>${data.provider}</code></p>
+                    <p><strong>Active Model:</strong> <code>${data.model}</code></p>
+                    <p><strong>ChromaDB Vault Status:</strong> ${data.rag_enabled ? '✅ Active' : '❌ Disabled'} (${data.vault_documents} documents)</p>
+                    <p><strong>Active Workspaces:</strong> ${data.workspaces_count}</p>
+                    <p><strong>Registered MCP Servers:</strong> ${data.mcp_servers_count}</p>
+                    <p><strong>Platform Capabilities:</strong> ${data.capabilities.map(c => `<span class="pill pill-cyan" style="margin: 0.2rem;">${c}</span>`).join('')}</p>
+                `;
+            } catch (e) {}
         }
     </script>
 </body>

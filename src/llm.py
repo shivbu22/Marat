@@ -1,4 +1,4 @@
-"""LLM factory – supports Ollama, OpenAI, OpenRouter, Anthropic via OpenAI-compatible client."""
+"""LLM factory – supports Ollama, OpenAI, OpenRouter, Anthropic, Groq, LMStudio, LocalAI, vLLM."""
 
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ def _resolve_ollama_model(base_url: str, requested: str) -> str:
             for m in models:
                 if m == prefix or m.startswith(f"{prefix}:"):
                     return m
-            # If requested model not found anywhere, pick first installed local model
             return models[0]
     except Exception:
         pass
@@ -38,7 +37,6 @@ def get_llm(temperature: float | None = None, model: str | None = None) -> BaseC
     temp = temperature if temperature is not None else s.temperature
     model_name = model or s.llm_model
 
-    # All providers go through OpenAI-compatible endpoint where possible
     if s.llm_provider == "ollama":
         resolved_model = _resolve_ollama_model(s.llm_base_url, model_name)
         return ChatOpenAI(
@@ -48,7 +46,39 @@ def get_llm(temperature: float | None = None, model: str | None = None) -> BaseC
             temperature=temp,
             max_tokens=s.max_tokens,
         )
-    if s.llm_provider == "openrouter":
+    elif s.llm_provider == "groq":
+        return ChatOpenAI(
+            model=model_name or "llama-3.3-70b-versatile",
+            base_url="https://api.groq.com/openai/v1",
+            api_key=s.llm_api_key,
+            temperature=temp,
+            max_tokens=s.max_tokens,
+        )
+    elif s.llm_provider == "lmstudio":
+        return ChatOpenAI(
+            model=model_name,
+            base_url="http://localhost:1234/v1",
+            api_key="lm-studio",
+            temperature=temp,
+            max_tokens=s.max_tokens,
+        )
+    elif s.llm_provider == "localai":
+        return ChatOpenAI(
+            model=model_name,
+            base_url="http://localhost:8080/v1",
+            api_key="localai",
+            temperature=temp,
+            max_tokens=s.max_tokens,
+        )
+    elif s.llm_provider == "vllm":
+        return ChatOpenAI(
+            model=model_name,
+            base_url=s.llm_base_url if s.llm_base_url != "http://localhost:11434/v1" else "http://localhost:8000/v1",
+            api_key=s.llm_api_key or "token",
+            temperature=temp,
+            max_tokens=s.max_tokens,
+        )
+    elif s.llm_provider == "openrouter":
         return ChatOpenAI(
             model=model_name,
             base_url="https://openrouter.ai/api/v1",
@@ -56,15 +86,24 @@ def get_llm(temperature: float | None = None, model: str | None = None) -> BaseC
             temperature=temp,
             max_tokens=s.max_tokens,
             default_headers={
-                "HTTP-Referer": "https://github.com/local-jarvis/research-assistant",
-                "X-Title": "Multi-Agent Research Assistant",
+                "HTTP-Referer": "https://github.com/shivbu22/Marat",
+                "X-Title": "MARAT Intelligence Platform",
             },
         )
-    # openai / anthropic (via compatible proxy or native openai client)
-    return ChatOpenAI(
-        model=model_name,
-        api_key=s.llm_api_key,
-        temperature=temp,
-        max_tokens=s.max_tokens,
-        base_url=s.llm_base_url if s.llm_base_url != "http://localhost:11434/v1" else None,
-    )
+    elif s.llm_provider == "anthropic":
+        # Anthropic via OpenAI-compatible gateway / proxy or standard proxy
+        return ChatOpenAI(
+            model=model_name or "claude-3-5-sonnet-20241022",
+            base_url="https://api.anthropic.com/v1" if s.llm_base_url == "http://localhost:11434/v1" else s.llm_base_url,
+            api_key=s.llm_api_key,
+            temperature=temp,
+            max_tokens=s.max_tokens,
+        )
+    else:  # default openai
+        return ChatOpenAI(
+            model=model_name,
+            api_key=s.llm_api_key,
+            temperature=temp,
+            max_tokens=s.max_tokens,
+            base_url=s.llm_base_url if s.llm_base_url != "http://localhost:11434/v1" else None,
+        )

@@ -17,13 +17,26 @@ class Settings(BaseSettings):
     )
 
     # LLM
-    llm_provider: Literal["ollama", "openai", "openrouter", "anthropic"] = "ollama"
+    llm_provider: Literal[
+        "ollama",
+        "openai",
+        "openrouter",
+        "anthropic",
+        "groq",
+        "lmstudio",
+        "localai",
+        "vllm",
+    ] = "ollama"
     llm_model: str = "llama3.2"
     llm_base_url: str = "http://localhost:11434/v1"
     llm_api_key: str = "ollama"
     temperature: float = 0.2
     max_tokens: int = 4096
     max_tool_turns: int = 12
+
+    # Workspaces & Storage (AnythingLLM architecture)
+    workspaces_db: Path = Path("./data/workspaces.db")
+    mcp_config_path: Path = Path("./configs/mcp_servers.json")
 
     # Search
     tavily_api_key: str = ""
@@ -47,6 +60,11 @@ class Settings(BaseSettings):
     # Video & Multimodal
     whisper_model: str = "base"
     video_window_seconds: float = 60.0
+
+    # Reverse Engineering (REA)
+    rea_mcp_command: str = "npx"
+    rea_mcp_args: list[str] = ["-y", "rea-agents@latest"]
+    rea_max_strings: int = 300
 
     # API
     api_host: str = "0.0.0.0"

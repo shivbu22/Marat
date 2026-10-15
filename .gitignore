@@ -39,6 +39,8 @@ htmlcov/
 
 # Local database & outputs
 data/chroma/
+data/*.db
+*.db
 reports/
 
 # IDE & OS

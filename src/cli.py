@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""CLI for Multi-Agent Research Assistant."""
+"""CLI for MARAT — Multi-Agent Research Assistant Technology."""
 
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 import time
+from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -23,9 +25,13 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
 from .config import get_settings
 from .graph.workflow import get_graph
+from .reverse_engineer.agent import run_target_analysis
+from .workspaces.manager import get_workspace_manager
+from .mcp.hypervisor import get_mcp_hypervisor
 
 MARAT_BANNER = """[bold cyan]
  __  __    _    ____      _  _____ 
@@ -34,13 +40,13 @@ MARAT_BANNER = """[bold cyan]
 | |  | |/ ___ \\|  _ <  / ___ \\| |  
 |_|  |_/_/   \\_\\_| \\_\\/_/   \\_\\_|  
 [/bold cyan]
-[bold bright_magenta]MARAT — Multi-Agent Research Assistant Technology[/bold bright_magenta]
-[dim italic]Featuring Mara, your intelligent research companion[/dim italic]
+[bold bright_magenta]MARAT v2 — Multi-Agent Research & Reverse Engineering Platform[/bold bright_magenta]
+[dim italic]Featuring Mara, your clever scholar red panda research companion[/dim italic]
 """
 
 app = typer.Typer(
     add_completion=False,
-    help="MARAT — Multi-Agent Research Assistant Technology featuring Mara",
+    help="MARAT — Multi-Agent Research & Reverse Engineering Platform featuring Mara",
 )
 console = Console()
 
@@ -48,17 +54,21 @@ console = Console()
 @app.command()
 def research(
     topic: str = typer.Argument(..., help="Research topic or question"),
-    focus: str = typer.Option("broad", help="Focus mode: broad | deep | verify"),
+    focus: str = typer.Option("broad", help="Focus mode: broad | deep | verify | reverse_engineer"),
     video: str = typer.Option("", "--video", "-v", help="Optional YouTube lecture URL or audio/video file path"),
+    target: str = typer.Option("", "--target", "-t", help="Optional binary, ASAR, APK, WASM, or code path to reverse-engineer"),
+    workspace: str = typer.Option("default", "--workspace", "-w", help="Workspace ID for isolated memory"),
     save: bool = typer.Option(True, help="Save report to disk"),
 ):
-    """Run a full multi-agent research pipeline on a topic."""
+    """Run a full multi-agent research and reverse-engineering pipeline."""
     s = get_settings()
     console.print(MARAT_BANNER)
     video_line = f"\n[bold yellow]Video Ingest:[/] {video}" if video else ""
+    target_line = f"\n[bold red]Reverse Engineering Target:[/] {target}" if target else ""
+    ws_line = f"\n[bold green]Workspace:[/] {workspace}"
     console.print(
         Panel.fit(
-            f"[bold cyan]Topic:[/] {topic}\n[bold magenta]Focus:[/] {focus}{video_line}\n[dim]Companion: Mara 🐾[/dim]",
+            f"[bold cyan]Topic:[/] {topic}\n[bold magenta]Focus:[/] {focus}{video_line}{target_line}{ws_line}\n[dim]Companion: Mara 🐾[/dim]",
             title="🐾 MARAT Mission Dispatch",
             border_style="cyan",
         )
@@ -69,8 +79,12 @@ def research(
         "topic": topic,
         "focus_mode": focus,
         "video_url": video,
+        "target_path": target,
+        "workspace_id": workspace,
         "sub_questions": [],
         "findings": [],
+        "re_findings": [],
+        "mcp_tools_used": [],
         "raw_search_notes": [],
         "fact_checks": [],
         "draft_report": "",
@@ -91,38 +105,53 @@ def research(
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-            task = progress.add_task("Planning research…", total=None)
+            task = progress.add_task("Planning investigation…", total=None)
 
             async for event in graph.astream(initial, stream_mode="updates"):
                 for node, update in event.items():
                     for k, v in update.items():
-                        if k in ("findings", "raw_search_notes", "sources_used") and isinstance(
-                            v, list
-                        ):
-                            final_state[k] = final_state.get(k, []) + v
+                        if k in ("findings", "raw_search_notes", "sources_used", "re_findings") and isinstance(v, list):
+                            final_state.setdefault(k, []).extend(v)
                         else:
                             final_state[k] = v
 
                     if node == "planner":
-                        n = len(update.get("sub_questions") or [])
+                        sqs = update.get("sub_questions") or []
                         progress.update(
-                            task, description=f"Planned {n} sub-questions → researching…"
+                            task,
+                            description=f"[cyan]Planner complete:[/] {len(sqs)} sub-questions identified",
+                        )
+                    elif node == "reverse_engineer":
+                        re_res = update.get("re_findings") or []
+                        progress.update(
+                            task,
+                            description=f"[red]Reverse Engineer complete:[/] {len(re_res)} targets analyzed",
                         )
                     elif node == "researcher":
-                        n = len(update.get("findings") or [])
-                        progress.update(task, description=f"Gathered {n} findings → fact-checking…")
-                    elif node == "fact_checker":
+                        n_findings = len(final_state.get("findings", []))
                         progress.update(
-                            task, description="Fact-checking complete → writing report…"
+                            task,
+                            description=f"[magenta]Researcher complete:[/] {n_findings} findings discovered",
+                        )
+                    elif node == "fact_checker":
+                        fcs = update.get("fact_checks") or []
+                        verified = sum(1 for fc in fcs if fc.get("status") in ("VERIFIED", "PARTIALLY_VERIFIED"))
+                        progress.update(
+                            task,
+                            description=f"[yellow]Fact-checker complete:[/] {verified}/{len(fcs)} claims verified",
                         )
                     elif node == "writer":
-                        progress.update(task, description="Draft written → reviewing…")
+                        progress.update(task, description="[blue]Writer complete:[/] Draft synthesized")
                     elif node == "reviewer":
-                        rc = update.get("review_count", 0)
-                        if update.get("status") == "done":
-                            progress.update(task, description="Report approved ✓")
+                        status = update.get("status", "")
+                        count = update.get("review_count", 1)
+                        if status == "done":
+                            progress.update(task, description=f"[green]Review approved after cycle {count}[/]")
                         else:
-                            progress.update(task, description=f"Revision requested (cycle {rc})…")
+                            progress.update(
+                                task,
+                                description=f"[yellow]Revision requested (cycle {count})[/]",
+                            )
 
         return final_state
 
@@ -155,7 +184,120 @@ def research(
         safe = "".join(c if c.isalnum() or c in "-_ " else "_" for c in topic)[:50]
         path = out_dir / f"{int(time.time())}_{safe}.md"
         path.write_text(report, encoding="utf-8")
-        console.print(f"[green]Saved → {path}[/]")
+        console.print(f"[green]Saved report → {path}[/]")
+
+
+@app.command("reverse-engineer")
+@app.command("re")
+def reverse_engineer_cmd(
+    target: str = typer.Argument(..., help="Path to binary, ASAR, APK, WASM, or code folder to inspect"),
+    json_output: bool = typer.Option(False, "--json", help="Output raw JSON results"),
+):
+    """Deep inspection of a binary, Electron ASAR, Android APK, WebAssembly, or source tree."""
+    console.print(MARAT_BANNER)
+    console.print(f"[bold red]Reverse Engineering Target:[/] {target}")
+
+    with console.status("[bold green]Inspecting binary layout, headers, and strings…[/]"):
+        result = run_target_analysis(target)
+
+    if "error" in result:
+        console.print(f"[red]Inspection failed:[/] {result['error']}")
+        raise typer.Exit(1)
+
+    if json_output:
+        console.print_json(json.dumps(result))
+        return
+
+    data = result.get("data", {})
+    fmt = result.get("format", "UNKNOWN")
+
+    console.print(
+        Panel.fit(
+            f"[bold cyan]File:[/] {result.get('file_name')}\n"
+            f"[bold magenta]Format:[/] {fmt}\n"
+            f"[bold yellow]Evidence ID:[/] {result.get('evidence_id')}\n"
+            f"[bold green]Summary:[/] {result.get('summary')}",
+            title="🛠️ Static Reverse Engineering Dossier",
+            border_style="red",
+        )
+    )
+
+    # Sections table if PE / ELF
+    sections = data.get("sections")
+    if sections:
+        table = Table(title="Executable Sections & Entropy", border_style="cyan")
+        table.add_column("Section", style="bold")
+        table.add_column("Virtual Size", justify="right")
+        table.add_column("Raw Size", justify="right")
+        table.add_column("Entropy", justify="right")
+        table.add_column("Flags")
+        for sec in sections[:15]:
+            ent_color = "red" if sec.get("entropy", 0) > 7.1 else "green"
+            table.add_row(
+                sec.get("name", ""),
+                f"{sec.get('virtual_size', 0):,}",
+                f"{sec.get('raw_size', 0):,}",
+                f"[{ent_color}]{sec.get('entropy', 0):.2f}[/]",
+                ", ".join(sec.get("characteristics", [])),
+            )
+        console.print(table)
+
+    # Imports preview
+    imports = data.get("imports")
+    if imports:
+        console.print(f"\n[bold]Imported Libraries ({len(imports)}):[/]")
+        for imp in imports[:10]:
+            console.print(f"  • [cyan]{imp.get('library')}[/]")
+
+    # ASAR IPC Channels if Electron
+    ipc_channels = data.get("ipc_channels")
+    if ipc_channels:
+        table = Table(title="Electron IPC Communication Channels", border_style="magenta")
+        table.add_column("Channel", style="bold green")
+        table.add_column("Type", style="yellow")
+        table.add_column("Source File", style="dim")
+        for ch in ipc_channels[:15]:
+            table.add_row(ch.get("channel", ""), ch.get("type", ""), ch.get("file", ""))
+        console.print(table)
+
+    # API Endpoints
+    endpoints = data.get("api_endpoints")
+    if endpoints:
+        console.print(f"\n[bold]Discovered API Endpoints ({len(endpoints)}):[/]")
+        for ep in endpoints[:15]:
+            console.print(f"  • [green]{ep}[/]")
+
+
+@app.command("workspaces")
+def workspaces_cmd():
+    """List all isolated knowledge workspaces."""
+    mgr = get_workspace_manager()
+    workspaces = mgr.list_workspaces()
+    table = Table(title="🐾 MARAT Knowledge Workspaces", border_style="green")
+    table.add_column("Name", style="bold cyan")
+    table.add_column("Slug", style="dim")
+    table.add_column("Documents", justify="right")
+    table.add_column("Vector Collection")
+    for ws in workspaces:
+        table.add_row(ws.name, ws.slug, str(ws.documents_count), ws.vector_collection)
+    console.print(table)
+
+
+@app.command("mcp")
+def mcp_cmd():
+    """List and test registered MCP servers."""
+    hyp = get_mcp_hypervisor()
+    servers = hyp.list_servers()
+    table = Table(title="⚡ MARAT MCP Hypervisor Servers", border_style="yellow")
+    table.add_column("Server", style="bold cyan")
+    table.add_column("Command", style="magenta")
+    table.add_column("Args", style="dim")
+    table.add_column("Status")
+    for s in servers:
+        test_res = hyp.test_server(s.name)
+        status_str = "[green]Connected[/]" if test_res.get("status") == "connected" else "[red]Offline[/]"
+        table.add_row(s.name, s.command, " ".join(s.args), status_str)
+    console.print(table)
 
 
 @app.command("ingest-video")
@@ -198,7 +340,7 @@ def serve(
     host: str = typer.Option(None, help="Host"),
     port: int = typer.Option(None, help="Port"),
 ):
-    """Start the FastAPI server."""
+    """Start the MARAT FastAPI server."""
     import uvicorn
 
     s = get_settings()
