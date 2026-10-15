@@ -12,7 +12,7 @@ from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..config import get_settings
@@ -21,6 +21,7 @@ from ..llm import get_llm
 from ..mcp.hypervisor import get_mcp_hypervisor
 from ..reverse_engineer.agent import run_target_analysis
 from ..workspaces.manager import get_workspace_manager
+from ..workspaces.memory import get_chat_memory
 from ..rag.store import get_rag
 
 app = FastAPI(
@@ -301,6 +302,19 @@ async def send_chat_message(req: ChatMessageRequest):
     is_agent = clean_msg.startswith("@agent") or clean_msg.startswith("/research") or req.mode in ("agent", "research")
     is_re = clean_msg.startswith("/re") or req.mode == "reverse_engineer" or bool(req.target_path)
 
+    # Retrieve thread name if present
+    thread = mgr.get_thread(thread_id)
+    thread_name = thread.name if thread else "Chat"
+
+    # Recall past conversation memory on this topic
+    chat_memory = get_chat_memory()
+    recalled_memories = chat_memory.recall_topic_memory(clean_msg, workspace_id=ws.id, k=3)
+    memory_context = ""
+    if recalled_memories:
+        memory_context = "\n\n--- Prior Conversation Memory on this Topic ---\n" + "\n---\n".join(
+            m["text"] for m in recalled_memories
+        ) + "\n(Note: The user is continuing or refining a discussion on this topic. Build directly upon these prior conclusions to improve continuous memory.)"
+
     # 1. Reverse Engineering Mode
     if is_re:
         target = req.target_path
@@ -333,11 +347,21 @@ async def send_chat_message(req: ChatMessageRequest):
             content,
             metadata={"type": "reverse_engineering", "data": re_res},
         )
+        chat_memory.append_turn(
+            workspace_id=ws.id,
+            thread_id=thread_id,
+            user_message=clean_msg,
+            assistant_message=content,
+            thread_name=thread_name,
+            mode="reverse_engineer",
+            metadata={"re_format": re_res.get("format")},
+        )
         return {
             "thread_id": thread_id,
             "user_message": user_msg,
             "assistant_message": asst_msg,
             "mode": "reverse_engineer",
+            "recalled_memories_count": len(recalled_memories),
         }
 
     # 2. Multi-Agent Autonomous Research Mode
@@ -379,11 +403,21 @@ async def send_chat_message(req: ChatMessageRequest):
                 "review_count": res.get("review_count", 0),
             },
         )
+        chat_memory.append_turn(
+            workspace_id=ws.id,
+            thread_id=thread_id,
+            user_message=clean_msg,
+            assistant_message=report,
+            thread_name=thread_name,
+            mode="agent_research",
+            sources=res.get("sources_used", []),
+        )
         return {
             "thread_id": thread_id,
             "user_message": user_msg,
             "assistant_message": asst_msg,
             "mode": "agent",
+            "recalled_memories_count": len(recalled_memories),
         }
 
     # 3. Direct Workspace RAG Chat
@@ -404,6 +438,8 @@ async def send_chat_message(req: ChatMessageRequest):
         from langchain_core.messages import HumanMessage, SystemMessage
         llm = get_llm(temperature=ws.temperature)
         system_content = f"{ws.system_prompt}\n\nYou are in the '{ws.name}' workspace in Marat. Answer helpfully, accurately, and concisely."
+        if memory_context:
+            system_content += memory_context
         if rag_context:
             system_content += f"\n{rag_context}"
         response = await llm.ainvoke([SystemMessage(content=system_content), HumanMessage(content=clean_msg)])
@@ -411,19 +447,77 @@ async def send_chat_message(req: ChatMessageRequest):
     except Exception as e:
         answer = f"Mara (companion): I received your message '{clean_msg}'. (Note: Local model response: {e}. You can connect Ollama or configure an API key in Settings!)"
 
+    recalled_info = [m["text"][:100] for m in recalled_memories] if recalled_memories else []
     asst_msg = mgr.add_message(
         thread_id,
         req.workspace_id,
         "assistant",
         answer,
-        metadata={"sources": list(set(sources))},
+        metadata={"sources": list(set(sources)), "recalled_memory": recalled_info},
+    )
+    chat_memory.append_turn(
+        workspace_id=ws.id,
+        thread_id=thread_id,
+        user_message=clean_msg,
+        assistant_message=answer,
+        thread_name=thread_name,
+        mode="chat",
+        sources=list(set(sources)),
     )
     return {
         "thread_id": thread_id,
         "user_message": user_msg,
         "assistant_message": asst_msg,
         "mode": "chat",
+        "recalled_memories_count": len(recalled_memories),
     }
+
+
+# ---------------------------------------------------------------------------
+# Persistent Chat Memory Endpoints
+# ---------------------------------------------------------------------------
+@app.get("/api/memory")
+async def get_memory_status():
+    mem = get_chat_memory()
+    records = mem.get_all_records()
+    return {
+        "status": "ok",
+        "file_path": str(mem.get_file_path()),
+        "total_turns": len(records),
+        "recent_turns": [r.model_dump() for r in records[-20:]],
+    }
+
+
+@app.get("/api/memory/export")
+async def export_chat_memory():
+    mem = get_chat_memory()
+    file_path = mem.get_file_path()
+    if not file_path.exists():
+        file_path.write_text("[]", encoding="utf-8")
+    return FileResponse(
+        str(file_path),
+        media_type="application/json",
+        filename="marat_chat_history.json",
+    )
+
+
+@app.post("/api/memory/import")
+async def import_chat_memory(file: UploadFile = File(...)):
+    mem = get_chat_memory()
+    content = await file.read()
+    try:
+        count = mem.import_records(content.decode("utf-8"))
+        return {"status": "success", "imported_records": count, "total_records": len(mem.get_all_records())}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to import chat memory: {e}")
+
+
+@app.get("/api/memory/recall")
+async def test_memory_recall(q: str = ""):
+    mem = get_chat_memory()
+    hits = mem.recall_topic_memory(q, k=5)
+    return {"query": q, "count": len(hits), "recalled_memories": hits}
+
 
 
 

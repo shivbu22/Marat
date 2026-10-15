@@ -6,25 +6,34 @@
     <title>MARAT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/gremlins.js"></script>
     <style>
         :root {
-            --bg-outer: #f1f3f6;
+            /* Warm Monochrome & Utilitarian Studio Palette */
+            --bg-outer: #f4f4f0;
             --bg-window: #ffffff;
-            --bg-sidebar: #f8fafc;
-            --sidebar-border: #e2e8f0;
-            --border-subtle: #eaecf0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --active-blue-bg: #e0e7ff;
-            --active-blue-text: #4338ca;
-            --active-pill: #3b82f6;
-            --accent-primary: #2563eb;
-            --card-hover: #f1f5f9;
+            --bg-sidebar: #fbfbfa;
+            --sidebar-border: #eaeaea;
+            --border-subtle: #eaeaea;
+            --text-main: #18181b;
+            --text-secondary: #52525b;
+            --text-muted: #71717a;
+            --text-light: #a1a1aa;
+            
+            /* Spot Muted Pastels (Strictly Minimalist Protocol) */
+            --pastel-blue-bg: #e1f3fe;
+            --pastel-blue-text: #1f6c9f;
+            --pastel-green-bg: #edf3ec;
+            --pastel-green-text: #346538;
+            --pastel-red-bg: #fdebec;
+            --pastel-red-text: #9f2f2d;
+            --pastel-yellow-bg: #fbf3db;
+            --pastel-yellow-text: #956400;
+
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-serif: 'Newsreader', Georgia, serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
 
@@ -42,27 +51,27 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 14px;
+            padding: 16px;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Desktop Application Window Frame (AnythingLLM aesthetic) */
+        /* Desktop Application Frame (Minimalist Utilitarian Window) */
         .app-window {
             width: 100%;
             height: 100%;
-            max-width: 1600px;
+            max-width: 1560px;
             background: var(--bg-window);
-            border-radius: 14px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.07);
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
         }
 
-        /* Window Top Header bar */
+        /* Top Bar Window Chrome */
         .window-topbar {
             height: 38px;
             background: var(--bg-sidebar);
@@ -81,22 +90,23 @@
         }
 
         .window-dot {
-            width: 11px;
-            height: 11px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
 
-        .dot-close { background: #ff5f56; border: 1px solid #e0443e; }
-        .dot-min { background: #ffbd2e; border: 1px solid #dea123; }
-        .dot-max { background: #27c93f; border: 1px solid #1aab29; }
+        .dot-close { background: #ff5f56; }
+        .dot-min { background: #ffbd2e; }
+        .dot-max { background: #27c93f; }
 
-        .app-version {
+        .app-version-badge {
             font-size: 11px;
+            font-family: var(--font-mono);
             color: var(--text-light);
             font-weight: 500;
         }
 
-        /* Main Workspace Container (Sidebar + Chat Area) */
+        /* App Body Layout */
         .app-body {
             display: flex;
             flex: 1;
@@ -113,7 +123,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: width 0.2s ease, min-width 0.2s ease, margin-left 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
         }
 
@@ -125,7 +135,7 @@
         }
 
         .sidebar-top {
-            padding: 14px 14px 0 14px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -137,21 +147,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-bottom: 4px;
+            padding-bottom: 2px;
         }
 
         .brand-logo-area {
             display: flex;
             align-items: center;
-            gap: 9px;
+            gap: 8px;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14px;
             letter-spacing: -0.01em;
             color: var(--text-main);
         }
 
-        .brand-symbol {
-            font-size: 18px;
+        .brand-logo-area .brand-symbol {
+            font-size: 16px;
             line-height: 1;
         }
 
@@ -165,11 +175,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.15s, color 0.15s;
+            transition: all 0.15s;
         }
 
         .icon-btn:hover {
-            background: var(--card-hover);
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
@@ -177,7 +187,7 @@
         .search-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
 
         .search-box {
@@ -187,15 +197,15 @@
             gap: 6px;
             background: #ffffff;
             border: 1px solid var(--sidebar-border);
-            border-radius: 8px;
+            border-radius: 7px;
             padding: 6px 10px;
-            font-size: 12.5px;
+            font-size: 12px;
             color: var(--text-muted);
             transition: border-color 0.15s;
         }
 
         .search-box:focus-within {
-            border-color: #cbd5e1;
+            border-color: #a1a1aa;
         }
 
         .search-box input {
@@ -203,7 +213,7 @@
             outline: none;
             background: transparent;
             width: 100%;
-            font-size: 12.5px;
+            font-size: 12px;
             color: var(--text-main);
             font-family: inherit;
         }
@@ -212,35 +222,29 @@
             background: #ffffff;
             border: 1px solid var(--sidebar-border);
             color: var(--text-muted);
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
+            border-radius: 7px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 15px;
             cursor: pointer;
             transition: all 0.15s;
         }
 
         .add-workspace-btn:hover {
-            background: var(--card-hover);
+            background: #f4f4f2;
             color: var(--text-main);
-            border-color: #cbd5e1;
         }
 
-        /* Active Workspace Card & Thread Tree */
-        .workspace-item {
-            margin-top: 4px;
-        }
-
+        /* Active Workspace Card & Thread Hierarchy */
         .workspace-card-active {
             background: #ffffff;
             border: 1px solid var(--sidebar-border);
-            border-radius: 10px;
-            padding: 8px 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            border-radius: 8px;
+            padding: 9px 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
         }
 
         .ws-card-header {
@@ -253,22 +257,25 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-main);
             cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .ws-drag-handle {
             color: var(--text-light);
-            font-size: 13px;
-            cursor: grab;
+            font-size: 12px;
+            line-height: 1;
         }
 
         .ws-actions {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
 
         .ws-icon-action {
@@ -285,26 +292,26 @@
         }
 
         .ws-icon-action:hover {
-            background: var(--card-hover);
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
-        /* Thread Tree Line Structure (matches AnythingLLM) */
+        /* Thread Tree (Exact branch structure) */
         .thread-tree-list {
             margin-top: 8px;
-            padding-left: 12px;
-            border-left: 1.5px solid #e2e8f0;
+            padding-left: 10px;
+            border-left: 1.5px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
             margin-left: 8px;
         }
 
         .thread-node {
-            font-size: 12.5px;
+            font-size: 12px;
             padding: 5px 8px;
             border-radius: 6px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
             overflow: hidden;
@@ -313,28 +320,27 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: relative;
         }
 
         .thread-node:hover {
-            background: var(--card-hover);
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
         .thread-node.active {
-            background: var(--active-blue-bg);
-            color: var(--active-blue-text);
+            background: var(--pastel-blue-bg);
+            color: var(--pastel-blue-text);
             font-weight: 500;
         }
 
         .thread-node .delete-thread-btn {
             display: none;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-light);
             background: transparent;
             border: none;
             cursor: pointer;
-            padding: 0 4px;
+            padding: 0 3px;
         }
 
         .thread-node:hover .delete-thread-btn {
@@ -352,9 +358,9 @@
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 500;
-            padding: 6px 8px;
+            padding: 5px 8px;
             border-radius: 6px;
             cursor: pointer;
             margin-top: 4px;
@@ -362,27 +368,27 @@
         }
 
         .new-thread-btn:hover {
-            background: var(--card-hover);
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
-        /* Inactive Workspaces List */
+        /* Other Inactive Workspaces */
         .other-workspaces-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-top: 10px;
+            gap: 5px;
+            margin-top: 8px;
         }
 
         .other-ws-card {
             background: #ffffff;
             border: 1px solid var(--sidebar-border);
-            border-radius: 9px;
-            padding: 8px 10px;
+            border-radius: 8px;
+            padding: 7px 10px;
             display: flex;
             align-items: center;
             gap: 7px;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 500;
             color: var(--text-main);
             cursor: pointer;
@@ -390,17 +396,13 @@
         }
 
         .other-ws-card:hover {
-            border-color: #cbd5e1;
-            background: var(--card-hover);
+            border-color: #d4d4d8;
+            background: #fbfbfa;
         }
 
-        .other-ws-card .ws-drag-handle {
-            color: var(--text-light);
-        }
-
-        /* Sidebar Footer Icons Bar */
+        /* Sidebar Footer (Toolbelt) */
         .sidebar-footer {
-            padding: 12px 14px;
+            padding: 10px 14px;
             border-top: 1px solid var(--sidebar-border);
             display: flex;
             align-items: center;
@@ -412,17 +414,16 @@
             border: none;
             cursor: pointer;
             color: var(--text-muted);
-            border-radius: 8px;
-            padding: 7px;
+            border-radius: 6px;
+            padding: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.15s;
-            position: relative;
         }
 
         .footer-action-btn:hover {
-            background: var(--card-hover);
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
@@ -437,9 +438,9 @@
             overflow: hidden;
         }
 
-        /* Top Bar inside Chat Area */
+        /* Chat Top Bar */
         .chat-topbar {
-            height: 52px;
+            height: 48px;
             padding: 0 24px;
             display: flex;
             align-items: center;
@@ -448,141 +449,139 @@
             user-select: none;
         }
 
-        .model-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-            font-family: var(--font-mono);
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 4px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .model-badge:hover {
-            border-color: #cbd5e1;
-            color: var(--text-main);
-        }
-
-        .model-badge-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #10b981;
-        }
-
-        .chat-top-actions {
+        .topbar-left {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .quick-action-pill {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 5px 12px;
-            font-size: 12px;
+        .model-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11.5px;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            background: var(--pastel-yellow-bg);
+            color: var(--pastel-yellow-text);
+            border: 1px solid rgba(0,0,0,0.06);
+            padding: 3px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .model-badge:hover {
+            opacity: 0.85;
+        }
+
+        .memory-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--pastel-green-text);
+            background: var(--pastel-green-bg);
+            border: 1px solid rgba(0,0,0,0.06);
+            padding: 3px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .memory-status-badge:hover {
+            opacity: 0.85;
+        }
+
+        .chat-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-pill {
+            background: #f8fafc;
+            border: 1px solid var(--sidebar-border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.15s;
         }
 
         .quick-action-pill:hover {
-            background: #e2e8f0;
-            color: var(--text-main);
-        }
-
-        .slider-tool-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            padding: 6px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-        }
-
-        .slider-tool-btn:hover {
             background: #f1f5f9;
             color: var(--text-main);
         }
 
-        /* Chat Scroll Area */
+        /* Chat Scroll Stream */
         .chat-scroll-area {
             flex: 1;
             overflow-y: auto;
             padding: 24px 32px 140px 32px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
         }
 
-        /* Empty state with prompt buttons */
+        /* Empty state */
         .chat-empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
-            gap: 16px;
+            gap: 14px;
             color: var(--text-light);
             user-select: none;
         }
 
         .empty-mascot {
-            font-size: 42px;
+            font-size: 38px;
             line-height: 1;
         }
 
         .empty-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
         }
 
         .quick-starters {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 7px;
             justify-content: center;
-            max-width: 540px;
-            margin-top: 6px;
+            max-width: 580px;
+            margin-top: 4px;
         }
 
         .starter-btn {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            padding: 7px 16px;
-            font-size: 12.5px;
-            color: var(--text-muted);
+            border-radius: 16px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.15s;
         }
 
         .starter-btn:hover {
-            background: #ffffff;
-            border-color: #cbd5e1;
+            border-color: #a1a1aa;
             color: var(--text-main);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
         }
 
-        /* Message Bubbles */
+        /* Message Rows */
         .message-row {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-width: 860px;
+            max-width: 820px;
             width: 100%;
             margin: 0 auto;
         }
@@ -596,178 +595,159 @@
         }
 
         .user-pill {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
-            padding: 8px 16px;
+            background: #f4f4f2;
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 8px 14px;
             font-size: 13.5px;
             color: var(--text-main);
-            max-width: 80%;
+            max-width: 82%;
+            line-height: 1.5;
             word-wrap: break-word;
-            line-height: 1.45;
         }
 
         .assistant-container {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
-        /* Agent status callout (@agent: Swapping over to agent chat...) */
+        /* Recall Memory Tag */
+        .memory-recalled-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--pastel-blue-bg);
+            color: var(--pastel-blue-text);
+            padding: 2px 8px;
+            border-radius: 4px;
+            width: fit-content;
+        }
+
+        /* Status Callout */
         .agent-status-callout {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 9px 14px;
+            background: #fbfbfa;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 8px 12px;
             font-family: var(--font-mono);
-            font-size: 12px;
-            color: #475569;
+            font-size: 11.5px;
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 8px;
             user-select: none;
         }
 
-        .agent-status-callout .agent-icon {
-            font-size: 14px;
-        }
-
-        /* Agent steps pipeline badges */
         .agent-steps-bar {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             flex-wrap: wrap;
-            padding: 4px 0;
         }
 
         .step-badge {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 500;
-            padding: 3px 8px;
-            border-radius: 12px;
-            background: #f1f5f9;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: var(--pastel-green-bg);
+            color: var(--pastel-green-text);
+            border: 1px solid rgba(0,0,0,0.04);
             display: flex;
             align-items: center;
-            gap: 4px;
-        }
-
-        .step-badge.done {
-            background: #ecfdf5;
-            color: #065f46;
-            border-color: #a7f3d0;
-        }
-
-        .step-badge.running {
-            background: #eff6ff;
-            color: #1e40af;
-            border-color: #bfdbfe;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            gap: 3px;
         }
 
         /* Assistant Markdown Body */
         .assistant-body {
-            font-size: 14px;
+            font-size: 13.5px;
             line-height: 1.65;
-            color: #1e293b;
+            color: #27272a;
             word-wrap: break-word;
         }
 
         .assistant-body h1, .assistant-body h2, .assistant-body h3 {
             margin-top: 14px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
-            color: #0f172a;
+            color: #18181b;
         }
 
-        .assistant-body h1 { font-size: 1.25rem; }
-        .assistant-body h2 { font-size: 1.1rem; }
-        .assistant-body h3 { font-size: 1rem; }
+        .assistant-body h1 { font-size: 1.2rem; }
+        .assistant-body h2 { font-size: 1.05rem; }
+        .assistant-body h3 { font-size: 0.95rem; }
 
-        .assistant-body p {
-            margin-bottom: 10px;
-        }
+        .assistant-body p { margin-bottom: 8px; }
 
         .assistant-body ul, .assistant-body ol {
             padding-left: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .assistant-body pre {
-            background: #0f172a;
-            color: #f8fafc;
-            border-radius: 8px;
-            padding: 12px 14px;
+            background: #18181b;
+            color: #fafafa;
+            border-radius: 6px;
+            padding: 10px 12px;
             font-family: var(--font-mono);
-            font-size: 12.5px;
+            font-size: 12px;
             overflow-x: auto;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         .assistant-body code:not(pre code) {
-            background: #f1f5f9;
-            color: #d97706;
-            padding: 2px 5px;
-            border-radius: 4px;
+            background: #f4f4f2;
+            color: #b45309;
+            padding: 2px 4px;
+            border-radius: 3px;
             font-family: var(--font-mono);
-            font-size: 12px;
-        }
-
-        .assistant-body blockquote {
-            border-left: 3px solid #cbd5e1;
-            padding-left: 12px;
-            color: #64748b;
-            margin: 8px 0;
-            font-style: italic;
+            font-size: 11.5px;
         }
 
         .assistant-sources {
-            font-size: 11.5px;
+            font-size: 11px;
             color: var(--text-light);
-            margin-top: 6px;
+            margin-top: 4px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             flex-wrap: wrap;
         }
 
         .source-tag {
-            background: #f1f5f9;
-            padding: 2px 7px;
-            border-radius: 4px;
-            border: 1px solid #e2e8f0;
+            background: #f4f4f2;
+            padding: 1px 6px;
+            border-radius: 3px;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
         }
 
-        /* --- BOTTOM FLOATING INPUT CONTAINER --- */
+        /* --- FLOATING INPUT CONTAINER --- */
         .chat-input-wrapper {
             position: absolute;
-            bottom: 24px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 64px);
-            max-width: 860px;
+            max-width: 820px;
             background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            padding: 12px 14px 10px 14px;
+            border: 1px solid #d4d4d8;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            padding: 10px 12px 8px 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            transition: border-color 0.15s, box-shadow 0.15s;
+            gap: 5px;
+            transition: all 0.15s;
         }
 
         .chat-input-wrapper:focus-within {
-            border-color: #94a3b8;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+            border-color: #71717a;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.07);
         }
 
         .chat-textarea {
@@ -776,10 +756,10 @@
             outline: none;
             resize: none;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 13.5px;
             color: var(--text-main);
-            max-height: 160px;
-            min-height: 24px;
+            max-height: 150px;
+            min-height: 22px;
             line-height: 1.45;
             background: transparent;
         }
@@ -792,49 +772,48 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 4px;
+            padding-top: 3px;
         }
 
         .tools-pill-btn {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 12px;
+            background: #fbfbfa;
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 3px 10px;
+            font-size: 11.5px;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             transition: all 0.15s;
         }
 
         .tools-pill-btn:hover {
-            background: #f1f5f9;
+            background: #f4f4f2;
             color: var(--text-main);
-            border-color: #cbd5e1;
         }
 
         .tools-dot {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: #0f172a;
+            background: #18181b;
         }
 
         .input-actions-right {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .input-action-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -844,16 +823,16 @@
         }
 
         .input-action-btn:hover {
-            background: #f1f5f9;
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
         .send-btn {
-            background: #cbd5e1;
+            background: #e4e4e7;
             color: #ffffff;
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -863,7 +842,7 @@
         }
 
         .send-btn.active {
-            background: var(--text-main);
+            background: #18181b;
             color: #ffffff;
         }
 
@@ -871,17 +850,21 @@
             background: #000000;
         }
 
+        .send-btn:active {
+            transform: scale(0.96);
+        }
+
         /* --- TOOLS POPOVER MENU --- */
         .tools-popover {
             position: absolute;
-            bottom: 58px;
-            left: 14px;
+            bottom: 54px;
+            left: 12px;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 250px;
-            padding: 6px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            width: 240px;
+            padding: 4px;
             display: none;
             flex-direction: column;
             gap: 2px;
@@ -893,19 +876,19 @@
         }
 
         .popover-item {
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 12.5px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-size: 12px;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 9px;
+            gap: 8px;
             cursor: pointer;
             transition: background 0.15s;
         }
 
         .popover-item:hover {
-            background: #f8fafc;
+            background: #f4f4f2;
         }
 
         /* --- MODALS & DRAWERS --- */
@@ -915,8 +898,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -929,25 +912,25 @@
 
         .modal-card {
             background: #ffffff;
-            border-radius: 14px;
+            border-radius: 10px;
             width: 90%;
-            max-width: 580px;
+            max-width: 560px;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid #e2e8f0;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-subtle);
             overflow: hidden;
-            animation: modalFadeIn 0.2s ease-out;
+            animation: modalIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .modal-header {
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
@@ -955,35 +938,35 @@
         }
 
         .modal-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 18px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .modal-footer {
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-top: 1px solid var(--border-subtle);
             display: flex;
             justify-content: flex-end;
-            gap: 8px;
-            background: #f8fafc;
+            gap: 7px;
+            background: #fbfbfa;
         }
 
         .btn {
-            padding: 7px 16px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12.5px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.15s;
@@ -992,17 +975,17 @@
 
         .btn-secondary {
             background: #ffffff;
-            border: 1px solid #cbd5e1;
-            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
         }
 
         .btn-secondary:hover {
-            background: #f1f5f9;
+            background: #f4f4f2;
             color: var(--text-main);
         }
 
         .btn-primary {
-            background: var(--text-main);
+            background: #18181b;
             color: #ffffff;
         }
 
@@ -1010,23 +993,27 @@
             background: #000000;
         }
 
+        .btn:active {
+            transform: scale(0.97);
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
 
         .form-label {
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 500;
             color: var(--text-muted);
         }
 
         .form-input, .form-textarea, .form-select {
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 13.5px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 13px;
             color: var(--text-main);
             font-family: inherit;
             outline: none;
@@ -1034,46 +1021,66 @@
         }
 
         .form-input:focus, .form-textarea:focus, .form-select:focus {
-            border-color: #3b82f6;
+            border-color: #71717a;
         }
 
-        /* Dropzone */
         .dropzone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 10px;
-            padding: 24px;
+            border: 1.5px dashed var(--border-subtle);
+            border-radius: 8px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
             color: var(--text-muted);
-            font-size: 13px;
-            background: #f8fafc;
+            font-size: 12.5px;
+            background: #fbfbfa;
             transition: all 0.15s;
         }
 
         .dropzone:hover {
-            border-color: #3b82f6;
-            background: #f0f7ff;
+            border-color: #a1a1aa;
+            background: #ffffff;
         }
 
-        /* Document table */
         .docs-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12.5px;
+            font-size: 12px;
         }
 
         .docs-table th, .docs-table td {
-            padding: 8px 10px;
+            padding: 7px 8px;
             text-align: left;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         .docs-table th {
-            color: var(--text-light);
+            color: var(--text-muted);
             font-weight: 500;
         }
 
-        /* Loading indicator */
+        .memory-record-card {
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 8px 10px;
+            background: #fbfbfa;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .memory-record-topic {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .memory-record-preview {
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .loading-dots {
             display: inline-flex;
             gap: 4px;
@@ -1081,10 +1088,10 @@
         }
 
         .loading-dots span {
-            width: 5px;
-            height: 5px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
-            background: #64748b;
+            background: var(--text-muted);
             animation: dotBounce 1.2s infinite ease-in-out;
         }
 
@@ -1093,46 +1100,46 @@
 
         @keyframes dotBounce {
             0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-5px); }
+            40% { transform: translateY(-4px); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Main Desktop Application Frame -->
+    <!-- Desktop Window Frame -->
     <div class="app-window">
 
-        <!-- Top Window Header -->
+        <!-- Top Header Chrome -->
         <div class="window-topbar">
             <div class="window-controls">
                 <div class="window-dot dot-close"></div>
                 <div class="window-dot dot-min"></div>
                 <div class="window-dot dot-max"></div>
             </div>
-            <div class="app-version">v2.0.0</div>
+            <div class="app-version-badge">v2.0.0 · MARAT</div>
         </div>
 
-        <!-- App Body (Sidebar + Chat Area) -->
+        <!-- Body Layout -->
         <div class="app-body">
 
             <!-- SIDEBAR -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-top">
-                    <!-- Brand Title -->
+                    <!-- Brand Area -->
                     <div class="sidebar-brand-row">
                         <div class="brand-logo-area">
                             <span class="brand-symbol">🐾</span>
-                            <span>Marat</span>
+                            <span>MARAT</span>
                         </div>
                         <button class="icon-btn" id="toggle-sidebar-btn" title="Toggle Sidebar">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
                         </button>
                     </div>
 
                     <!-- Search & Create Workspace -->
                     <div class="search-row">
                         <div class="search-box">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             <input type="text" id="workspace-search-input" placeholder="Search" />
                         </div>
                         <button class="add-workspace-btn" id="open-new-ws-btn" title="Create Workspace">+</button>
@@ -1148,18 +1155,16 @@
                                 </div>
                                 <div class="ws-actions">
                                     <button class="ws-icon-action" id="sidebar-upload-btn" title="Upload Document">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     </button>
                                     <button class="ws-icon-action" id="sidebar-settings-btn" title="Workspace Settings">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Threads Tree for Active Workspace -->
-                            <div class="thread-tree-list" id="thread-tree-list">
-                                <!-- Populated dynamically -->
-                            </div>
+                            <!-- Threads Tree with Line Indicator -->
+                            <div class="thread-tree-list" id="thread-tree-list"></div>
 
                             <button class="new-thread-btn" id="create-thread-btn">
                                 <span>+</span> New Thread
@@ -1167,25 +1172,26 @@
                         </div>
                     </div>
 
-                    <!-- Inactive Workspaces Cards -->
-                    <div class="other-workspaces-group" id="other-workspaces-list">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <!-- Other Workspaces Cards -->
+                    <div class="other-workspaces-group" id="other-workspaces-list"></div>
                 </div>
 
-                <!-- Sidebar Footer -->
+                <!-- Sidebar Toolbelt Footer -->
                 <div class="sidebar-footer">
+                    <button class="footer-action-btn" id="footer-memory-btn" title="Chat Memory File & History (chat_history.json)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"></path></svg>
+                    </button>
                     <button class="footer-action-btn" id="footer-mcp-btn" title="MCP Hypervisor Tools">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                     </button>
                     <button class="footer-action-btn" id="footer-docs-btn" title="Workspace Documents Vault">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                     </button>
                     <button class="footer-action-btn" id="footer-re-btn" title="Reverse Engineering Lab">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                     </button>
-                    <button class="footer-action-btn" id="footer-settings-btn" title="Global Settings">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <button class="footer-action-btn" id="footer-settings-btn" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                     </button>
                 </div>
             </aside>
@@ -1194,25 +1200,27 @@
             <main class="main-panel">
                 <!-- Chat Top Bar -->
                 <div class="chat-topbar">
-                    <div class="model-badge" id="top-model-badge" title="Click to configure Model & Provider">
-                        <div class="model-badge-dot"></div>
-                        <span id="current-model-name">ollama / llama3.2</span>
+                    <div class="topbar-left">
+                        <div class="model-badge" id="top-model-badge" title="Configure Model">
+                            <span id="current-model-name">ollama / llama3.2</span>
+                        </div>
+                        <div class="memory-status-badge" id="top-memory-badge" title="Continuous Topic Memory Active">
+                            <span>🧠 Memory Store</span>
+                        </div>
                     </div>
 
                     <div class="chat-top-actions">
                         <button class="quick-action-pill" id="summarize-doc-pill">Summarize this doc</button>
-                        <button class="slider-tool-btn" id="open-workspace-drawer-btn" title="Workspace Vault Drawer">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                        <button class="icon-btn" id="open-workspace-drawer-btn" title="Workspace Vault Documents">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- Chat Scroll Stream -->
-                <div class="chat-scroll-area" id="chat-messages-container">
-                    <!-- Populated dynamically -->
-                </div>
+                <!-- Chat Messages Stream -->
+                <div class="chat-scroll-area" id="chat-messages-container"></div>
 
-                <!-- Floating Input Container -->
+                <!-- Floating Input Wrapper -->
                 <div class="chat-input-wrapper">
                     <!-- Tools Popover -->
                     <div class="tools-popover" id="tools-popover">
@@ -1228,6 +1236,9 @@
                         <div class="popover-item" id="tool-opt-mcp">
                             <span>⚡</span> Execute MCP Tool Call
                         </div>
+                        <div class="popover-item" id="tool-opt-memory">
+                            <span>🧠</span> Persistent Memory & Chat History
+                        </div>
                         <div class="popover-item" id="tool-opt-doc">
                             <span>📎</span> Upload Document to Vault
                         </div>
@@ -1237,7 +1248,7 @@
                         id="chat-textarea" 
                         class="chat-textarea" 
                         rows="1" 
-                        placeholder="Send a message... (type @agent for research, /re to reverse engineer)"
+                        placeholder="Send a message... (or @agent for research, /re to reverse engineer)"
                     ></textarea>
 
                     <div class="chat-input-bottom-bar">
@@ -1248,14 +1259,14 @@
 
                         <div class="input-actions-right">
                             <button class="input-action-btn" id="mic-btn" title="Transcribe Audio/Lecture">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
                             </button>
                             <input type="file" id="inline-file-input" style="display: none;" />
-                            <button class="input-action-btn" id="attach-file-btn" title="Upload File to Active Workspace">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            <button class="input-action-btn" id="attach-file-btn" title="Attach Document to Workspace">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                             </button>
                             <button class="send-btn" id="send-chat-btn" title="Send message">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
                             </button>
                         </div>
                     </div>
@@ -1264,7 +1275,40 @@
         </div>
     </div>
 
-    <!-- MODAL 1: Create Workspace -->
+    <!-- MODAL 1: Persistent Chat Memory Inspector -->
+    <div class="modal-overlay" id="memory-modal">
+        <div class="modal-card" style="max-width: 660px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>🧠</span> Persistent Chat Memory (chat_history.json)</div>
+                <button class="icon-btn" onclick="closeModal('memory-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+                    All past and current chats are continuously recorded to <code>data/memory/chat_history.json</code> and indexed into ChromaDB. When you ask questions on the same topic, Marat automatically recalls prior conclusions to build deep institutional memory.
+                </p>
+                
+                <div style="display: flex; gap: 8px; margin: 4px 0 10px 0;">
+                    <a href="/api/memory/export" download="marat_chat_history.json" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>⬇</span> Export Chat History (.json)
+                    </a>
+                    <button class="btn btn-secondary" onclick="document.getElementById('import-memory-file').click()">
+                        <span>⬆</span> Import Memory File
+                    </button>
+                    <input type="file" id="import-memory-file" style="display: none;" accept=".json" />
+                </div>
+
+                <h4 style="font-size: 12.5px; font-weight: 600; margin-top: 6px;">Recent Conversation Topics in Memory:</h4>
+                <div id="memory-records-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('memory-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Create Workspace -->
     <div class="modal-overlay" id="new-ws-modal">
         <div class="modal-card">
             <div class="modal-header">
@@ -1292,22 +1336,22 @@
         </div>
     </div>
 
-    <!-- MODAL 2: Document Vault Drawer / Modal -->
+    <!-- MODAL 3: Document Vault Drawer -->
     <div class="modal-overlay" id="docs-modal">
-        <div class="modal-card" style="max-width: 680px;">
+        <div class="modal-card" style="max-width: 660px;">
             <div class="modal-header">
                 <div class="modal-title"><span>📖</span> Workspace Documents Vault</div>
                 <button class="icon-btn" onclick="closeModal('docs-modal')">✕</button>
             </div>
             <div class="modal-body">
                 <div class="dropzone" id="doc-dropzone">
-                    <p style="font-weight: 500; margin-bottom: 4px;">Click or Drag & Drop documents here</p>
-                    <p style="font-size: 11.5px; color: var(--text-light);">Supports PDF, Markdown, Python, JS, TS, CSV, Plaintext</p>
+                    <p style="font-weight: 500; margin-bottom: 2px;">Click or Drag & Drop documents here</p>
+                    <p style="font-size: 11px; color: var(--text-light);">Supports PDF, Markdown, Code, CSV, Text</p>
                     <input type="file" id="modal-file-input" style="display: none;" multiple />
                 </div>
 
-                <div style="margin-top: 10px;">
-                    <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Indexed Documents in this Workspace:</h4>
+                <div style="margin-top: 8px;">
+                    <h4 style="font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">Indexed Documents in Workspace:</h4>
                     <table class="docs-table">
                         <thead>
                             <tr>
@@ -1317,9 +1361,7 @@
                                 <th>Size</th>
                             </tr>
                         </thead>
-                        <tbody id="workspace-docs-tbody">
-                            <!-- Populated dynamically -->
-                        </tbody>
+                        <tbody id="workspace-docs-tbody"></tbody>
                     </table>
                 </div>
             </div>
@@ -1329,23 +1371,19 @@
         </div>
     </div>
 
-    <!-- MODAL 3: Reverse Engineering Lab -->
+    <!-- MODAL 4: Reverse Engineering Lab -->
     <div class="modal-overlay" id="re-modal">
-        <div class="modal-card" style="max-width: 760px;">
+        <div class="modal-card" style="max-width: 720px;">
             <div class="modal-header">
                 <div class="modal-title"><span>🔬</span> Reverse-Engineer-Anything Lab</div>
                 <button class="icon-btn" onclick="closeModal('re-modal')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 13px; color: var(--text-muted);">
-                    Inspect binaries (PE, ELF, Mach-O), Electron ASAR packages, Android APKs, WebAssembly, or source code directories.
-                </p>
-
                 <div class="form-group">
-                    <label class="form-label">Local Path to Inspect</label>
+                    <label class="form-label">Local File or Folder Path</label>
                     <div style="display: flex; gap: 8px;">
                         <input type="text" id="re-local-path" class="form-input" style="flex: 1;" placeholder="./src or path/to/binary.exe" value="./src" />
-                        <button class="btn btn-primary" id="re-analyze-path-btn">Analyze Path</button>
+                        <button class="btn btn-primary" id="re-analyze-path-btn">Inspect</button>
                     </div>
                 </div>
 
@@ -1354,8 +1392,8 @@
                     <input type="file" id="re-file-input" style="display: none;" />
                 </div>
 
-                <div id="re-result-area" style="display: none; margin-top: 10px; font-size: 13px;">
-                    <div id="re-summary-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;"></div>
+                <div id="re-result-area" style="display: none; margin-top: 8px; font-size: 12.5px;">
+                    <div id="re-summary-card" style="background: #fbfbfa; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; margin-bottom: 10px;"></div>
                     <button class="btn btn-primary" id="re-send-to-thread-btn" style="width: 100%;">Insert Findings into Current Thread</button>
                 </div>
             </div>
@@ -1365,20 +1403,15 @@
         </div>
     </div>
 
-    <!-- MODAL 4: MCP Hypervisor -->
+    <!-- MODAL 5: MCP Hypervisor -->
     <div class="modal-overlay" id="mcp-modal">
-        <div class="modal-card" style="max-width: 640px;">
+        <div class="modal-card" style="max-width: 620px;">
             <div class="modal-header">
-                <div class="modal-title"><span>⚡</span> Model Context Protocol (MCP) Hypervisor</div>
+                <div class="modal-title"><span>⚡</span> Model Context Protocol Hypervisor</div>
                 <button class="icon-btn" onclick="closeModal('mcp-modal')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 13px; color: var(--text-muted);">
-                    Connected external tool servers and stdio runners configured in <code>configs/mcp_servers.json</code>.
-                </p>
-                <div id="mcp-servers-list" style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- Populated dynamically -->
-                </div>
+                <div id="mcp-servers-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('mcp-modal')">Close</button>
@@ -1386,7 +1419,7 @@
         </div>
     </div>
 
-    <!-- MODAL 5: Global Settings -->
+    <!-- MODAL 6: Global Settings -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-card">
             <div class="modal-header">
@@ -1415,7 +1448,7 @@
                     <input type="text" id="settings-base-url" class="form-input" value="http://localhost:11434/v1" />
                 </div>
                 <div class="form-group">
-                    <label class="form-label">API Key (if cloud provider)</label>
+                    <label class="form-label">API Key (if cloud)</label>
                     <input type="password" id="settings-api-key" class="form-input" placeholder="ollama" />
                 </div>
             </div>
@@ -1433,9 +1466,8 @@
         let activeThread = null;
         let currentMessages = [];
         let isProcessing = false;
-        let lastReResult = null;
 
-        // Elements
+        // DOM Elements
         const sidebar = document.getElementById('sidebar');
         const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
         const activeWsNameEl = document.getElementById('active-ws-name');
@@ -1448,15 +1480,15 @@
         const toggleToolsBtn = document.getElementById('toggle-tools-btn');
         const topModelBadge = document.getElementById('top-model-badge');
         const currentModelName = document.getElementById('current-model-name');
+        const topMemoryBadge = document.getElementById('top-memory-badge');
 
-        // Modal Helpers
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-        // Initialize App
         async function init() {
             await loadSystemStatus();
             await loadWorkspaces();
+            await loadMemoryStatus();
             setupEventListeners();
         }
 
@@ -1466,7 +1498,17 @@
                 const data = await res.json();
                 currentModelName.textContent = `${data.provider} / ${data.model}`;
             } catch (e) {
-                console.warn('Health check warning:', e);
+                console.warn('Health check:', e);
+            }
+        }
+
+        async function loadMemoryStatus() {
+            try {
+                const res = await fetch('/api/memory');
+                const data = await res.json();
+                topMemoryBadge.innerHTML = `<span>🧠 Memory: ${data.total_turns} turns</span>`;
+            } catch (e) {
+                console.warn('Memory check:', e);
             }
         }
 
@@ -1477,15 +1519,11 @@
                 if (!workspaces || workspaces.length === 0) {
                     workspaces = [{ id: 'default', name: 'My Workspace', slug: 'default' }];
                 }
-
-                if (!activeWorkspace) {
-                    activeWorkspace = workspaces[0];
-                }
-
+                if (!activeWorkspace) activeWorkspace = workspaces[0];
                 renderWorkspaces();
                 await loadThreads(activeWorkspace.id);
             } catch (e) {
-                console.error('Failed to load workspaces:', e);
+                console.error('Workspaces load error:', e);
             }
         }
 
@@ -1493,7 +1531,6 @@
             if (!activeWorkspace) return;
             activeWsNameEl.textContent = activeWorkspace.name;
 
-            // Render other workspaces
             otherWorkspacesList.innerHTML = '';
             workspaces.forEach(ws => {
                 if (ws.id !== activeWorkspace.id) {
@@ -1542,14 +1579,13 @@
                     await loadMessages(activeThread.id);
                 }
             } catch (e) {
-                console.error('Failed to load threads:', e);
+                console.error('Threads error:', e);
             }
         }
 
         async function selectThread(th) {
             activeThread = th;
             document.querySelectorAll('.thread-node').forEach(el => el.classList.remove('active'));
-            // Re-render tree selection
             const nodes = document.querySelectorAll('.thread-node');
             nodes.forEach(node => {
                 if (node.textContent.includes(th.name)) node.classList.add('active');
@@ -1563,7 +1599,7 @@
                 currentMessages = await res.json();
                 renderMessages(currentMessages);
             } catch (e) {
-                console.error('Failed to load messages:', e);
+                console.error('Messages load error:', e);
             }
         }
 
@@ -1574,7 +1610,7 @@
                 activeThread = null;
                 await loadThreads(activeWorkspace.id);
             } catch (e) {
-                alert('Failed to delete thread: ' + e);
+                alert('Delete error: ' + e);
             }
         }
 
@@ -1582,32 +1618,30 @@
             chatMessagesContainer.innerHTML = '';
 
             if (!messages || messages.length === 0) {
-                // Empty state matching screenshot
                 chatMessagesContainer.innerHTML = `
                     <div class="chat-empty-state">
                         <div class="empty-mascot">🐾</div>
                         <div class="empty-title">What would you like to explore today?</div>
                         <div class="quick-starters">
-                            <button class="starter-btn" onclick="sendQuickPrompt('Summarize this doc')">Summarize this doc</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('Summarize recent global events')">Summarize recent global events</button>
                             <button class="starter-btn" onclick="sendQuickPrompt('/re ./src')">Reverse Engineer src/</button>
-                            <button class="starter-btn" onclick="sendQuickPrompt('@agent Analyze model architectures')">Deep Research of models</button>
-                            <button class="starter-btn" onclick="sendQuickPrompt('Hey')">Hey</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('@agent Analyze model architectures')">Deep Research on Models</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('Tell me about SpaceX Mechazilla booster catch')">SpaceX Mechazilla Catch</button>
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            // Always add top banner if agent was called
             const hasAgent = messages.some(m => m.metadata && (m.metadata.type === 'agent_research' || m.metadata.type === 'reverse_engineering'));
             if (hasAgent) {
                 const callout = document.createElement('div');
                 callout.className = 'agent-status-callout';
-                callout.style.maxWidth = '860px';
+                callout.style.maxWidth = '820px';
                 callout.style.margin = '0 auto';
                 callout.innerHTML = `
-                    <span class="agent-icon">🐾</span>
-                    <span>@agent: Swapping over to agent execution loop. Mara companion online.</span>
+                    <span>🐾</span>
+                    <span>@agent: Swapping over to agent execution loop. Continuous topic memory online.</span>
                 `;
                 chatMessagesContainer.appendChild(callout);
             }
@@ -1623,21 +1657,26 @@
                     if (msg.metadata && msg.metadata.type === 'agent_research') {
                         stepsHtml = `
                             <div class="agent-steps-bar">
-                                <span class="step-badge done">🧭 Planner</span>
-                                <span class="step-badge done">🔍 Researcher</span>
-                                <span class="step-badge done">⚖️ Fact Checker</span>
-                                <span class="step-badge done">✍️ Writer</span>
-                                <span class="step-badge done">🧐 Reviewer</span>
+                                <span class="step-badge">🧭 Planner</span>
+                                <span class="step-badge">🔍 Researcher</span>
+                                <span class="step-badge">⚖️ Fact Checker</span>
+                                <span class="step-badge">✍️ Writer</span>
+                                <span class="step-badge">🧐 Reviewer</span>
                             </div>
                         `;
                     } else if (msg.metadata && msg.metadata.type === 'reverse_engineering') {
                         stepsHtml = `
                             <div class="agent-steps-bar">
-                                <span class="step-badge done">🔬 Binary Inspector</span>
-                                <span class="step-badge done">⚡ Section Entropy</span>
-                                <span class="step-badge done">📡 IPC & Endpoints</span>
+                                <span class="step-badge">🔬 Binary Inspector</span>
+                                <span class="step-badge">⚡ Section Entropy</span>
+                                <span class="step-badge">📡 IPC & Endpoints</span>
                             </div>
                         `;
+                    }
+
+                    let memoryTag = '';
+                    if (msg.metadata && msg.metadata.recalled_memory && msg.metadata.recalled_memory.length > 0) {
+                        memoryTag = `<div class="memory-recalled-pill">✦ Recalled from prior topic memory (${msg.metadata.recalled_memory.length} items)</div>`;
                     }
 
                     let sourcesHtml = '';
@@ -1653,6 +1692,7 @@
                     const parsedBody = marked.parse(msg.content);
                     row.innerHTML = `
                         <div class="assistant-container">
+                            ${memoryTag}
                             ${stepsHtml}
                             <div class="assistant-body">${parsedBody}</div>
                             ${sourcesHtml}
@@ -1676,18 +1716,15 @@
             chatTextarea.value = '';
             chatTextarea.style.height = 'auto';
 
-            // Optimistic render of user message
-            const tempUserMsg = { role: 'user', content: msgText };
-            currentMessages.push(tempUserMsg);
+            currentMessages.push({ role: 'user', content: msgText });
             renderMessages(currentMessages);
 
-            // Add thinking indicator
             const thinkingRow = document.createElement('div');
             thinkingRow.className = 'message-row assistant';
             thinkingRow.id = 'thinking-indicator-row';
             thinkingRow.innerHTML = `
                 <div class="agent-status-callout">
-                    <span class="agent-icon">🐾</span>
+                    <span>🐾</span>
                     <span>Mara is reasoning</span>
                     <div class="loading-dots"><span></span><span></span><span></span></div>
                 </div>
@@ -1720,6 +1757,8 @@
                     currentMessages.push(data.assistant_message);
                     renderMessages(currentMessages);
                 }
+
+                await loadMemoryStatus();
             } catch (e) {
                 const ind = document.getElementById('thinking-indicator-row');
                 if (ind) ind.remove();
@@ -1734,12 +1773,10 @@
             sendMessage(promptText);
         }
 
-        // Event Listeners
         function setupEventListeners() {
-            // Textarea auto-resize & Enter to send
             chatTextarea.addEventListener('input', () => {
                 chatTextarea.style.height = 'auto';
-                chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 160) + 'px';
+                chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 150) + 'px';
                 if (chatTextarea.value.trim().length > 0) {
                     sendChatBtn.classList.add('active');
                 } else {
@@ -1758,7 +1795,6 @@
                 sendMessage(chatTextarea.value);
             });
 
-            // Toggle Tools Popover
             toggleToolsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toolsPopover.classList.toggle('open');
@@ -1768,62 +1804,51 @@
                 toolsPopover.classList.remove('open');
             });
 
-            // Tools Menu Actions
-            document.getElementById('tool-opt-re').addEventListener('click', () => {
-                openModal('re-modal');
-            });
-
+            // Tools popover
+            document.getElementById('tool-opt-re').addEventListener('click', () => openModal('re-modal'));
             document.getElementById('tool-opt-agent').addEventListener('click', () => {
                 chatTextarea.value = '@agent ';
                 chatTextarea.focus();
             });
-
             document.getElementById('tool-opt-video').addEventListener('click', () => {
-                const url = prompt('Enter YouTube URL or lecture media link:');
-                if (url) {
-                    sendMessage(`Ingest lecture: ${url}`, 'research');
-                }
+                const url = prompt('YouTube or lecture audio link:');
+                if (url) sendMessage(`Ingest lecture: ${url}`, 'research');
             });
-
             document.getElementById('tool-opt-mcp').addEventListener('click', () => {
                 openModal('mcp-modal');
                 loadMcpServers();
             });
-
+            document.getElementById('tool-opt-memory').addEventListener('click', () => {
+                openModal('memory-modal');
+                renderMemoryRecords();
+            });
             document.getElementById('tool-opt-doc').addEventListener('click', () => {
                 openModal('docs-modal');
                 loadWorkspaceDocs();
             });
 
-            // Topbar Actions
+            // Topbar
             document.getElementById('summarize-doc-pill').addEventListener('click', () => {
                 sendMessage('Summarize this doc');
             });
-
             document.getElementById('open-workspace-drawer-btn').addEventListener('click', () => {
                 openModal('docs-modal');
                 loadWorkspaceDocs();
             });
-
-            topModelBadge.addEventListener('click', () => {
-                openModal('settings-modal');
+            topModelBadge.addEventListener('click', () => openModal('settings-modal'));
+            topMemoryBadge.addEventListener('click', () => {
+                openModal('memory-modal');
+                renderMemoryRecords();
             });
 
             // Sidebar Controls
-            toggleSidebarBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-            });
-
-            document.getElementById('open-new-ws-btn').addEventListener('click', () => {
-                openModal('new-ws-modal');
-            });
-
+            toggleSidebarBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+            document.getElementById('open-new-ws-btn').addEventListener('click', () => openModal('new-ws-modal'));
             document.getElementById('save-new-ws-btn').addEventListener('click', async () => {
                 const name = document.getElementById('new-ws-name').value.trim();
                 const desc = document.getElementById('new-ws-desc').value.trim();
                 const prompt = document.getElementById('new-ws-prompt').value.trim();
-                if (!name) return alert('Please enter a workspace name');
-
+                if (!name) return alert('Enter a workspace name');
                 try {
                     const res = await fetch('/api/workspaces', {
                         method: 'POST',
@@ -1860,42 +1885,34 @@
                 openModal('docs-modal');
                 loadWorkspaceDocs();
             });
-
-            document.getElementById('sidebar-settings-btn').addEventListener('click', () => {
-                openModal('settings-modal');
-            });
+            document.getElementById('sidebar-settings-btn').addEventListener('click', () => openModal('settings-modal'));
 
             // Footer Buttons
+            document.getElementById('footer-memory-btn').addEventListener('click', () => {
+                openModal('memory-modal');
+                renderMemoryRecords();
+            });
             document.getElementById('footer-mcp-btn').addEventListener('click', () => {
                 openModal('mcp-modal');
                 loadMcpServers();
             });
-
             document.getElementById('footer-docs-btn').addEventListener('click', () => {
                 openModal('docs-modal');
                 loadWorkspaceDocs();
             });
+            document.getElementById('footer-re-btn').addEventListener('click', () => openModal('re-modal'));
+            document.getElementById('footer-settings-btn').addEventListener('click', () => openModal('settings-modal'));
 
-            document.getElementById('footer-re-btn').addEventListener('click', () => {
-                openModal('re-modal');
-            });
-
-            document.getElementById('footer-settings-btn').addEventListener('click', () => {
-                openModal('settings-modal');
-            });
-
-            // Inline file attach button
+            // File Uploads
             const attachBtn = document.getElementById('attach-file-btn');
             const inlineFileInput = document.getElementById('inline-file-input');
             attachBtn.addEventListener('click', () => inlineFileInput.click());
             inlineFileInput.addEventListener('change', async (e) => {
                 if (!e.target.files.length) return;
-                const file = e.target.files[0];
-                await uploadFileToWorkspace(file);
+                await uploadFileToWorkspace(e.target.files[0]);
                 inlineFileInput.value = '';
             });
 
-            // Dropzone in Docs Modal
             const docDropzone = document.getElementById('doc-dropzone');
             const modalFileInput = document.getElementById('modal-file-input');
             docDropzone.addEventListener('click', () => modalFileInput.click());
@@ -1907,7 +1924,26 @@
                 await loadWorkspaceDocs();
             });
 
-            // Reverse Engineering Modal handlers
+            // Memory Import
+            const importInput = document.getElementById('import-memory-file');
+            importInput.addEventListener('change', async (e) => {
+                if (!e.target.files.length) return;
+                const file = e.target.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                    const res = await fetch('/api/memory/import', { method: 'POST', body: formData });
+                    const d = await res.json();
+                    alert(`Imported ${d.imported_records} turns into persistent memory!`);
+                    await loadMemoryStatus();
+                    await renderMemoryRecords();
+                } catch (err) {
+                    alert('Import failed: ' + err);
+                }
+                importInput.value = '';
+            });
+
+            // Reverse Engineering
             document.getElementById('re-analyze-path-btn').addEventListener('click', async () => {
                 const target = document.getElementById('re-local-path').value.trim();
                 if (!target) return alert('Enter a path');
@@ -1920,12 +1956,11 @@
                         body: JSON.stringify({ target_path: target, workspace_id: activeWorkspace.id })
                     });
                     const data = await res.json();
-                    lastReResult = data;
                     renderReResult(data);
                 } catch (e) {
                     alert('Inspection failed: ' + e);
                 } finally {
-                    btn.textContent = 'Analyze Path';
+                    btn.textContent = 'Inspect';
                 }
             });
 
@@ -1935,7 +1970,7 @@
                 sendMessage(`/re ${target}`, 'reverse_engineer', target);
             });
 
-            // Save Settings
+            // Settings Save
             document.getElementById('save-settings-btn').addEventListener('click', () => {
                 const prov = document.getElementById('settings-provider').value;
                 const model = document.getElementById('settings-model').value;
@@ -1953,7 +1988,7 @@
                     body: formData
                 });
                 const data = await res.json();
-                alert(`File indexed: ${file.name} (${data.indexed_chunks} chunks stored in ChromaDB vault)`);
+                alert(`Indexed ${file.name} (${data.indexed_chunks} chunks stored in ChromaDB vault)`);
             } catch (e) {
                 alert('Upload failed: ' + e);
             }
@@ -1967,7 +2002,7 @@
                 const docs = await res.json();
                 tbody.innerHTML = '';
                 if (!docs || docs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-light);">No documents uploaded to this workspace yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-light);">No documents in this workspace.</td></tr>';
                     return;
                 }
                 docs.forEach(doc => {
@@ -1985,6 +2020,36 @@
             }
         }
 
+        async function renderMemoryRecords() {
+            const list = document.getElementById('memory-records-list');
+            list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">Loading conversation memory...</p>';
+            try {
+                const res = await fetch('/api/memory');
+                const data = await res.json();
+                list.innerHTML = '';
+                if (!data.recent_turns || data.recent_turns.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">No stored conversation turns yet. Send messages to begin recording memory!</p>';
+                    return;
+                }
+                data.recent_turns.slice().reverse().forEach(rec => {
+                    const card = document.createElement('div');
+                    card.className = 'memory-record-card';
+                    const dateStr = new Date(rec.timestamp * 1000).toLocaleString();
+                    card.innerHTML = `
+                        <div class="memory-record-topic">${escapeHtml(rec.user_message)}</div>
+                        <div class="memory-record-preview">${escapeHtml(rec.assistant_message)}</div>
+                        <div style="font-size: 10.5px; color: var(--text-light); display: flex; justify-content: space-between;">
+                            <span>${dateStr}</span>
+                            <span>Thread: ${escapeHtml(rec.thread_name || 'General')}</span>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (e) {
+                list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to load memory: ${e}</p>`;
+            }
+        }
+
         function renderReResult(data) {
             const area = document.getElementById('re-result-area');
             const card = document.getElementById('re-summary-card');
@@ -1992,50 +2057,50 @@
 
             let extra = '';
             if (data.data && data.data.ipc_channels) {
-                extra += `<p style="margin-top: 6px;"><b>Discovered Electron IPC Channels:</b> ${data.data.ipc_channels.length}</p>`;
+                extra += `<p style="margin-top: 4px;"><b>Discovered Electron IPC Channels:</b> ${data.data.ipc_channels.length}</p>`;
             }
             if (data.data && data.data.api_endpoints) {
-                extra += `<p style="margin-top: 4px;"><b>Discovered API Endpoints:</b> ${data.data.api_endpoints.length}</p>`;
+                extra += `<p style="margin-top: 2px;"><b>Discovered API Endpoints:</b> ${data.data.api_endpoints.length}</p>`;
             }
 
             card.innerHTML = `
-                <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">${escapeHtml(data.file_name)} [${data.format}]</div>
-                <div style="color: #64748b; font-size: 12.5px;">${escapeHtml(data.summary)}</div>
+                <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">${escapeHtml(data.file_name)} [${data.format}]</div>
+                <div style="color: var(--text-secondary); font-size: 12px;">${escapeHtml(data.summary)}</div>
                 ${extra}
             `;
         }
 
         async function loadMcpServers() {
             const list = document.getElementById('mcp-servers-list');
-            list.innerHTML = '<p style="color: var(--text-light); font-size: 12.5px;">Querying MCP servers...</p>';
+            list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">Querying MCP servers...</p>';
             try {
                 const res = await fetch('/api/mcp/servers');
                 const servers = await res.json();
                 list.innerHTML = '';
                 if (!servers || servers.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-light); font-size: 12.5px;">No MCP servers registered.</p>';
+                    list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">No MCP servers registered.</p>';
                     return;
                 }
                 servers.forEach(s => {
                     const row = document.createElement('div');
-                    row.style.background = '#f8fafc';
-                    row.style.border = '1px solid #e2e8f0';
-                    row.style.borderRadius = '8px';
-                    row.style.padding = '10px 12px';
+                    row.style.background = '#fbfbfa';
+                    row.style.border = '1px solid var(--border-subtle)';
+                    row.style.borderRadius = '6px';
+                    row.style.padding = '8px 10px';
                     row.style.display = 'flex';
                     row.style.justifyContent = 'space-between';
                     row.style.alignItems = 'center';
                     row.innerHTML = `
                         <div>
-                            <div style="font-weight: 600; font-size: 13px;">${escapeHtml(s.name)}</div>
-                            <div style="color: var(--text-light); font-size: 11.5px; font-family: monospace;">${escapeHtml(s.command)} ${s.args.join(' ')}</div>
+                            <div style="font-weight: 600; font-size: 12.5px;">${escapeHtml(s.name)}</div>
+                            <div style="color: var(--text-light); font-size: 11px; font-family: monospace;">${escapeHtml(s.command)} ${s.args.join(' ')}</div>
                         </div>
-                        <span style="font-size: 11px; padding: 3px 8px; border-radius: 12px; background: #ecfdf5; color: #065f46; font-weight: 500;">Ready</span>
+                        <span style="font-size: 10.5px; padding: 2px 7px; border-radius: 4px; background: var(--pastel-green-bg); color: var(--pastel-green-text); font-weight: 500;">Ready</span>
                     `;
                     list.appendChild(row);
                 });
             } catch (e) {
-                list.innerHTML = `<p style="color: red; font-size: 12.5px;">Failed to query MCP servers: ${e}</p>`;
+                list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to query MCP servers: ${e}</p>`;
             }
         }
 

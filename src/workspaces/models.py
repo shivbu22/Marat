@@ -49,3 +49,19 @@ class ThreadMessage(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: float = Field(default_factory=time.time)
 
+
+class ChatMemoryRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    workspace_id: str
+    thread_id: str
+    thread_name: str = ""
+    timestamp: float = Field(default_factory=time.time)
+    topic: str = ""
+    user_message: str
+    assistant_message: str
+    mode: str = "chat"
+    sources: list[str] = Field(default_factory=list)
+    key_facts: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
