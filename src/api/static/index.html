@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MARAT v2 — Multi-Agent Research & Reverse Engineering Platform</title>
+    <title>MARAT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/gremlins.js"></script>
     <style>
         :root {
-            --bg-primary: #070a12;
-            --bg-secondary: #0d1322;
-            --bg-card: rgba(20, 30, 50, 0.7);
-            --border-color: rgba(60, 80, 115, 0.5);
-            --border-hover: rgba(99, 102, 241, 0.6);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-primary: #6366f1;
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
-            --re-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #8b5cf6 100%);
-            --accent-success: #10b981;
-            --accent-warning: #f59e0b;
-            --accent-error: #ef4444;
-            --node-inactive: #131b2e;
-            --node-active: #4f46e5;
-            --node-done: #059669;
+            --bg-outer: #f1f3f6;
+            --bg-window: #ffffff;
+            --bg-sidebar: #f8fafc;
+            --sidebar-border: #e2e8f0;
+            --border-subtle: #eaecf0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --active-blue-bg: #e0e7ff;
+            --active-blue-text: #4338ca;
+            --active-pill: #3b82f6;
+            --accent-primary: #2563eb;
+            --card-hover: #f1f5f9;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         * {
@@ -35,1247 +35,2021 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.5;
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.04) 0%, transparent 50%);
+            font-family: var(--font-sans);
+            background: var(--bg-outer);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(16px);
-            background: rgba(7, 10, 18, 0.88);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.85rem 2rem;
+        /* Desktop Application Window Frame (AnythingLLM aesthetic) */
+        .app-window {
+            width: 100%;
+            height: 100%;
+            max-width: 1600px;
+            background: var(--bg-window);
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Window Top Header bar */
+        .window-topbar {
+            height: 38px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--sidebar-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 0 16px;
+            user-select: none;
         }
 
-        .brand {
+        .window-controls {
             display: flex;
             align-items: center;
-            gap: 0.85rem;
+            gap: 7px;
         }
 
-        .brand-badge {
-            font-size: 2rem;
-            line-height: 1;
-            filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.4));
+        .window-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
         }
 
-        .brand-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.02em;
-        }
+        .dot-close { background: #ff5f56; border: 1px solid #e0443e; }
+        .dot-min { background: #ffbd2e; border: 1px solid #dea123; }
+        .dot-max { background: #27c93f; border: 1px solid #1aab29; }
 
-        .brand-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+        .app-version {
+            font-size: 11px;
+            color: var(--text-light);
             font-weight: 500;
         }
 
-        .nav-tabs {
+        /* Main Workspace Container (Sidebar + Chat Area) */
+        .app-body {
             display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(13, 19, 34, 0.8);
-            padding: 0.3rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .nav-tab {
-            padding: 0.45rem 1rem;
-            border-radius: 8px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .nav-tab:hover {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-tab.active {
-            background: var(--accent-primary);
-            color: white;
-            box-shadow: 0 0 14px rgba(99, 102, 241, 0.4);
-        }
-
-        .nav-tab.active.re-tab {
-            background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
-            box-shadow: 0 0 14px rgba(244, 63, 94, 0.4);
-        }
-
-        .status-bar {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.8rem;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.35rem 0.75rem;
-            border-radius: 9999px;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid var(--border-color);
-            color: #cbd5e1;
-        }
-
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-success);
-            box-shadow: 0 0 8px var(--accent-success);
-        }
-
-        main {
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 1.5rem 2rem;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.25s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .layout-grid {
-            display: grid;
-            grid-template-columns: 460px 1fr;
-            gap: 1.75rem;
-        }
-
-        @media (max-width: 1024px) {
-            .layout-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 1.5rem;
-            backdrop-filter: blur(12px);
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.25rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Companion Widget */
-        .companion-box {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(244, 63, 94, 0.08) 100%);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .companion-avatar {
-            font-size: 2.75rem;
-            line-height: 1;
-            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
-        }
-
-        .companion-text {
             flex: 1;
+            overflow: hidden;
+            height: calc(100% - 38px);
         }
 
-        .companion-name {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: #f1f5f9;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .companion-speech {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-top: 0.2rem;
-            font-style: italic;
-        }
-
-        /* Form Controls */
-        .form-group {
-            margin-bottom: 1.1rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #cbd5e1;
-            margin-bottom: 0.4rem;
-        }
-
-        .form-input, .form-textarea, .form-select {
-            width: 100%;
-            background: rgba(9, 13, 22, 0.9);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.65rem 0.85rem;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary {
-            width: 100%;
-            background: var(--accent-gradient);
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem 1.25rem;
-            color: white;
-            font-weight: 700;
-            font-size: 0.88rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-        }
-
-        .btn-re {
-            background: var(--re-gradient);
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
-        }
-
-        .btn-re:hover {
-            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.5);
-        }
-
-        /* Flow Graph Visualization */
-        .flow-container {
-            background: rgba(13, 19, 34, 0.7);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .nodes-flow {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
-            overflow-x: auto;
-        }
-
-        .node-step {
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 270px;
+            min-width: 270px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 0.35rem;
-            flex: 1;
-            min-width: 75px;
+            justify-content: space-between;
+            transition: width 0.2s ease, min-width 0.2s ease, margin-left 0.2s ease;
+            position: relative;
         }
 
-        .node-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--node-inactive);
-            border: 2px solid var(--border-color);
+        .sidebar.collapsed {
+            width: 0;
+            min-width: 0;
+            margin-left: -270px;
+            overflow: hidden;
+        }
+
+        .sidebar-top {
+            padding: 14px 14px 0 14px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .node-step.active .node-circle {
-            background: var(--node-active);
-            border-color: #a5b4fc;
-            box-shadow: 0 0 16px rgba(99, 102, 241, 0.8);
-            animation: pulse 1.5s infinite;
-        }
-
-        .node-step.completed .node-circle {
-            background: var(--node-done);
-            border-color: #34d399;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
-
-        .node-label {
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-
-        .node-arrow {
-            color: var(--border-color);
-            font-size: 0.85rem;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-            100% { transform: scale(1); }
-        }
-
-        /* Live Terminal */
-        .terminal-box {
-            background: #020617;
-            border: 1px solid rgba(51, 65, 85, 0.4);
-            border-radius: 8px;
-            padding: 0.85rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            color: #94a3b8;
-            height: 150px;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
             overflow-y: auto;
         }
 
-        .log-entry { margin-bottom: 0.3rem; }
-        .log-node { color: #818cf8; font-weight: 600; }
-        .log-msg { color: #cbd5e1; }
-
-        /* Report & Output Viewer */
-        .report-panel {
-            background: rgba(13, 19, 34, 0.85);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            min-height: 550px;
+        .sidebar-brand-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 4px;
         }
 
-        .markdown-body h1 { font-size: 1.7rem; font-weight: 800; margin-bottom: 1rem; color: #fff; }
-        .markdown-body h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #60a5fa; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 0.4rem; }
-        .markdown-body h3 { font-size: 1.05rem; font-weight: 600; margin-top: 1.2rem; color: #e2e8f0; }
-        .markdown-body p { margin-bottom: 0.9rem; color: #cbd5e1; font-size: 0.9rem; }
-        .markdown-body ul, .markdown-body ol { margin-left: 1.4rem; margin-bottom: 1rem; color: #cbd5e1; font-size: 0.9rem; }
-        .markdown-body li { margin-bottom: 0.3rem; }
-        .markdown-body pre { background: #030712; padding: 1rem; border-radius: 8px; border: 1px solid #1e293b; overflow-x: auto; margin-bottom: 1rem; }
-        .markdown-body code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #38bdf8; }
+        .brand-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+        }
 
-        /* Data Tables */
-        .data-table {
+        .brand-symbol {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .icon-btn:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+        }
+
+        /* Search & Add Workspace Row */
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1px solid var(--sidebar-border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            transition: border-color 0.15s;
+        }
+
+        .search-box:focus-within {
+            border-color: #cbd5e1;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-            margin-top: 1rem;
+            font-size: 12.5px;
+            color: var(--text-main);
+            font-family: inherit;
         }
 
-        .data-table th, .data-table td {
-            padding: 0.65rem 0.85rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        .add-workspace-btn {
+            background: #ffffff;
+            border: 1px solid var(--sidebar-border);
+            color: var(--text-muted);
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
         }
 
-        .data-table th {
-            color: #94a3b8;
+        .add-workspace-btn:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+            border-color: #cbd5e1;
+        }
+
+        /* Active Workspace Card & Thread Tree */
+        .workspace-item {
+            margin-top: 4px;
+        }
+
+        .workspace-card-active {
+            background: #ffffff;
+            border: 1px solid var(--sidebar-border);
+            border-radius: 10px;
+            padding: 8px 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .ws-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ws-title-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13.5px;
             font-weight: 600;
-            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-main);
+            cursor: pointer;
         }
 
-        .data-table tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
+        .ws-drag-handle {
+            color: var(--text-light);
+            font-size: 13px;
+            cursor: grab;
         }
 
-        .pill {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
+        .ws-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ws-icon-action {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .ws-icon-action:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+        }
+
+        /* Thread Tree Line Structure (matches AnythingLLM) */
+        .thread-tree-list {
+            margin-top: 8px;
+            padding-left: 12px;
+            border-left: 1.5px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-left: 8px;
+        }
+
+        .thread-node {
+            font-size: 12.5px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .thread-node:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+        }
+
+        .thread-node.active {
+            background: var(--active-blue-bg);
+            color: var(--active-blue-text);
+            font-weight: 500;
+        }
+
+        .thread-node .delete-thread-btn {
+            display: none;
+            font-size: 12px;
+            color: var(--text-light);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .thread-node:hover .delete-thread-btn {
+            display: block;
+        }
+
+        .thread-node .delete-thread-btn:hover {
+            color: #ef4444;
+        }
+
+        .new-thread-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: all 0.15s;
+        }
+
+        .new-thread-btn:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+        }
+
+        /* Inactive Workspaces List */
+        .other-workspaces-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .other-ws-card {
+            background: #ffffff;
+            border: 1px solid var(--sidebar-border);
+            border-radius: 9px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .other-ws-card:hover {
+            border-color: #cbd5e1;
+            background: var(--card-hover);
+        }
+
+        .other-ws-card .ws-drag-handle {
+            color: var(--text-light);
+        }
+
+        /* Sidebar Footer Icons Bar */
+        .sidebar-footer {
+            padding: 12px 14px;
+            border-top: 1px solid var(--sidebar-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .footer-action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: 8px;
+            padding: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .footer-action-btn:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+        }
+
+        /* --- MAIN CHAT PANEL --- */
+        .main-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Top Bar inside Chat Area */
+        .chat-topbar {
+            height: 52px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-subtle);
+            user-select: none;
+        }
+
+        .model-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .model-badge:hover {
+            border-color: #cbd5e1;
+            color: var(--text-main);
+        }
+
+        .model-badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .chat-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-action-pill {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .quick-action-pill:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .slider-tool-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .slider-tool-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        /* Chat Scroll Area */
+        .chat-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px 140px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Empty state with prompt buttons */
+        .chat-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 16px;
+            color: var(--text-light);
+            user-select: none;
+        }
+
+        .empty-mascot {
+            font-size: 42px;
+            line-height: 1;
+        }
+
+        .empty-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .quick-starters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            max-width: 540px;
+            margin-top: 6px;
+        }
+
+        .starter-btn {
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 7px 16px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .starter-btn:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        /* Message Bubbles */
+        .message-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .message-row.user {
+            align-items: flex-end;
+        }
+
+        .message-row.assistant {
+            align-items: flex-start;
+        }
+
+        .user-pill {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 8px 16px;
+            font-size: 13.5px;
+            color: var(--text-main);
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.45;
+        }
+
+        .assistant-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Agent status callout (@agent: Swapping over to agent chat...) */
+        .agent-status-callout {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .agent-status-callout .agent-icon {
+            font-size: 14px;
+        }
+
+        /* Agent steps pipeline badges */
+        .agent-steps-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 4px 0;
+        }
+
+        .step-badge {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .step-badge.done {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        .step-badge.running {
+            background: #eff6ff;
+            color: #1e40af;
+            border-color: #bfdbfe;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Assistant Markdown Body */
+        .assistant-body {
+            font-size: 14px;
+            line-height: 1.65;
+            color: #1e293b;
+            word-wrap: break-word;
+        }
+
+        .assistant-body h1, .assistant-body h2, .assistant-body h3 {
+            margin-top: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .assistant-body h1 { font-size: 1.25rem; }
+        .assistant-body h2 { font-size: 1.1rem; }
+        .assistant-body h3 { font-size: 1rem; }
+
+        .assistant-body p {
+            margin-bottom: 10px;
+        }
+
+        .assistant-body ul, .assistant-body ol {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .assistant-body pre {
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .assistant-body code:not(pre code) {
+            background: #f1f5f9;
+            color: #d97706;
+            padding: 2px 5px;
             border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: var(--font-mono);
+            font-size: 12px;
         }
-        .pill-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .pill-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .pill-purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
-        .pill-cyan { background: rgba(6, 182, 212, 0.2); color: #38bdf8; }
+
+        .assistant-body blockquote {
+            border-left: 3px solid #cbd5e1;
+            padding-left: 12px;
+            color: #64748b;
+            margin: 8px 0;
+            font-style: italic;
+        }
+
+        .assistant-sources {
+            font-size: 11.5px;
+            color: var(--text-light);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .source-tag {
+            background: #f1f5f9;
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* --- BOTTOM FLOATING INPUT CONTAINER --- */
+        .chat-input-wrapper {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 64px);
+            max-width: 860px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 12px 14px 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: #94a3b8;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .chat-textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            max-height: 160px;
+            min-height: 24px;
+            line-height: 1.45;
+            background: transparent;
+        }
+
+        .chat-textarea::placeholder {
+            color: var(--text-light);
+        }
+
+        .chat-input-bottom-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 4px;
+        }
+
+        .tools-pill-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .tools-pill-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+            border-color: #cbd5e1;
+        }
+
+        .tools-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #0f172a;
+        }
+
+        .input-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .input-action-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .send-btn {
+            background: #cbd5e1;
+            color: #ffffff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .send-btn.active {
+            background: var(--text-main);
+            color: #ffffff;
+        }
+
+        .send-btn.active:hover {
+            background: #000000;
+        }
+
+        /* --- TOOLS POPOVER MENU --- */
+        .tools-popover {
+            position: absolute;
+            bottom: 58px;
+            left: 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 250px;
+            padding: 6px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 40;
+        }
+
+        .tools-popover.open {
+            display: flex;
+        }
+
+        .popover-item {
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .popover-item:hover {
+            background: #f8fafc;
+        }
+
+        /* --- MODALS & DRAWERS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 580px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background: #f8fafc;
+        }
+
+        .btn {
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-muted);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #000000;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13.5px;
+            color: var(--text-main);
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: #3b82f6;
+        }
 
         /* Dropzone */
         .dropzone {
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 2.5rem 1.5rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 24px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
-            background: rgba(9, 13, 22, 0.5);
+            color: var(--text-muted);
+            font-size: 13px;
+            background: #f8fafc;
+            transition: all 0.15s;
         }
 
-        .dropzone:hover, .dropzone.dragover {
-            border-color: var(--accent-primary);
-            background: rgba(99, 102, 241, 0.05);
+        .dropzone:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
         }
 
-        .dropzone-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
+        /* Document table */
+        .docs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
         }
 
-        .dropzone-title {
-            font-weight: 700;
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
+        .docs-table th, .docs-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .dropzone-desc {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+        .docs-table th {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Loading indicator */
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .loading-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #64748b;
+            animation: dotBounce 1.2s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="brand">
-            <span class="brand-badge">🐾</span>
-            <div>
-                <div class="brand-title">MARAT v2</div>
-                <div class="brand-subtitle">Multi-Agent Research & Reverse Engineering Platform • No gremlins allowed!</div>
+    <!-- Main Desktop Application Frame -->
+    <div class="app-window">
+
+        <!-- Top Window Header -->
+        <div class="window-topbar">
+            <div class="window-controls">
+                <div class="window-dot dot-close"></div>
+                <div class="window-dot dot-min"></div>
+                <div class="window-dot dot-max"></div>
             </div>
+            <div class="app-version">v2.0.0</div>
         </div>
 
-        <nav class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('research')">🔬 Research Studio</button>
-            <button class="nav-tab re-tab" onclick="switchTab('reverse-engineer')">🛠️ Reverse Engineering Lab</button>
-            <button class="nav-tab" onclick="switchTab('workspaces')">📁 Workspaces & Vault</button>
-            <button class="nav-tab" onclick="switchTab('mcp')">⚡ MCP Hypervisor</button>
-            <button class="nav-tab" onclick="switchTab('settings')">⚙️ Settings</button>
-        </nav>
+        <!-- App Body (Sidebar + Chat Area) -->
+        <div class="app-body">
 
-        <div class="status-bar">
-            <div class="badge">
-                <span class="badge-dot"></span>
-                <span id="headerStatus">Mara Online</span>
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-top">
+                    <!-- Brand Title -->
+                    <div class="sidebar-brand-row">
+                        <div class="brand-logo-area">
+                            <span class="brand-symbol">🐾</span>
+                            <span>Marat</span>
+                        </div>
+                        <button class="icon-btn" id="toggle-sidebar-btn" title="Toggle Sidebar">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        </button>
+                    </div>
+
+                    <!-- Search & Create Workspace -->
+                    <div class="search-row">
+                        <div class="search-box">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="workspace-search-input" placeholder="Search" />
+                        </div>
+                        <button class="add-workspace-btn" id="open-new-ws-btn" title="Create Workspace">+</button>
+                    </div>
+
+                    <!-- Active Workspace Card -->
+                    <div class="workspace-item" id="active-workspace-card">
+                        <div class="workspace-card-active">
+                            <div class="ws-card-header">
+                                <div class="ws-title-group" id="active-ws-title-group">
+                                    <span class="ws-drag-handle">⠿</span>
+                                    <span id="active-ws-name">My Workspace</span>
+                                </div>
+                                <div class="ws-actions">
+                                    <button class="ws-icon-action" id="sidebar-upload-btn" title="Upload Document">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    </button>
+                                    <button class="ws-icon-action" id="sidebar-settings-btn" title="Workspace Settings">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Threads Tree for Active Workspace -->
+                            <div class="thread-tree-list" id="thread-tree-list">
+                                <!-- Populated dynamically -->
+                            </div>
+
+                            <button class="new-thread-btn" id="create-thread-btn">
+                                <span>+</span> New Thread
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Inactive Workspaces Cards -->
+                    <div class="other-workspaces-group" id="other-workspaces-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Sidebar Footer -->
+                <div class="sidebar-footer">
+                    <button class="footer-action-btn" id="footer-mcp-btn" title="MCP Hypervisor Tools">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </button>
+                    <button class="footer-action-btn" id="footer-docs-btn" title="Workspace Documents Vault">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    </button>
+                    <button class="footer-action-btn" id="footer-re-btn" title="Reverse Engineering Lab">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    </button>
+                    <button class="footer-action-btn" id="footer-settings-btn" title="Global Settings">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- MAIN CHAT PANEL -->
+            <main class="main-panel">
+                <!-- Chat Top Bar -->
+                <div class="chat-topbar">
+                    <div class="model-badge" id="top-model-badge" title="Click to configure Model & Provider">
+                        <div class="model-badge-dot"></div>
+                        <span id="current-model-name">ollama / llama3.2</span>
+                    </div>
+
+                    <div class="chat-top-actions">
+                        <button class="quick-action-pill" id="summarize-doc-pill">Summarize this doc</button>
+                        <button class="slider-tool-btn" id="open-workspace-drawer-btn" title="Workspace Vault Drawer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Scroll Stream -->
+                <div class="chat-scroll-area" id="chat-messages-container">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Floating Input Container -->
+                <div class="chat-input-wrapper">
+                    <!-- Tools Popover -->
+                    <div class="tools-popover" id="tools-popover">
+                        <div class="popover-item" id="tool-opt-re">
+                            <span>🔬</span> Reverse Engineer Binary / Code
+                        </div>
+                        <div class="popover-item" id="tool-opt-agent">
+                            <span>🧭</span> Multi-Agent Research Mission
+                        </div>
+                        <div class="popover-item" id="tool-opt-video">
+                            <span>🎙️</span> Ingest Video / Audio Lecture
+                        </div>
+                        <div class="popover-item" id="tool-opt-mcp">
+                            <span>⚡</span> Execute MCP Tool Call
+                        </div>
+                        <div class="popover-item" id="tool-opt-doc">
+                            <span>📎</span> Upload Document to Vault
+                        </div>
+                    </div>
+
+                    <textarea 
+                        id="chat-textarea" 
+                        class="chat-textarea" 
+                        rows="1" 
+                        placeholder="Send a message... (type @agent for research, /re to reverse engineer)"
+                    ></textarea>
+
+                    <div class="chat-input-bottom-bar">
+                        <button class="tools-pill-btn" id="toggle-tools-btn">
+                            <span class="tools-dot"></span>
+                            <span>Tools</span>
+                        </button>
+
+                        <div class="input-actions-right">
+                            <button class="input-action-btn" id="mic-btn" title="Transcribe Audio/Lecture">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                            </button>
+                            <input type="file" id="inline-file-input" style="display: none;" />
+                            <button class="input-action-btn" id="attach-file-btn" title="Upload File to Active Workspace">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            </button>
+                            <button class="send-btn" id="send-chat-btn" title="Send message">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL 1: Create Workspace -->
+    <div class="modal-overlay" id="new-ws-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title"><span>📁</span> New Workspace</div>
+                <button class="icon-btn" onclick="closeModal('new-ws-modal')">✕</button>
             </div>
-            <div class="badge" id="headerProviderBadge">
-                <span>🤖 <span id="headerProvider">ollama</span></span>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Workspace Name</label>
+                    <input type="text" id="new-ws-name" class="form-input" placeholder="e.g. Finance Workflows" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" id="new-ws-desc" class="form-input" placeholder="Isolated departmental memory vault" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">System Prompt</label>
+                    <textarea id="new-ws-prompt" class="form-textarea" rows="3" placeholder="You are Mara, an analytical research companion..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('new-ws-modal')">Cancel</button>
+                <button class="btn btn-primary" id="save-new-ws-btn">Create Workspace</button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main>
-        <!-- TAB 1: RESEARCH STUDIO -->
-        <section id="tab-research" class="tab-content active">
-            <div class="layout-grid">
-                <div>
-                    <!-- Mara Companion Box -->
-                    <div class="companion-box">
-                        <div class="companion-avatar">🐾</div>
-                        <div class="companion-text">
-                            <div class="companion-name">Mara <span class="pill pill-green">Active Guide</span></div>
-                            <div class="companion-speech" id="maraSpeech">"Ready to decompose your research topic and fact-check every claim!"</div>
-                        </div>
-                    </div>
-
-                    <!-- Research Dispatch Form -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">🚀 Dispatch Multi-Agent Investigation</h2>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Research Topic or Goal</label>
-                            <textarea id="researchTopic" class="form-textarea" rows="3" placeholder="e.g. Compare Post-Quantum Cryptography algorithms with real-world NIST standardization milestones"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Focus Mode</label>
-                            <select id="researchFocus" class="form-select">
-                                <option value="broad">Broad Overview (Multiple Themes)</option>
-                                <option value="deep">Deep Investigation (Technical & Empirical)</option>
-                                <option value="verify">Strict Fact-Check Verification</option>
-                                <option value="reverse_engineer">Reverse Engineering Architecture</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Active Workspace</label>
-                            <select id="researchWorkspaceSelect" class="form-select">
-                                <option value="default">Default Workspace</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Multimodal Video / Audio Ingest (Optional)</label>
-                            <input type="text" id="researchVideo" class="form-input" placeholder="YouTube URL or local recording path">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Binary / Code Target Path (Optional)</label>
-                            <input type="text" id="researchTarget" class="form-input" placeholder="Path to .exe, .asar, .apk, .wasm, or code folder">
-                        </div>
-
-                        <button id="btnDispatchResearch" class="btn-primary" onclick="startResearch()">
-                            <span>🐾 Launch Multi-Agent Workflow</span>
-                        </button>
-                    </div>
-
-                    <!-- Flow Visualizer -->
-                    <div class="flow-container">
-                        <div class="nodes-flow">
-                            <div class="node-step" id="nodePlanner">
-                                <div class="node-circle">🧭</div>
-                                <span class="node-label">Planner</span>
-                            </div>
-                            <span class="node-arrow">→</span>
-                            <div class="node-step" id="nodeRE">
-                                <div class="node-circle">🛠️</div>
-                                <span class="node-label">Rev Eng</span>
-                            </div>
-                            <span class="node-arrow">→</span>
-                            <div class="node-step" id="nodeResearcher">
-                                <div class="node-circle">🔍</div>
-                                <span class="node-label">Research</span>
-                            </div>
-                            <span class="node-arrow">→</span>
-                            <div class="node-step" id="nodeFactChecker">
-                                <div class="node-circle">⚖️</div>
-                                <span class="node-label">Fact Check</span>
-                            </div>
-                            <span class="node-arrow">→</span>
-                            <div class="node-step" id="nodeWriter">
-                                <div class="node-circle">✍️</div>
-                                <span class="node-label">Writer</span>
-                            </div>
-                            <span class="node-arrow">→</span>
-                            <div class="node-step" id="nodeReviewer">
-                                <div class="node-circle">🧐</div>
-                                <span class="node-label">Reviewer</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Telemetry Terminal -->
-                    <div class="card" style="margin-bottom: 0;">
-                        <div class="card-header" style="margin-bottom: 0.5rem; padding-bottom: 0.4rem;">
-                            <h3 class="card-title" style="font-size: 0.85rem;">📡 Live Pipeline Telemetry</h3>
-                        </div>
-                        <div class="terminal-box" id="telemetryLog">
-                            <div class="log-entry"><span class="log-node">[System]</span> <span class="log-msg">MARAT v2 ready. Awaiting dispatch.</span></div>
-                        </div>
-                    </div>
+    <!-- MODAL 2: Document Vault Drawer / Modal -->
+    <div class="modal-overlay" id="docs-modal">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>📖</span> Workspace Documents Vault</div>
+                <button class="icon-btn" onclick="closeModal('docs-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="dropzone" id="doc-dropzone">
+                    <p style="font-weight: 500; margin-bottom: 4px;">Click or Drag & Drop documents here</p>
+                    <p style="font-size: 11.5px; color: var(--text-light);">Supports PDF, Markdown, Python, JS, TS, CSV, Plaintext</p>
+                    <input type="file" id="modal-file-input" style="display: none;" multiple />
                 </div>
 
-                <!-- Report Output Area -->
-                <div>
-                    <div class="report-panel" id="reportViewer">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-                            <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff;">📄 Investigation Report & Dossier</h2>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn-primary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.78rem;" onclick="copyReport()">📋 Copy Markdown</button>
-                            </div>
-                        </div>
-                        <div id="reportContent" class="markdown-body">
-                            <p style="color: #64748b; font-style: italic;">No active investigation run. Fill in the dispatch mission on the left and click "Launch Multi-Agent Workflow".</p>
-                        </div>
-                    </div>
+                <div style="margin-top: 10px;">
+                    <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Indexed Documents in this Workspace:</h4>
+                    <table class="docs-table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Type</th>
+                                <th>Chunks</th>
+                                <th>Size</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workspace-docs-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </section>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('docs-modal')">Close</button>
+            </div>
+        </div>
+    </div>
 
-        <!-- TAB 2: REVERSE ENGINEERING LAB -->
-        <section id="tab-reverse-engineer" class="tab-content">
-            <div class="layout-grid">
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title" style="color: #f43f5e;">🛠️ REA Binary & Package Inspector</h2>
-                        </div>
-                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
-                            Decompile and inspect native PE/ELF binaries, Electron ASAR archives, Android APKs, WebAssembly, and JavaScript source trees.
-                        </p>
+    <!-- MODAL 3: Reverse Engineering Lab -->
+    <div class="modal-overlay" id="re-modal">
+        <div class="modal-card" style="max-width: 760px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>🔬</span> Reverse-Engineer-Anything Lab</div>
+                <button class="icon-btn" onclick="closeModal('re-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    Inspect binaries (PE, ELF, Mach-O), Electron ASAR packages, Android APKs, WebAssembly, or source code directories.
+                </p>
 
-                        <!-- File Dropzone -->
-                        <div class="dropzone" id="reDropzone" onclick="document.getElementById('reFileInput').click()">
-                            <input type="file" id="reFileInput" style="display: none;" onchange="handleFileUpload(event)">
-                            <div class="dropzone-icon">📦</div>
-                            <div class="dropzone-title">Click or Drop Binary / Package Here</div>
-                            <div class="dropzone-desc">Supports .exe, .dll, .so, .asar, .apk, .wasm, .js, .zip</div>
-                        </div>
-
-                        <div style="text-align: center; margin: 1rem 0; font-size: 0.75rem; color: #64748b;">— OR SPECIFY LOCAL PATH —</div>
-
-                        <div class="form-group">
-                            <label class="form-label">Absolute Target File/Directory Path</label>
-                            <input type="text" id="reLocalPath" class="form-input" placeholder="C:\path\to\target.exe or ./app.asar">
-                        </div>
-
-                        <button class="btn-primary btn-re" onclick="analyzeRePath()">
-                            <span>⚡ Execute Static Analysis</span>
-                        </button>
-                    </div>
-
-                    <!-- Quick Telemetry Card -->
-                    <div class="card" id="reSummaryCard" style="display: none;">
-                        <div class="card-header">
-                            <h3 class="card-title">📊 Binary Architecture Summary</h3>
-                        </div>
-                        <div id="reSummaryText" style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;"></div>
+                <div class="form-group">
+                    <label class="form-label">Local Path to Inspect</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="re-local-path" class="form-input" style="flex: 1;" placeholder="./src or path/to/binary.exe" value="./src" />
+                        <button class="btn btn-primary" id="re-analyze-path-btn">Analyze Path</button>
                     </div>
                 </div>
 
-                <!-- RE Analysis Visualizer -->
-                <div>
-                    <div class="report-panel" id="reReportViewer">
-                        <div class="card-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 1rem;">
-                            <h2 class="card-title" style="color: #f43f5e;">🔍 Decompiled Sections, IPC & Endpoints</h2>
-                        </div>
-                        <div id="reResultsContainer">
-                            <p style="color: #64748b; font-style: italic;">Select or upload an artifact to begin reverse-engineering inspection.</p>
-                        </div>
-                    </div>
+                <div class="dropzone" id="re-file-dropzone" style="padding: 16px;">
+                    <p style="font-weight: 500;">Or Drop an Executable / ASAR / APK file</p>
+                    <input type="file" id="re-file-input" style="display: none;" />
+                </div>
+
+                <div id="re-result-area" style="display: none; margin-top: 10px; font-size: 13px;">
+                    <div id="re-summary-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;"></div>
+                    <button class="btn btn-primary" id="re-send-to-thread-btn" style="width: 100%;">Insert Findings into Current Thread</button>
                 </div>
             </div>
-        </section>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('re-modal')">Close</button>
+            </div>
+        </div>
+    </div>
 
-        <!-- TAB 3: WORKSPACES & DOCUMENT VAULT -->
-        <section id="tab-workspaces" class="tab-content">
-            <div class="layout-grid">
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">📁 Workspace Manager</h2>
-                        </div>
-                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
-                            Isolate your research documents, vector vaults, and reverse engineering dossiers into dedicated workspaces.
-                        </p>
-
-                        <div class="form-group">
-                            <label class="form-label">New Workspace Name</label>
-                            <input type="text" id="newWsName" class="form-input" placeholder="e.g. Malware Analysis Project">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Description</label>
-                            <input type="text" id="newWsDesc" class="form-input" placeholder="Purpose or scope of this workspace">
-                        </div>
-
-                        <button class="btn-primary" onclick="createWorkspace()">
-                            <span>➕ Create Workspace</span>
-                        </button>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">📑 Ingest Document into Workspace</h3>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Target Workspace</label>
-                            <select id="uploadWsSelect" class="form-select"></select>
-                        </div>
-                        <div class="form-group">
-                            <input type="file" id="wsDocUpload" class="form-input">
-                        </div>
-                        <button class="btn-primary" onclick="uploadDocToWorkspace()">
-                            <span>📥 Ingest & Vectorize Document</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">🏢 Existing Workspaces</h2>
-                        </div>
-                        <div id="workspacesListContainer">Loading workspaces…</div>
-                    </div>
+    <!-- MODAL 4: MCP Hypervisor -->
+    <div class="modal-overlay" id="mcp-modal">
+        <div class="modal-card" style="max-width: 640px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>⚡</span> Model Context Protocol (MCP) Hypervisor</div>
+                <button class="icon-btn" onclick="closeModal('mcp-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    Connected external tool servers and stdio runners configured in <code>configs/mcp_servers.json</code>.
+                </p>
+                <div id="mcp-servers-list" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
-        </section>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('mcp-modal')">Close</button>
+            </div>
+        </div>
+    </div>
 
-        <!-- TAB 4: MCP HYPERVISOR -->
-        <section id="tab-mcp" class="tab-content">
-            <div class="layout-grid">
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">⚡ Register MCP Server</h2>
-                        </div>
-                        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
-                            Connect standard Model Context Protocol servers to dynamically supply tools to your research agents.
-                        </p>
-
-                        <div class="form-group">
-                            <label class="form-label">Server Identifier</label>
-                            <input type="text" id="mcpServerName" class="form-input" placeholder="e.g. rea, sqlite, github">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Executable Command</label>
-                            <input type="text" id="mcpServerCmd" class="form-input" placeholder="e.g. npx, uvx, python">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Arguments (space separated)</label>
-                            <input type="text" id="mcpServerArgs" class="form-input" placeholder="-y rea-agents@latest">
-                        </div>
-
-                        <button class="btn-primary" onclick="registerMcpServer()">
-                            <span>🔌 Connect MCP Server</span>
-                        </button>
-                    </div>
+    <!-- MODAL 5: Global Settings -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title"><span>⚙️</span> Marat Settings</div>
+                <button class="icon-btn" onclick="closeModal('settings-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">LLM Provider</label>
+                    <select id="settings-provider" class="form-select">
+                        <option value="ollama">Ollama (Local / Zero Cost)</option>
+                        <option value="lmstudio">LMStudio (Local Inference)</option>
+                        <option value="localai">LocalAI / vLLM</option>
+                        <option value="groq">Groq (Ultra-Fast)</option>
+                        <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+                        <option value="anthropic">Anthropic (Claude 3.5)</option>
+                        <option value="openrouter">OpenRouter</option>
+                    </select>
                 </div>
-
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">🔌 Active MCP Servers & Tools</h2>
-                        </div>
-                        <div id="mcpServersListContainer">Loading MCP servers…</div>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Model Name</label>
+                    <input type="text" id="settings-model" class="form-input" value="llama3.2:3b" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Base URL</label>
+                    <input type="text" id="settings-base-url" class="form-input" value="http://localhost:11434/v1" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">API Key (if cloud provider)</label>
+                    <input type="password" id="settings-api-key" class="form-input" placeholder="ollama" />
                 </div>
             </div>
-        </section>
-
-        <!-- TAB 5: SETTINGS -->
-        <section id="tab-settings" class="tab-content">
-            <div class="card" style="max-width: 700px; margin: 0 auto;">
-                <div class="card-header">
-                    <h2 class="card-title">⚙️ Platform Architecture Settings</h2>
-                </div>
-                <div id="settingsDetails" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.8;">
-                    Loading system status…
-                </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
+                <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script>
-        // Tab switching logic
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById('tab-' + tabId);
-            if (target) target.classList.add('active');
-            event.target.classList.add('active');
+        // State
+        let workspaces = [];
+        let activeWorkspace = null;
+        let activeThread = null;
+        let currentMessages = [];
+        let isProcessing = false;
+        let lastReResult = null;
 
-            if (tabId === 'workspaces') loadWorkspaces();
-            if (tabId === 'mcp') loadMcpServers();
-            if (tabId === 'settings') loadSettings();
+        // Elements
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+        const activeWsNameEl = document.getElementById('active-ws-name');
+        const threadTreeList = document.getElementById('thread-tree-list');
+        const otherWorkspacesList = document.getElementById('other-workspaces-list');
+        const chatMessagesContainer = document.getElementById('chat-messages-container');
+        const chatTextarea = document.getElementById('chat-textarea');
+        const sendChatBtn = document.getElementById('send-chat-btn');
+        const toolsPopover = document.getElementById('tools-popover');
+        const toggleToolsBtn = document.getElementById('toggle-tools-btn');
+        const topModelBadge = document.getElementById('top-model-badge');
+        const currentModelName = document.getElementById('current-model-name');
+
+        // Modal Helpers
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Initialize App
+        async function init() {
+            await loadSystemStatus();
+            await loadWorkspaces();
+            setupEventListeners();
         }
 
-        // System status loader
-        async function checkStatus() {
+        async function loadSystemStatus() {
             try {
-                const res = await fetch('/system/status');
+                const res = await fetch('/health');
                 const data = await res.json();
-                document.getElementById('headerProvider').textContent = `${data.provider} (${data.model})`;
+                currentModelName.textContent = `${data.provider} / ${data.model}`;
             } catch (e) {
-                console.error(e);
+                console.warn('Health check warning:', e);
             }
         }
-        checkStatus();
 
-        // Multi-Agent Research Dispatch with SSE Stream
-        async function startResearch() {
-            const topic = document.getElementById('researchTopic').value.trim();
-            if (!topic) {
-                alert('Please enter a research topic.');
-                return;
-            }
-
-            const focus = document.getElementById('researchFocus').value;
-            const video = document.getElementById('researchVideo').value.trim();
-            const target = document.getElementById('researchTarget').value.trim();
-            const workspace = document.getElementById('researchWorkspaceSelect').value;
-
-            // Reset UI
-            resetFlowNodes();
-            document.getElementById('nodePlanner').classList.add('active');
-            logTelemetry('System', `Mission dispatched: "${topic}"`);
-            document.getElementById('maraSpeech').textContent = `"I'm coordinating the team to investigate ${topic}!"`;
-
-            const btn = document.getElementById('btnDispatchResearch');
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳ Investigating…</span>';
-
+        async function loadWorkspaces() {
             try {
-                const response = await fetch('/api/research/stream', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        topic: topic,
-                        focus_mode: focus,
-                        video_url: video,
-                        target_path: target,
-                        workspace_id: workspace,
-                        stream: true
-                    })
-                });
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
-
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n\n');
-                    buffer = lines.pop();
-
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const ev = JSON.parse(line.substring(6));
-                                handleResearchEvent(ev);
-                            } catch (e) {}
-                        }
-                    }
+                const res = await fetch('/api/workspaces');
+                workspaces = await res.json();
+                if (!workspaces || workspaces.length === 0) {
+                    workspaces = [{ id: 'default', name: 'My Workspace', slug: 'default' }];
                 }
-            } catch (err) {
-                logTelemetry('Error', err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>🐾 Launch Multi-Agent Workflow</span>';
+
+                if (!activeWorkspace) {
+                    activeWorkspace = workspaces[0];
+                }
+
+                renderWorkspaces();
+                await loadThreads(activeWorkspace.id);
+            } catch (e) {
+                console.error('Failed to load workspaces:', e);
             }
         }
 
-        function handleResearchEvent(ev) {
-            if (ev.event === 'node_update' || ev.event === 'node_complete') {
-                const node = ev.node;
-                logTelemetry(node, `Finished step: status=${ev.status}`);
+        function renderWorkspaces() {
+            if (!activeWorkspace) return;
+            activeWsNameEl.textContent = activeWorkspace.name;
 
-                if (node === 'planner') {
-                    document.getElementById('nodePlanner').classList.remove('active');
-                    document.getElementById('nodePlanner').classList.add('completed');
-                    document.getElementById('nodeResearcher').classList.add('active');
-                    document.getElementById('maraSpeech').textContent = `"Planner decomposed ${ev.sub_questions ? ev.sub_questions.length : 0} angles to explore!"`;
-                } else if (node === 'reverse_engineer') {
-                    document.getElementById('nodeRE').classList.remove('active');
-                    document.getElementById('nodeRE').classList.add('completed');
-                    document.getElementById('maraSpeech').textContent = `"Reverse Engineer extracted binary layout and exposed endpoints!"`;
-                } else if (node === 'researcher') {
-                    document.getElementById('nodeResearcher').classList.remove('active');
-                    document.getElementById('nodeResearcher').classList.add('completed');
-                    document.getElementById('nodeFactChecker').classList.add('active');
-                    document.getElementById('maraSpeech').textContent = `"Researcher uncovered ${ev.findings_count} verified evidence items!"`;
-                } else if (node === 'fact_checker') {
-                    document.getElementById('nodeFactChecker').classList.remove('active');
-                    document.getElementById('nodeFactChecker').classList.add('completed');
-                    document.getElementById('nodeWriter').classList.add('active');
-                    document.getElementById('maraSpeech').textContent = `"Fact Checker cross-verified findings against ground truth!"`;
-                } else if (node === 'writer') {
-                    document.getElementById('nodeWriter').classList.remove('active');
-                    document.getElementById('nodeWriter').classList.add('completed');
-                    document.getElementById('nodeReviewer').classList.add('active');
-                } else if (node === 'reviewer') {
-                    document.getElementById('nodeReviewer').classList.remove('active');
-                    document.getElementById('nodeReviewer').classList.add('completed');
-                    document.getElementById('maraSpeech').textContent = `"Review complete! The dossier has been peer-reviewed and finalized."`;
+            // Render other workspaces
+            otherWorkspacesList.innerHTML = '';
+            workspaces.forEach(ws => {
+                if (ws.id !== activeWorkspace.id) {
+                    const card = document.createElement('div');
+                    card.className = 'other-ws-card';
+                    card.innerHTML = `<span class="ws-drag-handle">⠿</span> <span>${escapeHtml(ws.name)}</span>`;
+                    card.onclick = () => selectWorkspace(ws);
+                    otherWorkspacesList.appendChild(card);
                 }
-            } else if (ev.event === 'completed') {
-                logTelemetry('System', `Mission accomplished in ${ev.elapsed_seconds}s.`);
-                // Fetch final report from regular endpoint if needed
-                fetchLatestReport();
-            }
-        }
-
-        async function fetchLatestReport() {
-            const topic = document.getElementById('researchTopic').value.trim();
-            const focus = document.getElementById('researchFocus').value;
-            const target = document.getElementById('researchTarget').value.trim();
-            const ws = document.getElementById('researchWorkspaceSelect').value;
-
-            try {
-                const res = await fetch('/api/research', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic, focus_mode: focus, target_path: target, workspace_id: ws })
-                });
-                const data = await res.json();
-                if (data.final_report) {
-                    document.getElementById('reportContent').innerHTML = marked.parse(data.final_report);
-                }
-            } catch (e) {}
-        }
-
-        function resetFlowNodes() {
-            ['nodePlanner', 'nodeRE', 'nodeResearcher', 'nodeFactChecker', 'nodeWriter', 'nodeReviewer'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.classList.remove('active'); el.classList.remove('completed'); }
             });
         }
 
-        function logTelemetry(node, msg) {
-            const box = document.getElementById('telemetryLog');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            const time = new Date().toLocaleTimeString();
-            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-node">[${node}]</span> <span class="log-msg">${msg}</span>`;
-            box.appendChild(entry);
-            box.scrollTop = box.scrollHeight;
+        async function selectWorkspace(ws) {
+            activeWorkspace = ws;
+            renderWorkspaces();
+            await loadThreads(ws.id);
         }
 
-        function copyReport() {
-            const text = document.getElementById('reportContent').innerText;
-            navigator.clipboard.writeText(text);
-            alert('Report markdown copied to clipboard!');
+        async function loadThreads(workspaceId) {
+            try {
+                const res = await fetch(`/api/workspaces/${workspaceId}/threads`);
+                const threads = await res.json();
+
+                threadTreeList.innerHTML = '';
+                if (!threads || threads.length === 0) {
+                    activeThread = null;
+                    renderMessages([]);
+                    return;
+                }
+
+                threads.forEach((th, idx) => {
+                    const node = document.createElement('div');
+                    const isActive = (!activeThread && idx === 0) || (activeThread && activeThread.id === th.id);
+                    if (isActive) activeThread = th;
+
+                    node.className = `thread-node ${isActive ? 'active' : ''}`;
+                    node.innerHTML = `
+                        <span style="overflow: hidden; text-overflow: ellipsis;">${escapeHtml(th.name)}</span>
+                        <button class="delete-thread-btn" title="Delete Thread" onclick="event.stopPropagation(); deleteThread('${th.id}')">✕</button>
+                    `;
+                    node.onclick = () => selectThread(th);
+                    threadTreeList.appendChild(node);
+                });
+
+                if (activeThread) {
+                    await loadMessages(activeThread.id);
+                }
+            } catch (e) {
+                console.error('Failed to load threads:', e);
+            }
         }
 
-        // Reverse Engineering Analysis
-        async function analyzeRePath() {
-            const path = document.getElementById('reLocalPath').value.trim();
-            if (!path) {
-                alert('Please enter a target path.');
+        async function selectThread(th) {
+            activeThread = th;
+            document.querySelectorAll('.thread-node').forEach(el => el.classList.remove('active'));
+            // Re-render tree selection
+            const nodes = document.querySelectorAll('.thread-node');
+            nodes.forEach(node => {
+                if (node.textContent.includes(th.name)) node.classList.add('active');
+            });
+            await loadMessages(th.id);
+        }
+
+        async function loadMessages(threadId) {
+            try {
+                const res = await fetch(`/api/threads/${threadId}/messages`);
+                currentMessages = await res.json();
+                renderMessages(currentMessages);
+            } catch (e) {
+                console.error('Failed to load messages:', e);
+            }
+        }
+
+        async function deleteThread(threadId) {
+            if (!confirm('Delete this thread?')) return;
+            try {
+                await fetch(`/api/threads/${threadId}`, { method: 'DELETE' });
+                activeThread = null;
+                await loadThreads(activeWorkspace.id);
+            } catch (e) {
+                alert('Failed to delete thread: ' + e);
+            }
+        }
+
+        function renderMessages(messages) {
+            chatMessagesContainer.innerHTML = '';
+
+            if (!messages || messages.length === 0) {
+                // Empty state matching screenshot
+                chatMessagesContainer.innerHTML = `
+                    <div class="chat-empty-state">
+                        <div class="empty-mascot">🐾</div>
+                        <div class="empty-title">What would you like to explore today?</div>
+                        <div class="quick-starters">
+                            <button class="starter-btn" onclick="sendQuickPrompt('Summarize this doc')">Summarize this doc</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('/re ./src')">Reverse Engineer src/</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('@agent Analyze model architectures')">Deep Research of models</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('Hey')">Hey</button>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
-            renderLoadingRE();
+            // Always add top banner if agent was called
+            const hasAgent = messages.some(m => m.metadata && (m.metadata.type === 'agent_research' || m.metadata.type === 'reverse_engineering'));
+            if (hasAgent) {
+                const callout = document.createElement('div');
+                callout.className = 'agent-status-callout';
+                callout.style.maxWidth = '860px';
+                callout.style.margin = '0 auto';
+                callout.innerHTML = `
+                    <span class="agent-icon">🐾</span>
+                    <span>@agent: Swapping over to agent execution loop. Mara companion online.</span>
+                `;
+                chatMessagesContainer.appendChild(callout);
+            }
+
+            messages.forEach(msg => {
+                const row = document.createElement('div');
+                row.className = `message-row ${msg.role}`;
+
+                if (msg.role === 'user') {
+                    row.innerHTML = `<div class="user-pill">${escapeHtml(msg.content)}</div>`;
+                } else {
+                    let stepsHtml = '';
+                    if (msg.metadata && msg.metadata.type === 'agent_research') {
+                        stepsHtml = `
+                            <div class="agent-steps-bar">
+                                <span class="step-badge done">🧭 Planner</span>
+                                <span class="step-badge done">🔍 Researcher</span>
+                                <span class="step-badge done">⚖️ Fact Checker</span>
+                                <span class="step-badge done">✍️ Writer</span>
+                                <span class="step-badge done">🧐 Reviewer</span>
+                            </div>
+                        `;
+                    } else if (msg.metadata && msg.metadata.type === 'reverse_engineering') {
+                        stepsHtml = `
+                            <div class="agent-steps-bar">
+                                <span class="step-badge done">🔬 Binary Inspector</span>
+                                <span class="step-badge done">⚡ Section Entropy</span>
+                                <span class="step-badge done">📡 IPC & Endpoints</span>
+                            </div>
+                        `;
+                    }
+
+                    let sourcesHtml = '';
+                    if (msg.metadata && msg.metadata.sources && msg.metadata.sources.length > 0) {
+                        sourcesHtml = `
+                            <div class="assistant-sources">
+                                <span>Ground truth sources:</span>
+                                ${msg.metadata.sources.map(s => `<span class="source-tag">${escapeHtml(s)}</span>`).join('')}
+                            </div>
+                        `;
+                    }
+
+                    const parsedBody = marked.parse(msg.content);
+                    row.innerHTML = `
+                        <div class="assistant-container">
+                            ${stepsHtml}
+                            <div class="assistant-body">${parsedBody}</div>
+                            ${sourcesHtml}
+                        </div>
+                    `;
+                }
+
+                chatMessagesContainer.appendChild(row);
+            });
+
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
+        async function sendMessage(text, mode = 'chat', targetPath = '') {
+            if (!text || isProcessing) return;
+            const msgText = text.trim();
+            if (!msgText) return;
+
+            isProcessing = true;
+            sendChatBtn.classList.remove('active');
+            chatTextarea.value = '';
+            chatTextarea.style.height = 'auto';
+
+            // Optimistic render of user message
+            const tempUserMsg = { role: 'user', content: msgText };
+            currentMessages.push(tempUserMsg);
+            renderMessages(currentMessages);
+
+            // Add thinking indicator
+            const thinkingRow = document.createElement('div');
+            thinkingRow.className = 'message-row assistant';
+            thinkingRow.id = 'thinking-indicator-row';
+            thinkingRow.innerHTML = `
+                <div class="agent-status-callout">
+                    <span class="agent-icon">🐾</span>
+                    <span>Mara is reasoning</span>
+                    <div class="loading-dots"><span></span><span></span><span></span></div>
+                </div>
+            `;
+            chatMessagesContainer.appendChild(thinkingRow);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
             try {
-                const res = await fetch('/api/reverse-engineer/analyze', {
+                const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ target_path: path })
+                    body: JSON.stringify({
+                        workspace_id: activeWorkspace ? activeWorkspace.id : 'default',
+                        thread_id: activeThread ? activeThread.id : null,
+                        message: msgText,
+                        mode: mode,
+                        target_path: targetPath,
+                    })
                 });
+
                 const data = await res.json();
-                renderReResults(data);
-            } catch (err) {
-                document.getElementById('reResultsContainer').innerHTML = `<p style="color: #ef4444;">Analysis failed: ${err.message}</p>`;
+                const ind = document.getElementById('thinking-indicator-row');
+                if (ind) ind.remove();
+
+                if (data.thread_id && (!activeThread || activeThread.id !== data.thread_id)) {
+                    await loadThreads(activeWorkspace.id);
+                }
+
+                if (data.assistant_message) {
+                    currentMessages.push(data.assistant_message);
+                    renderMessages(currentMessages);
+                }
+            } catch (e) {
+                const ind = document.getElementById('thinking-indicator-row');
+                if (ind) ind.remove();
+                alert('Chat error: ' + e);
+            } finally {
+                isProcessing = false;
             }
         }
 
-        async function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        function sendQuickPrompt(promptText) {
+            chatTextarea.value = promptText;
+            sendMessage(promptText);
+        }
 
-            renderLoadingRE();
+        // Event Listeners
+        function setupEventListeners() {
+            // Textarea auto-resize & Enter to send
+            chatTextarea.addEventListener('input', () => {
+                chatTextarea.style.height = 'auto';
+                chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 160) + 'px';
+                if (chatTextarea.value.trim().length > 0) {
+                    sendChatBtn.classList.add('active');
+                } else {
+                    sendChatBtn.classList.remove('active');
+                }
+            });
+
+            chatTextarea.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(chatTextarea.value);
+                }
+            });
+
+            sendChatBtn.addEventListener('click', () => {
+                sendMessage(chatTextarea.value);
+            });
+
+            // Toggle Tools Popover
+            toggleToolsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toolsPopover.classList.toggle('open');
+            });
+
+            document.addEventListener('click', () => {
+                toolsPopover.classList.remove('open');
+            });
+
+            // Tools Menu Actions
+            document.getElementById('tool-opt-re').addEventListener('click', () => {
+                openModal('re-modal');
+            });
+
+            document.getElementById('tool-opt-agent').addEventListener('click', () => {
+                chatTextarea.value = '@agent ';
+                chatTextarea.focus();
+            });
+
+            document.getElementById('tool-opt-video').addEventListener('click', () => {
+                const url = prompt('Enter YouTube URL or lecture media link:');
+                if (url) {
+                    sendMessage(`Ingest lecture: ${url}`, 'research');
+                }
+            });
+
+            document.getElementById('tool-opt-mcp').addEventListener('click', () => {
+                openModal('mcp-modal');
+                loadMcpServers();
+            });
+
+            document.getElementById('tool-opt-doc').addEventListener('click', () => {
+                openModal('docs-modal');
+                loadWorkspaceDocs();
+            });
+
+            // Topbar Actions
+            document.getElementById('summarize-doc-pill').addEventListener('click', () => {
+                sendMessage('Summarize this doc');
+            });
+
+            document.getElementById('open-workspace-drawer-btn').addEventListener('click', () => {
+                openModal('docs-modal');
+                loadWorkspaceDocs();
+            });
+
+            topModelBadge.addEventListener('click', () => {
+                openModal('settings-modal');
+            });
+
+            // Sidebar Controls
+            toggleSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+            });
+
+            document.getElementById('open-new-ws-btn').addEventListener('click', () => {
+                openModal('new-ws-modal');
+            });
+
+            document.getElementById('save-new-ws-btn').addEventListener('click', async () => {
+                const name = document.getElementById('new-ws-name').value.trim();
+                const desc = document.getElementById('new-ws-desc').value.trim();
+                const prompt = document.getElementById('new-ws-prompt').value.trim();
+                if (!name) return alert('Please enter a workspace name');
+
+                try {
+                    const res = await fetch('/api/workspaces', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, description: desc, system_prompt: prompt })
+                    });
+                    const newWs = await res.json();
+                    closeModal('new-ws-modal');
+                    await loadWorkspaces();
+                    selectWorkspace(newWs);
+                } catch (e) {
+                    alert('Error creating workspace: ' + e);
+                }
+            });
+
+            document.getElementById('create-thread-btn').addEventListener('click', async () => {
+                const threadName = prompt('Thread name:', 'New Thread');
+                if (!threadName) return;
+                try {
+                    const res = await fetch(`/api/workspaces/${activeWorkspace.id}/threads`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: threadName })
+                    });
+                    const th = await res.json();
+                    await loadThreads(activeWorkspace.id);
+                    selectThread(th);
+                } catch (e) {
+                    alert('Error creating thread: ' + e);
+                }
+            });
+
+            document.getElementById('sidebar-upload-btn').addEventListener('click', () => {
+                openModal('docs-modal');
+                loadWorkspaceDocs();
+            });
+
+            document.getElementById('sidebar-settings-btn').addEventListener('click', () => {
+                openModal('settings-modal');
+            });
+
+            // Footer Buttons
+            document.getElementById('footer-mcp-btn').addEventListener('click', () => {
+                openModal('mcp-modal');
+                loadMcpServers();
+            });
+
+            document.getElementById('footer-docs-btn').addEventListener('click', () => {
+                openModal('docs-modal');
+                loadWorkspaceDocs();
+            });
+
+            document.getElementById('footer-re-btn').addEventListener('click', () => {
+                openModal('re-modal');
+            });
+
+            document.getElementById('footer-settings-btn').addEventListener('click', () => {
+                openModal('settings-modal');
+            });
+
+            // Inline file attach button
+            const attachBtn = document.getElementById('attach-file-btn');
+            const inlineFileInput = document.getElementById('inline-file-input');
+            attachBtn.addEventListener('click', () => inlineFileInput.click());
+            inlineFileInput.addEventListener('change', async (e) => {
+                if (!e.target.files.length) return;
+                const file = e.target.files[0];
+                await uploadFileToWorkspace(file);
+                inlineFileInput.value = '';
+            });
+
+            // Dropzone in Docs Modal
+            const docDropzone = document.getElementById('doc-dropzone');
+            const modalFileInput = document.getElementById('modal-file-input');
+            docDropzone.addEventListener('click', () => modalFileInput.click());
+            modalFileInput.addEventListener('change', async (e) => {
+                for (let file of e.target.files) {
+                    await uploadFileToWorkspace(file);
+                }
+                modalFileInput.value = '';
+                await loadWorkspaceDocs();
+            });
+
+            // Reverse Engineering Modal handlers
+            document.getElementById('re-analyze-path-btn').addEventListener('click', async () => {
+                const target = document.getElementById('re-local-path').value.trim();
+                if (!target) return alert('Enter a path');
+                const btn = document.getElementById('re-analyze-path-btn');
+                btn.textContent = 'Inspecting…';
+                try {
+                    const res = await fetch('/api/reverse-engineer/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ target_path: target, workspace_id: activeWorkspace.id })
+                    });
+                    const data = await res.json();
+                    lastReResult = data;
+                    renderReResult(data);
+                } catch (e) {
+                    alert('Inspection failed: ' + e);
+                } finally {
+                    btn.textContent = 'Analyze Path';
+                }
+            });
+
+            document.getElementById('re-send-to-thread-btn').addEventListener('click', () => {
+                closeModal('re-modal');
+                const target = document.getElementById('re-local-path').value.trim() || './src';
+                sendMessage(`/re ${target}`, 'reverse_engineer', target);
+            });
+
+            // Save Settings
+            document.getElementById('save-settings-btn').addEventListener('click', () => {
+                const prov = document.getElementById('settings-provider').value;
+                const model = document.getElementById('settings-model').value;
+                currentModelName.textContent = `${prov} / ${model}`;
+                closeModal('settings-modal');
+            });
+        }
+
+        async function uploadFileToWorkspace(file) {
             const formData = new FormData();
             formData.append('file', file);
-
             try {
-                const res = await fetch('/api/reverse-engineer/upload', {
+                const res = await fetch(`/api/workspaces/${activeWorkspace.id}/upload`, {
                     method: 'POST',
                     body: formData
                 });
                 const data = await res.json();
-                renderReResults(data);
-            } catch (err) {
-                document.getElementById('reResultsContainer').innerHTML = `<p style="color: #ef4444;">Upload analysis failed: ${err.message}</p>`;
+                alert(`File indexed: ${file.name} (${data.indexed_chunks} chunks stored in ChromaDB vault)`);
+            } catch (e) {
+                alert('Upload failed: ' + e);
             }
         }
 
-        function renderLoadingRE() {
-            document.getElementById('reResultsContainer').innerHTML = `
-                <div style="text-align: center; padding: 3rem;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem; animation: pulse 1s infinite;">🔍</div>
-                    <div style="font-weight: 700; color: #fff;">Decompiling & Extracting Telemetry…</div>
-                    <div style="font-size: 0.8rem; color: #94a3b8;">Analyzing headers, sections, IPC channels, and strings</div>
-                </div>
-            `;
-        }
-
-        function renderReResults(res) {
-            const data = res.data || {};
-            const container = document.getElementById('reResultsContainer');
-            document.getElementById('reSummaryCard').style.display = 'block';
-            document.getElementById('reSummaryText').textContent = res.summary || 'Analysis complete.';
-
-            let html = `
-                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                    <span class="pill pill-cyan">Format: ${res.format}</span>
-                    <span class="pill pill-purple">Evidence ID: ${res.evidence_id}</span>
-                    <span class="pill pill-green">Size: ${(data.file_size || data.total_size || 0).toLocaleString()} bytes</span>
-                    ${data.average_entropy ? `<span class="pill ${data.average_entropy > 7.1 ? 'pill-red' : 'pill-green'}">Entropy: ${data.average_entropy}</span>` : ''}
-                </div>
-            `;
-
-            // Sections Table
-            if (data.sections && data.sections.length > 0) {
-                html += `
-                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #60a5fa; margin-top: 1.25rem;">Executable Sections</h3>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Section</th>
-                                <th>Virtual Size</th>
-                                <th>Raw Size</th>
-                                <th>Entropy</th>
-                                <th>Flags</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.sections.slice(0, 15).map(s => `
-                                <tr>
-                                    <td style="font-weight: 600;">${s.name}</td>
-                                    <td>${s.virtual_size.toLocaleString()}</td>
-                                    <td>${s.raw_size.toLocaleString()}</td>
-                                    <td style="color: ${s.entropy > 7.1 ? '#f87171' : '#34d399'}; font-weight: 600;">${s.entropy}</td>
-                                    <td><span class="pill pill-purple">${s.characteristics.join(', ') || 'NONE'}</span></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            }
-
-            // IPC Channels (Electron)
-            if (data.ipc_channels && data.ipc_channels.length > 0) {
-                html += `
-                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #ec4899; margin-top: 1.5rem;">Electron Inter-Process Communication (IPC)</h3>
-                    <table class="data-table">
-                        <thead><tr><th>Channel</th><th>Type</th><th>File</th></tr></thead>
-                        <tbody>
-                            ${data.ipc_channels.slice(0, 20).map(ch => `
-                                <tr>
-                                    <td style="font-weight: 600; color: #34d399;">${ch.channel}</td>
-                                    <td><span class="pill pill-cyan">${ch.type}</span></td>
-                                    <td style="font-size: 0.75rem; color: #94a3b8;">${ch.file}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            }
-
-            // API Endpoints
-            if (data.api_endpoints && data.api_endpoints.length > 0) {
-                html += `
-                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #38bdf8; margin-top: 1.5rem;">Discovered API Endpoints</h3>
-                    <ul style="margin: 0.75rem 0 1rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #38bdf8;">
-                        ${data.api_endpoints.slice(0, 20).map(ep => `<li>${ep}</li>`).join('')}
-                    </ul>
-                `;
-            }
-
-            // Harvested Strings
-            if (data.interesting_strings && data.interesting_strings.length > 0) {
-                html += `
-                    <h3 style="font-size: 0.95rem; font-weight: 700; color: #fbbf24; margin-top: 1.5rem;">Interesting Harvested Strings & URLs</h3>
-                    <table class="data-table">
-                        <thead><tr><th>Offset</th><th>Kind</th><th>String Value</th></tr></thead>
-                        <tbody>
-                            ${data.interesting_strings.slice(0, 20).map(s => `
-                                <tr>
-                                    <td style="font-family: monospace; color: #64748b;">0x${s.offset.toString(16)}</td>
-                                    <td><span class="pill ${s.kind === 'url' ? 'pill-green' : 'pill-cyan'}">${s.kind}</span></td>
-                                    <td style="word-break: break-all; font-family: 'JetBrains Mono', monospace;">${s.value}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-
-        // Workspaces Management
-        async function loadWorkspaces() {
+        async function loadWorkspaceDocs() {
+            const tbody = document.getElementById('workspace-docs-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-light);">Loading documents...</td></tr>';
             try {
-                const res = await fetch('/api/workspaces');
-                const list = await res.json();
-
-                const select1 = document.getElementById('researchWorkspaceSelect');
-                const select2 = document.getElementById('uploadWsSelect');
-                select1.innerHTML = '';
-                select2.innerHTML = '';
-
-                list.forEach(ws => {
-                    const opt1 = document.createElement('option');
-                    opt1.value = ws.id;
-                    opt1.textContent = `${ws.name} (${ws.documents_count} docs)`;
-                    select1.appendChild(opt1);
-
-                    const opt2 = document.createElement('option');
-                    opt2.value = ws.id;
-                    opt2.textContent = ws.name;
-                    select2.appendChild(opt2);
+                const res = await fetch(`/api/workspaces/${activeWorkspace.id}/documents`);
+                const docs = await res.json();
+                tbody.innerHTML = '';
+                if (!docs || docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-light);">No documents uploaded to this workspace yet.</td></tr>';
+                    return;
+                }
+                docs.forEach(doc => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 500;">${escapeHtml(doc.filename)}</td>
+                        <td><code>${escapeHtml(doc.file_type)}</code></td>
+                        <td>${doc.chunks_count}</td>
+                        <td>${(doc.file_size / 1024).toFixed(1)} KB</td>
+                    `;
+                    tbody.appendChild(tr);
                 });
-
-                const container = document.getElementById('workspacesListContainer');
-                container.innerHTML = `
-                    <table class="data-table">
-                        <thead><tr><th>Name</th><th>Slug</th><th>Documents</th><th>Collection</th><th>Actions</th></tr></thead>
-                        <tbody>
-                            ${list.map(w => `
-                                <tr>
-                                    <td style="font-weight: 600;">${w.name}</td>
-                                    <td style="color: #94a3b8;">${w.slug}</td>
-                                    <td><span class="pill pill-green">${w.documents_count} docs</span></td>
-                                    <td style="font-family: monospace; font-size: 0.75rem;">${w.vector_collection}</td>
-                                    <td><button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="deleteWorkspace('${w.id}')">Delete</button></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } catch (e) {}
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" style="color: red;">Error: ${e}</td></tr>`;
+            }
         }
 
-        async function createWorkspace() {
-            const name = document.getElementById('newWsName').value.trim();
-            const desc = document.getElementById('newWsDesc').value.trim();
-            if (!name) return alert('Enter a workspace name.');
+        function renderReResult(data) {
+            const area = document.getElementById('re-result-area');
+            const card = document.getElementById('re-summary-card');
+            area.style.display = 'block';
 
-            await fetch('/api/workspaces', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description: desc })
-            });
-            document.getElementById('newWsName').value = '';
-            document.getElementById('newWsDesc').value = '';
-            loadWorkspaces();
+            let extra = '';
+            if (data.data && data.data.ipc_channels) {
+                extra += `<p style="margin-top: 6px;"><b>Discovered Electron IPC Channels:</b> ${data.data.ipc_channels.length}</p>`;
+            }
+            if (data.data && data.data.api_endpoints) {
+                extra += `<p style="margin-top: 4px;"><b>Discovered API Endpoints:</b> ${data.data.api_endpoints.length}</p>`;
+            }
+
+            card.innerHTML = `
+                <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">${escapeHtml(data.file_name)} [${data.format}]</div>
+                <div style="color: #64748b; font-size: 12.5px;">${escapeHtml(data.summary)}</div>
+                ${extra}
+            `;
         }
 
-        async function deleteWorkspace(id) {
-            if (!confirm('Delete this workspace and its documents?')) return;
-            await fetch(`/api/workspaces/${id}`, { method: 'DELETE' });
-            loadWorkspaces();
-        }
-
-        async function uploadDocToWorkspace() {
-            const wsId = document.getElementById('uploadWsSelect').value;
-            const fileInput = document.getElementById('wsDocUpload');
-            const file = fileInput.files[0];
-            if (!file) return alert('Select a file to upload.');
-
-            const fd = new FormData();
-            fd.append('file', file);
-            await fetch(`/api/workspaces/${wsId}/upload`, { method: 'POST', body: fd });
-            fileInput.value = '';
-            alert('Document ingested and vectorized successfully!');
-            loadWorkspaces();
-        }
-
-        // MCP Hypervisor Management
         async function loadMcpServers() {
+            const list = document.getElementById('mcp-servers-list');
+            list.innerHTML = '<p style="color: var(--text-light); font-size: 12.5px;">Querying MCP servers...</p>';
             try {
                 const res = await fetch('/api/mcp/servers');
-                const list = await res.json();
-                const container = document.getElementById('mcpServersListContainer');
-
-                container.innerHTML = `
-                    <table class="data-table">
-                        <thead><tr><th>Server</th><th>Command</th><th>Args</th><th>Status</th><th>Action</th></tr></thead>
-                        <tbody>
-                            ${list.map(s => `
-                                <tr>
-                                    <td style="font-weight: 700; color: #38bdf8;">${s.name}</td>
-                                    <td style="font-family: monospace;">${s.command}</td>
-                                    <td style="font-size: 0.75rem; color: #94a3b8;">${(s.args || []).join(' ')}</td>
-                                    <td><span class="pill ${s.status === 'connected' ? 'pill-green' : 'pill-red'}">${s.status}</span></td>
-                                    <td>
-                                        <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.72rem;" onclick="testMcpServer('${s.name}')">Test</button>
-                                        <button class="btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.72rem; color: #ef4444;" onclick="removeMcpServer('${s.name}')">Remove</button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } catch (e) {}
+                const servers = await res.json();
+                list.innerHTML = '';
+                if (!servers || servers.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-light); font-size: 12.5px;">No MCP servers registered.</p>';
+                    return;
+                }
+                servers.forEach(s => {
+                    const row = document.createElement('div');
+                    row.style.background = '#f8fafc';
+                    row.style.border = '1px solid #e2e8f0';
+                    row.style.borderRadius = '8px';
+                    row.style.padding = '10px 12px';
+                    row.style.display = 'flex';
+                    row.style.justifyContent = 'space-between';
+                    row.style.alignItems = 'center';
+                    row.innerHTML = `
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px;">${escapeHtml(s.name)}</div>
+                            <div style="color: var(--text-light); font-size: 11.5px; font-family: monospace;">${escapeHtml(s.command)} ${s.args.join(' ')}</div>
+                        </div>
+                        <span style="font-size: 11px; padding: 3px 8px; border-radius: 12px; background: #ecfdf5; color: #065f46; font-weight: 500;">Ready</span>
+                    `;
+                    list.appendChild(row);
+                });
+            } catch (e) {
+                list.innerHTML = `<p style="color: red; font-size: 12.5px;">Failed to query MCP servers: ${e}</p>`;
+            }
         }
 
-        async function registerMcpServer() {
-            const name = document.getElementById('mcpServerName').value.trim();
-            const cmd = document.getElementById('mcpServerCmd').value.trim();
-            const rawArgs = document.getElementById('mcpServerArgs').value.trim();
-            if (!name || !cmd) return alert('Enter server name and command.');
-
-            const args = rawArgs ? rawArgs.split(' ') : [];
-            await fetch('/api/mcp/servers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, command: cmd, args })
-            });
-            loadMcpServers();
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        async function testMcpServer(name) {
-            const res = await fetch(`/api/mcp/servers/${name}/test`, { method: 'POST' });
-            const data = await res.json();
-            alert(`Server ${name}: ${data.status} ${data.message || ''}`);
-            loadMcpServers();
-        }
-
-        async function removeMcpServer(name) {
-            await fetch(`/api/mcp/servers/${name}`, { method: 'DELETE' });
-            loadMcpServers();
-        }
-
-        // Settings Loader
-        async function loadSettings() {
-            try {
-                const res = await fetch('/system/status');
-                const data = await res.json();
-                document.getElementById('settingsDetails').innerHTML = `
-                    <p><strong>Platform:</strong> MARAT v2 (Multi-Agent Research & Reverse Engineering Platform)</p>
-                    <p><strong>Companion:</strong> Mara 🐾 (Clever Scholar Red Panda)</p>
-                    <p><strong>Active LLM Provider:</strong> <code>${data.provider}</code></p>
-                    <p><strong>Active Model:</strong> <code>${data.model}</code></p>
-                    <p><strong>ChromaDB Vault Status:</strong> ${data.rag_enabled ? '✅ Active' : '❌ Disabled'} (${data.vault_documents} documents)</p>
-                    <p><strong>Active Workspaces:</strong> ${data.workspaces_count}</p>
-                    <p><strong>Registered MCP Servers:</strong> ${data.mcp_servers_count}</p>
-                    <p><strong>Platform Capabilities:</strong> ${data.capabilities.map(c => `<span class="pill pill-cyan" style="margin: 0.2rem;">${c}</span>`).join('')}</p>
-                `;
-            } catch (e) {}
-        }
+        init();
     </script>
 </body>
 </html>

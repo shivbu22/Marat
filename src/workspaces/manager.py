@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .models import Workspace, WorkspaceDocument
+from .models import Workspace, WorkspaceDocument, WorkspaceThread, ThreadMessage
 from .collector import DocumentCollector
 
 
@@ -56,17 +56,45 @@ class WorkspaceManager:
                     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS workspace_threads (
+                    id TEXT PRIMARY KEY,
+                    workspace_id TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    created_at REAL,
+                    updated_at REAL,
+                    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+                )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS thread_messages (
+                    id TEXT PRIMARY KEY,
+                    thread_id TEXT NOT NULL,
+                    workspace_id TEXT NOT NULL,
+                    role TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    metadata_json TEXT,
+                    created_at REAL,
+                    FOREIGN KEY (thread_id) REFERENCES workspace_threads(id) ON DELETE CASCADE
+                )
+            """)
             conn.commit()
 
     def _ensure_default_workspace(self) -> None:
         """Create the default research & engineering workspace if none exists."""
-        if not self.get_workspace_by_slug("default"):
-            self.create_workspace(
-                name="Default Workspace",
+        default_ws = self.get_workspace_by_slug("default")
+        if not default_ws:
+            default_ws = self.create_workspace(
+                name="My Workspace",
                 slug="default",
                 description="Default multi-agent research, document vault, and reverse engineering workbench.",
                 system_prompt="You are Mara, a studious and clever red panda research companion. Guide the user with accuracy, depth, and evidence.",
             )
+        threads = self.list_threads(default_ws.id)
+        if not threads:
+            self.create_thread(default_ws.id, name="Hey")
+            self.create_thread(default_ws.id, name="Working Excel Spreadsheet")
+            self.create_thread(default_ws.id, name="Deep Research of Model Architectures")
 
     def create_workspace(
         self,
@@ -238,6 +266,93 @@ class WorkspaceManager:
                 d["metadata"] = json.loads(meta_json or "{}")
                 docs.append(WorkspaceDocument(**d))
             return docs
+
+    def list_threads(self, workspace_id: str) -> list[WorkspaceThread]:
+        with self._get_conn() as conn:
+            rows = conn.execute(
+                "SELECT * FROM workspace_threads WHERE workspace_id = ? ORDER BY created_at ASC",
+                (workspace_id,),
+            ).fetchall()
+            return [WorkspaceThread(**dict(r)) for r in rows]
+
+    def create_thread(self, workspace_id: str, name: str = "New Thread") -> WorkspaceThread:
+        thread = WorkspaceThread(workspace_id=workspace_id, name=name)
+        with self._get_conn() as conn:
+            conn.execute(
+                """
+                INSERT INTO workspace_threads (id, workspace_id, name, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (thread.id, thread.workspace_id, thread.name, thread.created_at, thread.updated_at),
+            )
+            conn.commit()
+        return thread
+
+    def get_thread(self, thread_id: str) -> WorkspaceThread | None:
+        with self._get_conn() as conn:
+            row = conn.execute("SELECT * FROM workspace_threads WHERE id = ?", (thread_id,)).fetchone()
+            if row:
+                return WorkspaceThread(**dict(row))
+        return None
+
+    def delete_thread(self, thread_id: str) -> bool:
+        with self._get_conn() as conn:
+            conn.execute("DELETE FROM thread_messages WHERE thread_id = ?", (thread_id,))
+            res = conn.execute("DELETE FROM workspace_threads WHERE id = ?", (thread_id,))
+            conn.commit()
+            return res.rowcount > 0
+
+    def list_messages(self, thread_id: str, limit: int = 100) -> list[ThreadMessage]:
+        with self._get_conn() as conn:
+            rows = conn.execute(
+                "SELECT * FROM thread_messages WHERE thread_id = ? ORDER BY created_at ASC LIMIT ?",
+                (thread_id, limit),
+            ).fetchall()
+            messages = []
+            for r in rows:
+                d = dict(r)
+                meta_json = d.pop("metadata_json", "{}")
+                d["metadata"] = json.loads(meta_json or "{}")
+                messages.append(ThreadMessage(**d))
+            return messages
+
+    def add_message(
+        self,
+        thread_id: str,
+        workspace_id: str,
+        role: str,
+        content: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> ThreadMessage:
+        msg = ThreadMessage(
+            thread_id=thread_id,
+            workspace_id=workspace_id,
+            role=role,
+            content=content,
+            metadata=metadata or {},
+        )
+        with self._get_conn() as conn:
+            conn.execute(
+                """
+                INSERT INTO thread_messages (id, thread_id, workspace_id, role, content, metadata_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    msg.id,
+                    msg.thread_id,
+                    msg.workspace_id,
+                    msg.role,
+                    msg.content,
+                    json.dumps(msg.metadata),
+                    msg.created_at,
+                ),
+            )
+            conn.execute(
+                "UPDATE workspace_threads SET updated_at = ? WHERE id = ?",
+                (time.time(), thread_id),
+            )
+            conn.commit()
+        return msg
 
 
 _ws_manager: WorkspaceManager | None = None

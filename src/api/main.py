@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from ..config import get_settings
 from ..graph.workflow import get_graph
+from ..llm import get_llm
 from ..mcp.hypervisor import get_mcp_hypervisor
 from ..reverse_engineer.agent import run_target_analysis
 from ..workspaces.manager import get_workspace_manager
@@ -100,6 +101,20 @@ class McpToolCallRequest(BaseModel):
     server_name: str
     tool_name: str
     arguments: dict[str, Any] = Field(default_factory=dict)
+
+
+class ThreadCreateRequest(BaseModel):
+    name: str = Field(default="New Thread", min_length=1, max_length=100)
+
+
+class ChatMessageRequest(BaseModel):
+    workspace_id: str = "default"
+    thread_id: str | None = None
+    message: str = Field(..., min_length=1)
+    mode: str = Field(default="chat")  # "chat" | "agent" | "research" | "reverse_engineer"
+    target_path: str = ""
+    tools: list[str] = Field(default_factory=list)
+
 
 
 STATIC_INDEX = Path(__file__).parent / "static" / "index.html"
@@ -219,6 +234,197 @@ async def upload_document(workspace_id: str, file: UploadFile = File(...)):
         "document": doc,
         "indexed_chunks": len(chunks),
     }
+
+
+# ---------------------------------------------------------------------------
+# Threads & Chat Endpoints (AnythingLLM Feature)
+# ---------------------------------------------------------------------------
+@app.get("/api/workspaces/{workspace_id}/threads")
+async def list_workspace_threads(workspace_id: str):
+    mgr = get_workspace_manager()
+    threads = mgr.list_threads(workspace_id)
+    if not threads:
+        initial = mgr.create_thread(workspace_id, name="Hey")
+        threads = [initial]
+    return threads
+
+
+@app.post("/api/workspaces/{workspace_id}/threads")
+async def create_workspace_thread(workspace_id: str, req: ThreadCreateRequest):
+    mgr = get_workspace_manager()
+    ws = mgr.get_workspace(workspace_id)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    return mgr.create_thread(workspace_id, name=req.name)
+
+
+@app.get("/api/threads/{thread_id}/messages")
+async def get_thread_messages(thread_id: str):
+    mgr = get_workspace_manager()
+    return mgr.list_messages(thread_id)
+
+
+@app.delete("/api/threads/{thread_id}")
+async def delete_thread(thread_id: str):
+    mgr = get_workspace_manager()
+    success = mgr.delete_thread(thread_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    return {"status": "deleted", "id": thread_id}
+
+
+@app.post("/api/chat")
+async def send_chat_message(req: ChatMessageRequest):
+    mgr = get_workspace_manager()
+    rag = get_rag()
+    ws = mgr.get_workspace(req.workspace_id)
+    if not ws:
+        ws = mgr.get_workspace_by_slug("default")
+        if not ws:
+            raise HTTPException(status_code=404, detail="Workspace not found")
+        req.workspace_id = ws.id
+
+    # Ensure thread exists
+    thread_id = req.thread_id
+    if not thread_id:
+        threads = mgr.list_threads(req.workspace_id)
+        if threads:
+            thread_id = threads[0].id
+        else:
+            new_th = mgr.create_thread(req.workspace_id, name="Hey")
+            thread_id = new_th.id
+
+    # Record user message
+    user_msg = mgr.add_message(thread_id, req.workspace_id, "user", req.message)
+
+    clean_msg = req.message.strip()
+    is_agent = clean_msg.startswith("@agent") or clean_msg.startswith("/research") or req.mode in ("agent", "research")
+    is_re = clean_msg.startswith("/re") or req.mode == "reverse_engineer" or bool(req.target_path)
+
+    # 1. Reverse Engineering Mode
+    if is_re:
+        target = req.target_path
+        if not target and clean_msg.startswith("/re"):
+            parts = clean_msg.split(maxsplit=1)
+            target = parts[1].strip() if len(parts) > 1 else "./src"
+        if not target:
+            target = "./src"
+
+        re_res = run_target_analysis(target)
+        summary = re_res.get("summary", "Analysis completed.")
+        content = f"### 🔬 Reverse Engineering Findings for `{re_res.get('file_name', target)}`\n\n**Format:** {re_res.get('format')}\n\n**Summary:** {summary}\n\n"
+        data = re_res.get("data", {})
+        if data.get("sections"):
+            content += f"**Sections ({len(data['sections'])}):** " + ", ".join(f"`{s['name']}` (entropy: {s.get('entropy', 0):.2f})" for s in data["sections"][:5]) + "\n\n"
+        if data.get("ipc_channels"):
+            content += f"**Electron IPC Channels ({len(data['ipc_channels'])}):**\n"
+            for ch in data["ipc_channels"][:8]:
+                content += f"- `{ch.get('channel')}` ({ch.get('type')})\n"
+            content += "\n"
+        if data.get("api_endpoints"):
+            content += f"**Discovered API Endpoints ({len(data['api_endpoints'])}):**\n"
+            for ep in data["api_endpoints"][:8]:
+                content += f"- `{ep}`\n"
+
+        asst_msg = mgr.add_message(
+            thread_id,
+            req.workspace_id,
+            "assistant",
+            content,
+            metadata={"type": "reverse_engineering", "data": re_res},
+        )
+        return {
+            "thread_id": thread_id,
+            "user_message": user_msg,
+            "assistant_message": asst_msg,
+            "mode": "reverse_engineer",
+        }
+
+    # 2. Multi-Agent Autonomous Research Mode
+    if is_agent:
+        topic = clean_msg.replace("@agent", "").replace("/research", "").strip() or clean_msg
+        graph = get_graph()
+        initial_state = {
+            "topic": topic,
+            "focus_mode": "broad",
+            "video_url": "",
+            "target_path": req.target_path,
+            "workspace_id": req.workspace_id,
+            "sub_questions": [],
+            "findings": [],
+            "re_findings": [],
+            "mcp_tools_used": [],
+            "raw_search_notes": [],
+            "fact_checks": [],
+            "draft_report": "",
+            "final_report": "",
+            "review_count": 0,
+            "review_feedback": "",
+            "status": "planning",
+            "error": "",
+            "sources_used": [],
+        }
+        res = await graph.ainvoke(initial_state)
+        report = res.get("final_report") or res.get("draft_report") or "No report synthesized."
+        asst_msg = mgr.add_message(
+            thread_id,
+            req.workspace_id,
+            "assistant",
+            report,
+            metadata={
+                "type": "agent_research",
+                "sub_questions": res.get("sub_questions", []),
+                "fact_checks": res.get("fact_checks", []),
+                "sources": res.get("sources_used", []),
+                "review_count": res.get("review_count", 0),
+            },
+        )
+        return {
+            "thread_id": thread_id,
+            "user_message": user_msg,
+            "assistant_message": asst_msg,
+            "mode": "agent",
+        }
+
+    # 3. Direct Workspace RAG Chat
+    rag_context = ""
+    sources = []
+    if ws.vector_collection:
+        try:
+            chunks = rag.search(clean_msg, k=4, collection_name=ws.vector_collection)
+            if chunks:
+                rag_context = "\n\nRelevant Workspace Documents:\n" + "\n---\n".join(
+                    c.get("text", "") for c in chunks
+                )
+                sources = [c.get("metadata", {}).get("filename", "Doc") for c in chunks if c.get("metadata")]
+        except Exception:
+            pass
+
+    try:
+        from langchain_core.messages import HumanMessage, SystemMessage
+        llm = get_llm(temperature=ws.temperature)
+        system_content = f"{ws.system_prompt}\n\nYou are in the '{ws.name}' workspace in Marat. Answer helpfully, accurately, and concisely."
+        if rag_context:
+            system_content += f"\n{rag_context}"
+        response = await llm.ainvoke([SystemMessage(content=system_content), HumanMessage(content=clean_msg)])
+        answer = response.content if hasattr(response, "content") else str(response)
+    except Exception as e:
+        answer = f"Mara (companion): I received your message '{clean_msg}'. (Note: Local model response: {e}. You can connect Ollama or configure an API key in Settings!)"
+
+    asst_msg = mgr.add_message(
+        thread_id,
+        req.workspace_id,
+        "assistant",
+        answer,
+        metadata={"sources": list(set(sources))},
+    )
+    return {
+        "thread_id": thread_id,
+        "user_message": user_msg,
+        "assistant_message": asst_msg,
+        "mode": "chat",
+    }
+
 
 
 # ---------------------------------------------------------------------------
