@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MARAT</title>
+    <title>MARAT — Intelligence & Reverse Engineering Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/gremlins.js"></script>
     <style>
         :root {
-            /* Warm Monochrome & Utilitarian Studio Palette */
+            /* Warm Studio (Default Theme) */
             --bg-outer: #f4f4f0;
             --bg-window: #ffffff;
             --bg-sidebar: #fbfbfa;
@@ -22,7 +22,12 @@
             --text-muted: #71717a;
             --text-light: #a1a1aa;
             
-            /* Spot Muted Pastels (Strictly Minimalist Protocol) */
+            --card-bg: #ffffff;
+            --card-subtle-bg: #fbfbfa;
+            --pill-bg: #f4f4f2;
+            --chat-user-bg: #f4f4f2;
+            --accent-glow: rgba(0, 0, 0, 0.04);
+            
             --pastel-blue-bg: #e1f3fe;
             --pastel-blue-text: #1f6c9f;
             --pastel-green-bg: #edf3ec;
@@ -32,9 +37,89 @@
             --pastel-yellow-bg: #fbf3db;
             --pastel-yellow-text: #956400;
 
+            --code-bg: #18181b;
+            --code-header-bg: #27272a;
+            --code-text: #fafafa;
+
+            --btn-primary-bg: #18181b;
+            --btn-primary-text: #ffffff;
+            --btn-primary-hover: #000000;
+
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --font-serif: 'Newsreader', Georgia, serif;
             --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        /* Obsidian Dark Theme */
+        body.theme-dark {
+            --bg-outer: #09090b;
+            --bg-window: #121215;
+            --bg-sidebar: #0e0e11;
+            --sidebar-border: #222227;
+            --border-subtle: #222227;
+            --text-main: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --text-light: #52525b;
+
+            --card-bg: #18181c;
+            --card-subtle-bg: #141418;
+            --pill-bg: #1e1e24;
+            --chat-user-bg: #272730;
+            --accent-glow: rgba(99, 102, 241, 0.12);
+
+            --pastel-blue-bg: #1e293b;
+            --pastel-blue-text: #38bdf8;
+            --pastel-green-bg: #142e1d;
+            --pastel-green-text: #4ade80;
+            --pastel-red-bg: #371418;
+            --pastel-red-text: #f87171;
+            --pastel-yellow-bg: #35260c;
+            --pastel-yellow-text: #facc15;
+
+            --code-bg: #09090b;
+            --code-header-bg: #18181b;
+            --code-text: #f4f4f5;
+
+            --btn-primary-bg: #6366f1;
+            --btn-primary-text: #ffffff;
+            --btn-primary-hover: #4f46e5;
+        }
+
+        /* Cyberpunk Terminal Theme */
+        body.theme-cyber {
+            --bg-outer: #040807;
+            --bg-window: #09110e;
+            --bg-sidebar: #060c0a;
+            --sidebar-border: #13271f;
+            --border-subtle: #13271f;
+            --text-main: #ecfdf5;
+            --text-secondary: #6ee7b7;
+            --text-muted: #34d399;
+            --text-light: #065f46;
+
+            --card-bg: #0d1a15;
+            --card-subtle-bg: #09130f;
+            --pill-bg: #10261e;
+            --chat-user-bg: #133328;
+            --accent-glow: rgba(16, 185, 129, 0.2);
+
+            --pastel-blue-bg: #06282d;
+            --pastel-blue-text: #22d3ee;
+            --pastel-green-bg: #062e1c;
+            --pastel-green-text: #10b981;
+            --pastel-red-bg: #311119;
+            --pastel-red-text: #fb7185;
+            --pastel-yellow-bg: #2d2407;
+            --pastel-yellow-text: #f59e0b;
+
+            --code-bg: #020604;
+            --code-header-bg: #0a1811;
+            --code-text: #a7f3d0;
+
+            --btn-primary-bg: #10b981;
+            --btn-primary-text: #04100a;
+            --btn-primary-hover: #059669;
         }
 
         * {
@@ -51,19 +136,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 14px;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
-        /* Desktop Application Frame (Minimalist Utilitarian Window) */
+        /* Desktop Application Frame */
         .app-window {
             width: 100%;
             height: 100%;
-            max-width: 1560px;
+            max-width: 1600px;
             background: var(--bg-window);
             border-radius: 12px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 8px 36px var(--accent-glow), 0 1px 3px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--sidebar-border);
             display: flex;
             flex-direction: column;
@@ -73,7 +159,7 @@
 
         /* Top Bar Window Chrome */
         .window-topbar {
-            height: 38px;
+            height: 40px;
             background: var(--bg-sidebar);
             border-bottom: 1px solid var(--sidebar-border);
             display: flex;
@@ -99,25 +185,69 @@
         .dot-min { background: #ffbd2e; }
         .dot-max { background: #27c93f; }
 
-        .app-version-badge {
-            font-size: 11px;
-            font-family: var(--font-mono);
-            color: var(--text-light);
-            font-weight: 500;
+        .topbar-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* App Body Layout */
+        .topbar-search-trigger {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .topbar-search-trigger:hover {
+            border-color: var(--text-light);
+            color: var(--text-main);
+        }
+
+        .kbd-badge {
+            background: var(--pill-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-select {
+            background: var(--card-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
         .app-body {
             display: flex;
             flex: 1;
             overflow: hidden;
-            height: calc(100% - 38px);
+            height: calc(100% - 40px);
         }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 270px;
-            min-width: 270px;
+            width: 280px;
+            min-width: 280px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--sidebar-border);
             display: flex;
@@ -130,7 +260,7 @@
         .sidebar.collapsed {
             width: 0;
             min-width: 0;
-            margin-left: -270px;
+            margin-left: -280px;
             overflow: hidden;
         }
 
@@ -147,7 +277,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-bottom: 2px;
         }
 
         .brand-logo-area {
@@ -156,12 +285,11 @@
             gap: 8px;
             font-weight: 700;
             font-size: 14px;
-            letter-spacing: -0.01em;
             color: var(--text-main);
         }
 
-        .brand-logo-area .brand-symbol {
-            font-size: 16px;
+        .brand-symbol {
+            font-size: 18px;
             line-height: 1;
         }
 
@@ -179,72 +307,17 @@
         }
 
         .icon-btn:hover {
-            background: #f4f4f2;
+            background: var(--pill-bg);
             color: var(--text-main);
         }
 
-        /* Search & Add Workspace Row */
-        .search-row {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .search-box {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #ffffff;
-            border: 1px solid var(--sidebar-border);
-            border-radius: 7px;
-            padding: 6px 10px;
-            font-size: 12px;
-            color: var(--text-muted);
-            transition: border-color 0.15s;
-        }
-
-        .search-box:focus-within {
-            border-color: #a1a1aa;
-        }
-
-        .search-box input {
-            border: none;
-            outline: none;
-            background: transparent;
-            width: 100%;
-            font-size: 12px;
-            color: var(--text-main);
-            font-family: inherit;
-        }
-
-        .add-workspace-btn {
-            background: #ffffff;
-            border: 1px solid var(--sidebar-border);
-            color: var(--text-muted);
-            border-radius: 7px;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .add-workspace-btn:hover {
-            background: #f4f4f2;
-            color: var(--text-main);
-        }
-
-        /* Active Workspace Card & Thread Hierarchy */
+        /* Workspace Hierarchy Card */
         .workspace-card-active {
-            background: #ffffff;
+            background: var(--card-bg);
             border: 1px solid var(--sidebar-border);
             border-radius: 8px;
             padding: 9px 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         .ws-card-header {
@@ -266,37 +339,29 @@
             text-overflow: ellipsis;
         }
 
-        .ws-drag-handle {
-            color: var(--text-light);
-            font-size: 12px;
-            line-height: 1;
-        }
-
         .ws-actions {
             display: flex;
             align-items: center;
             gap: 3px;
         }
 
-        .ws-icon-action {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            padding: 4px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-        }
-
-        .ws-icon-action:hover {
-            background: #f4f4f2;
+        .ws-filter-input {
+            width: 100%;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 11.5px;
+            background: var(--bg-sidebar);
             color: var(--text-main);
+            outline: none;
+            margin-top: 8px;
         }
 
-        /* Thread Tree (Exact branch structure) */
+        .ws-filter-input:focus {
+            border-color: var(--text-light);
+        }
+
+        /* Thread Tree */
         .thread-tree-list {
             margin-top: 8px;
             padding-left: 10px;
@@ -304,7 +369,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
-            margin-left: 8px;
+            margin-left: 6px;
         }
 
         .thread-node {
@@ -323,32 +388,37 @@
         }
 
         .thread-node:hover {
-            background: #f4f4f2;
+            background: var(--pill-bg);
             color: var(--text-main);
         }
 
         .thread-node.active {
             background: var(--pastel-blue-bg);
             color: var(--pastel-blue-text);
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .thread-node .delete-thread-btn {
+        .thread-btn-group {
             display: none;
-            font-size: 11px;
-            color: var(--text-light);
+            align-items: center;
+            gap: 4px;
+        }
+
+        .thread-node:hover .thread-btn-group {
+            display: flex;
+        }
+
+        .thread-action-mini {
             background: transparent;
             border: none;
             cursor: pointer;
-            padding: 0 3px;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 0 2px;
         }
 
-        .thread-node:hover .delete-thread-btn {
-            display: block;
-        }
-
-        .thread-node .delete-thread-btn:hover {
-            color: #ef4444;
+        .thread-action-mini:hover {
+            color: var(--text-main);
         }
 
         .new-thread-btn {
@@ -368,11 +438,10 @@
         }
 
         .new-thread-btn:hover {
-            background: #f4f4f2;
+            background: var(--pill-bg);
             color: var(--text-main);
         }
 
-        /* Other Inactive Workspaces */
         .other-workspaces-group {
             display: flex;
             flex-direction: column;
@@ -381,7 +450,7 @@
         }
 
         .other-ws-card {
-            background: #ffffff;
+            background: var(--card-bg);
             border: 1px solid var(--sidebar-border);
             border-radius: 8px;
             padding: 7px 10px;
@@ -396,11 +465,11 @@
         }
 
         .other-ws-card:hover {
-            border-color: #d4d4d8;
-            background: #fbfbfa;
+            border-color: var(--text-light);
+            background: var(--card-subtle-bg);
         }
 
-        /* Sidebar Footer (Toolbelt) */
+        /* Sidebar Footer */
         .sidebar-footer {
             padding: 10px 14px;
             border-top: 1px solid var(--sidebar-border);
@@ -409,36 +478,17 @@
             justify-content: space-around;
         }
 
-        .footer-action-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            border-radius: 6px;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-        }
-
-        .footer-action-btn:hover {
-            background: #f4f4f2;
-            color: var(--text-main);
-        }
-
-        /* --- MAIN CHAT PANEL --- */
+        /* --- MAIN PANEL --- */
         .main-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #ffffff;
+            background: var(--bg-window);
             position: relative;
             height: 100%;
             overflow: hidden;
         }
 
-        /* Chat Top Bar */
         .chat-topbar {
             height: 48px;
             padding: 0 24px;
@@ -449,60 +499,20 @@
             user-select: none;
         }
 
-        .topbar-left {
+        .chat-topbar-left {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .model-badge {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 11.5px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            background: var(--pastel-yellow-bg);
-            color: var(--pastel-yellow-text);
-            border: 1px solid rgba(0,0,0,0.06);
-            padding: 3px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .model-badge:hover {
-            opacity: 0.85;
-        }
-
-        .memory-status-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11.5px;
-            font-weight: 500;
-            color: var(--pastel-green-text);
-            background: var(--pastel-green-bg);
-            border: 1px solid rgba(0,0,0,0.06);
-            padding: 3px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .memory-status-badge:hover {
-            opacity: 0.85;
-        }
-
-        .chat-top-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .top-thread-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
         }
 
         .quick-action-pill {
-            background: #f8fafc;
+            background: var(--card-subtle-bg);
             border: 1px solid var(--sidebar-border);
             border-radius: 6px;
             padding: 4px 10px;
@@ -511,14 +521,17 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .quick-action-pill:hover {
-            background: #f1f5f9;
+            background: var(--pill-bg);
             color: var(--text-main);
         }
 
-        /* Chat Scroll Stream */
+        /* Chat Stream */
         .chat-scroll-area {
             flex: 1;
             overflow-y: auto;
@@ -528,7 +541,6 @@
             gap: 18px;
         }
 
-        /* Empty state */
         .chat-empty-state {
             display: flex;
             flex-direction: column;
@@ -541,8 +553,14 @@
         }
 
         .empty-mascot {
-            font-size: 38px;
+            font-size: 42px;
             line-height: 1;
+            animation: bounceMascot 2.5s infinite;
+        }
+
+        @keyframes bounceMascot {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
 
         .empty-title {
@@ -554,14 +572,14 @@
         .quick-starters {
             display: flex;
             flex-wrap: wrap;
-            gap: 7px;
+            gap: 8px;
             justify-content: center;
-            max-width: 580px;
+            max-width: 640px;
             margin-top: 4px;
         }
 
         .starter-btn {
-            background: #ffffff;
+            background: var(--card-bg);
             border: 1px solid var(--border-subtle);
             border-radius: 16px;
             padding: 6px 14px;
@@ -572,16 +590,16 @@
         }
 
         .starter-btn:hover {
-            border-color: #a1a1aa;
+            border-color: var(--text-light);
             color: var(--text-main);
         }
 
-        /* Message Rows */
+        /* Messages */
         .message-row {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-width: 820px;
+            max-width: 860px;
             width: 100%;
             margin: 0 auto;
         }
@@ -595,10 +613,10 @@
         }
 
         .user-pill {
-            background: #f4f4f2;
+            background: var(--chat-user-bg);
             border: 1px solid var(--border-subtle);
             border-radius: 14px;
-            padding: 8px 14px;
+            padding: 9px 15px;
             font-size: 13.5px;
             color: var(--text-main);
             max-width: 82%;
@@ -613,7 +631,13 @@
             gap: 8px;
         }
 
-        /* Recall Memory Tag */
+        .assistant-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
         .memory-recalled-pill {
             display: inline-flex;
             align-items: center;
@@ -627,19 +651,29 @@
             width: fit-content;
         }
 
-        /* Status Callout */
-        .agent-status-callout {
-            background: #fbfbfa;
+        .tts-btn {
+            background: transparent;
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-family: var(--font-mono);
-            font-size: 11.5px;
-            color: var(--text-secondary);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            user-select: none;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+
+        .tts-btn:hover {
+            border-color: var(--text-light);
+            color: var(--text-main);
+        }
+
+        .tts-btn.speaking {
+            background: var(--pastel-green-bg);
+            color: var(--pastel-green-text);
+            border-color: var(--pastel-green-text);
         }
 
         .agent-steps-bar {
@@ -662,11 +696,10 @@
             gap: 3px;
         }
 
-        /* Assistant Markdown Body */
         .assistant-body {
             font-size: 13.5px;
             line-height: 1.65;
-            color: #27272a;
+            color: var(--text-main);
             word-wrap: break-word;
         }
 
@@ -674,36 +707,68 @@
             margin-top: 14px;
             margin-bottom: 6px;
             font-weight: 600;
-            color: #18181b;
+            color: var(--text-main);
         }
 
-        .assistant-body h1 { font-size: 1.2rem; }
-        .assistant-body h2 { font-size: 1.05rem; }
-        .assistant-body h3 { font-size: 0.95rem; }
-
+        .assistant-body h1 { font-size: 1.25rem; }
+        .assistant-body h2 { font-size: 1.1rem; }
+        .assistant-body h3 { font-size: 0.98rem; }
         .assistant-body p { margin-bottom: 8px; }
+        .assistant-body ul, .assistant-body ol { padding-left: 20px; margin-bottom: 8px; }
 
-        .assistant-body ul, .assistant-body ol {
-            padding-left: 20px;
-            margin-bottom: 8px;
+        /* Code block wrapper with copy button */
+        .code-block-wrapper {
+            background: var(--code-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .code-block-header {
+            background: var(--code-header-bg);
+            padding: 4px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .copy-code-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .copy-code-btn:hover {
+            color: var(--btn-primary-text);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .assistant-body pre {
-            background: #18181b;
-            color: #fafafa;
-            border-radius: 6px;
+            background: transparent;
+            color: var(--code-text);
             padding: 10px 12px;
             font-family: var(--font-mono);
             font-size: 12px;
             overflow-x: auto;
-            margin: 8px 0;
+            margin: 0;
         }
 
         .assistant-body code:not(pre code) {
-            background: #f4f4f2;
-            color: #b45309;
-            padding: 2px 4px;
-            border-radius: 3px;
+            background: var(--pill-bg);
+            color: #d97706;
+            padding: 2px 5px;
+            border-radius: 4px;
             font-family: var(--font-mono);
             font-size: 11.5px;
         }
@@ -719,35 +784,35 @@
         }
 
         .source-tag {
-            background: #f4f4f2;
-            padding: 1px 6px;
-            border-radius: 3px;
+            background: var(--pill-bg);
+            padding: 2px 7px;
+            border-radius: 4px;
             border: 1px solid var(--border-subtle);
             color: var(--text-secondary);
         }
 
-        /* --- FLOATING INPUT CONTAINER --- */
+        /* --- FLOATING CHAT INPUT --- */
         .chat-input-wrapper {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 64px);
-            max-width: 820px;
-            background: #ffffff;
-            border: 1px solid #d4d4d8;
+            max-width: 860px;
+            background: var(--card-bg);
+            border: 1px solid var(--sidebar-border);
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-            padding: 10px 12px 8px 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+            padding: 10px 14px 8px 14px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
             transition: all 0.15s;
         }
 
         .chat-input-wrapper:focus-within {
-            border-color: #71717a;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.07);
+            border-color: var(--text-light);
+            box-shadow: 0 4px 28px var(--accent-glow);
         }
 
         .chat-textarea {
@@ -759,7 +824,7 @@
             font-size: 13.5px;
             color: var(--text-main);
             max-height: 150px;
-            min-height: 22px;
+            min-height: 24px;
             line-height: 1.45;
             background: transparent;
         }
@@ -772,11 +837,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 3px;
+            padding-top: 4px;
         }
 
         .tools-pill-btn {
-            background: #fbfbfa;
+            background: var(--card-subtle-bg);
             border: 1px solid var(--border-subtle);
             border-radius: 14px;
             padding: 3px 10px;
@@ -791,45 +856,45 @@
         }
 
         .tools-pill-btn:hover {
-            background: #f4f4f2;
+            background: var(--pill-bg);
             color: var(--text-main);
         }
 
-        .tools-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #18181b;
-        }
-
-        .input-actions-right {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .input-action-btn {
+        .voice-rec-btn {
             background: transparent;
-            border: none;
-            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50%;
             width: 28px;
             height: 28px;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            color: var(--text-muted);
             transition: all 0.15s;
         }
 
-        .input-action-btn:hover {
-            background: #f4f4f2;
+        .voice-rec-btn:hover {
+            border-color: var(--text-light);
             color: var(--text-main);
         }
 
-        .send-btn {
-            background: #e4e4e7;
+        .voice-rec-btn.recording {
+            background: #ef4444;
             color: #ffffff;
+            border-color: #ef4444;
+            animation: pulseWave 1.2s infinite;
+        }
+
+        @keyframes pulseWave {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .send-btn {
+            background: var(--pill-bg);
+            color: var(--text-light);
             border: none;
             width: 28px;
             height: 28px;
@@ -842,64 +907,105 @@
         }
 
         .send-btn.active {
-            background: #18181b;
-            color: #ffffff;
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
         }
 
         .send-btn.active:hover {
-            background: #000000;
+            background: var(--btn-primary-hover);
         }
 
-        .send-btn:active {
-            transform: scale(0.96);
-        }
-
-        /* --- TOOLS POPOVER MENU --- */
-        .tools-popover {
-            position: absolute;
-            bottom: 54px;
-            left: 12px;
-            background: #ffffff;
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            width: 240px;
-            padding: 4px;
+        /* --- SPOTLIGHT COMMAND PALETTE --- */
+        .spotlight-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
             display: none;
-            flex-direction: column;
-            gap: 2px;
-            z-index: 40;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 12vh;
+            z-index: 200;
         }
 
-        .tools-popover.open {
+        .spotlight-overlay.open {
             display: flex;
         }
 
-        .popover-item {
-            padding: 7px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: var(--text-main);
+        .spotlight-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalIn 0.16s ease-out;
+        }
+
+        .spotlight-input-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .spotlight-input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-main);
+            font-family: inherit;
+        }
+
+        .spotlight-results {
+            max-height: 380px;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .spotlight-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: all 0.12s;
+            color: var(--text-main);
+            font-size: 13px;
         }
 
-        .popover-item:hover {
-            background: #f4f4f2;
+        .spotlight-item:hover, .spotlight-item.selected {
+            background: var(--pill-bg);
         }
 
-        /* --- MODALS & DRAWERS --- */
+        .spotlight-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spotlight-badge {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* --- MODALS --- */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(2px);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -911,15 +1017,15 @@
         }
 
         .modal-card {
-            background: #ffffff;
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 12px;
             width: 90%;
-            max-width: 560px;
+            max-width: 600px;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-subtle);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--sidebar-border);
             overflow: hidden;
             animation: modalIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -943,7 +1049,7 @@
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
         }
 
         .modal-body {
@@ -959,8 +1065,8 @@
             border-top: 1px solid var(--border-subtle);
             display: flex;
             justify-content: flex-end;
-            gap: 7px;
-            background: #fbfbfa;
+            gap: 8px;
+            background: var(--card-subtle-bg);
         }
 
         .btn {
@@ -974,33 +1080,29 @@
         }
 
         .btn-secondary {
-            background: #ffffff;
+            background: var(--card-bg);
             border: 1px solid var(--border-subtle);
             color: var(--text-secondary);
         }
 
         .btn-secondary:hover {
-            background: #f4f4f2;
+            background: var(--pill-bg);
             color: var(--text-main);
         }
 
         .btn-primary {
-            background: #18181b;
-            color: #ffffff;
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
         }
 
         .btn-primary:hover {
-            background: #000000;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
+            background: var(--btn-primary-hover);
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
         }
 
         .form-label {
@@ -1015,13 +1117,14 @@
             padding: 7px 10px;
             font-size: 13px;
             color: var(--text-main);
+            background: var(--bg-window);
             font-family: inherit;
             outline: none;
             transition: border-color 0.15s;
         }
 
         .form-input:focus, .form-textarea:focus, .form-select:focus {
-            border-color: #71717a;
+            border-color: var(--text-light);
         }
 
         .dropzone {
@@ -1032,13 +1135,13 @@
             cursor: pointer;
             color: var(--text-muted);
             font-size: 12.5px;
-            background: #fbfbfa;
+            background: var(--card-subtle-bg);
             transition: all 0.15s;
         }
 
         .dropzone:hover {
-            border-color: #a1a1aa;
-            background: #ffffff;
+            border-color: var(--text-light);
+            background: var(--card-bg);
         }
 
         .docs-table {
@@ -1048,42 +1151,105 @@
         }
 
         .docs-table th, .docs-table td {
-            padding: 7px 8px;
+            padding: 8px 10px;
             text-align: left;
             border-bottom: 1px solid var(--border-subtle);
         }
 
         .docs-table th {
-            color: var(--text-muted);
             font-weight: 500;
+            color: var(--text-muted);
         }
 
-        .memory-record-card {
-            border: 1px solid var(--border-subtle);
+        .docs-table td {
+            color: var(--text-secondary);
+        }
+
+        /* Tools popover */
+        .tools-popover {
+            position: absolute;
+            bottom: 56px;
+            left: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--sidebar-border);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            width: 250px;
+            padding: 5px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 40;
+        }
+
+        .tools-popover.open {
+            display: flex;
+        }
+
+        .popover-item {
+            padding: 7px 10px;
             border-radius: 6px;
-            padding: 8px 10px;
-            background: #fbfbfa;
             font-size: 12px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .popover-item:hover {
+            background: var(--pill-bg);
+        }
+
+        /* Digest Cards Grid */
+        .digest-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .digest-card {
+            background: var(--card-subtle-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
-        .memory-record-topic {
+        .digest-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .digest-card-domain {
             font-weight: 600;
+            font-size: 13px;
             color: var(--text-main);
         }
 
-        .memory-record-preview {
-            color: var(--text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .digest-card-tag {
+            font-size: 10.5px;
+            background: var(--pastel-blue-bg);
+            color: var(--pastel-blue-text);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 500;
         }
 
+        .digest-card-summary {
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        /* Loading Dots */
         .loading-dots {
             display: inline-flex;
-            gap: 4px;
+            gap: 3px;
             align-items: center;
         }
 
@@ -1092,189 +1258,188 @@
             height: 4px;
             border-radius: 50%;
             background: var(--text-muted);
-            animation: dotBounce 1.2s infinite ease-in-out;
+            animation: dotFlashing 1s infinite alternate;
         }
 
         .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
         .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-        @keyframes dotBounce {
-            0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-4px); }
+        @keyframes dotFlashing {
+            0% { opacity: 0.2; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
-<body>
+<body class="theme-warm">
 
-    <!-- Desktop Window Frame -->
     <div class="app-window">
-
-        <!-- Top Header Chrome -->
+        <!-- Window Chrome Topbar -->
         <div class="window-topbar">
             <div class="window-controls">
                 <div class="window-dot dot-close"></div>
                 <div class="window-dot dot-min"></div>
                 <div class="window-dot dot-max"></div>
+                <button class="icon-btn" id="toggle-sidebar-btn" title="Toggle Sidebar" style="margin-left: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                </button>
             </div>
-            <div class="app-version-badge">v2.0.0 · MARAT</div>
+
+            <!-- Spotlight Trigger in Top Bar -->
+            <div class="topbar-center">
+                <div class="topbar-search-trigger" id="spotlight-trigger-btn" title="Open Command Palette (Ctrl+K)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>Command Palette</span>
+                    <span class="kbd-badge">Ctrl K</span>
+                </div>
+            </div>
+
+            <!-- Theme Switcher & Status Badges -->
+            <div class="topbar-actions">
+                <select id="theme-selector" class="theme-select" title="Theme Selector">
+                    <option value="theme-warm">☀️ Warm Studio</option>
+                    <option value="theme-dark">🌙 Obsidian Dark</option>
+                    <option value="theme-cyber">⚡ Cyber Terminal</option>
+                </select>
+
+                <div class="topbar-search-trigger" id="top-memory-badge" title="Continuous Topic Memory Status">
+                    <span>🧠 Memory: loading...</span>
+                </div>
+                <div class="topbar-search-trigger" id="top-model-badge" title="Model Configuration">
+                    <span id="current-model-name">Ollama / llama3.2</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Body Layout -->
+        <!-- App Body Layout -->
         <div class="app-body">
-
-            <!-- SIDEBAR -->
+            <!-- Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-top">
-                    <!-- Brand Area -->
                     <div class="sidebar-brand-row">
                         <div class="brand-logo-area">
                             <span class="brand-symbol">🐾</span>
                             <span>MARAT</span>
                         </div>
-                        <button class="icon-btn" id="toggle-sidebar-btn" title="Toggle Sidebar">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="icon-btn" id="open-new-ws-btn" title="New Workspace">+</button>
+                            <button class="icon-btn" id="sidebar-settings-btn" title="Settings">⚙️</button>
+                        </div>
+                    </div>
+
+                    <!-- Active Workspace -->
+                    <div class="workspace-card-active">
+                        <div class="ws-card-header">
+                            <div class="ws-title-group" id="active-ws-title-group" title="Active Workspace">
+                                <span style="font-size: 13px;">📁</span>
+                                <span id="active-ws-name">My Workspace</span>
+                            </div>
+                            <div class="ws-actions">
+                                <button class="icon-btn" id="open-workspace-drawer-btn" title="Document Vault">📖</button>
+                                <button class="icon-btn" id="create-thread-btn" title="New Thread">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Thread Filter -->
+                        <input type="text" id="thread-search-input" class="ws-filter-input" placeholder="Search threads..." />
+
+                        <!-- Thread Tree -->
+                        <div class="thread-tree-list" id="thread-tree-list"></div>
+
+                        <button class="new-thread-btn" id="new-thread-btn-inline">
+                            <span>+</span> <span>New Thread</span>
                         </button>
                     </div>
 
-                    <!-- Search & Create Workspace -->
-                    <div class="search-row">
-                        <div class="search-box">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            <input type="text" id="workspace-search-input" placeholder="Search" />
-                        </div>
-                        <button class="add-workspace-btn" id="open-new-ws-btn" title="Create Workspace">+</button>
+                    <!-- Other Workspaces -->
+                    <div style="margin-top: 10px;">
+                        <span style="font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase;">Workspaces</span>
+                        <div class="other-workspaces-group" id="other-workspaces-list"></div>
                     </div>
-
-                    <!-- Active Workspace Card -->
-                    <div class="workspace-item" id="active-workspace-card">
-                        <div class="workspace-card-active">
-                            <div class="ws-card-header">
-                                <div class="ws-title-group" id="active-ws-title-group">
-                                    <span class="ws-drag-handle">⠿</span>
-                                    <span id="active-ws-name">My Workspace</span>
-                                </div>
-                                <div class="ws-actions">
-                                    <button class="ws-icon-action" id="sidebar-upload-btn" title="Upload Document">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                    </button>
-                                    <button class="ws-icon-action" id="sidebar-settings-btn" title="Workspace Settings">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Threads Tree with Line Indicator -->
-                            <div class="thread-tree-list" id="thread-tree-list"></div>
-
-                            <button class="new-thread-btn" id="create-thread-btn">
-                                <span>+</span> New Thread
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Other Workspaces Cards -->
-                    <div class="other-workspaces-group" id="other-workspaces-list"></div>
                 </div>
 
-                <!-- Sidebar Toolbelt Footer -->
+                <!-- Sidebar Footer -->
                 <div class="sidebar-footer">
-                    <button class="footer-action-btn" id="footer-memory-btn" title="Chat Memory File & History (chat_history.json)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"></path></svg>
-                    </button>
-                    <button class="footer-action-btn" id="footer-mcp-btn" title="MCP Hypervisor Tools">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                    </button>
-                    <button class="footer-action-btn" id="footer-docs-btn" title="Workspace Documents Vault">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </button>
-                    <button class="footer-action-btn" id="footer-re-btn" title="Reverse Engineering Lab">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    </button>
-                    <button class="footer-action-btn" id="footer-settings-btn" title="Settings">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </button>
+                    <button class="icon-btn" id="footer-digest-btn" title="Knowledge Digest">🌍</button>
+                    <button class="icon-btn" id="footer-india-news-btn" title="India News">🇮🇳</button>
+                    <button class="icon-btn" id="footer-yt-btn" title="YouTube Summarizer">🎥</button>
+                    <button class="icon-btn" id="footer-re-btn" title="Reverse Engineering Lab">🔬</button>
+                    <button class="icon-btn" id="footer-docs-btn" title="Documents Vault">📖</button>
+                    <button class="icon-btn" id="footer-mcp-btn" title="MCP Hypervisor">⚡</button>
                 </div>
             </aside>
 
-            <!-- MAIN CHAT PANEL -->
+            <!-- Main Chat Panel -->
             <main class="main-panel">
-                <!-- Chat Top Bar -->
                 <div class="chat-topbar">
-                    <div class="topbar-left">
-                        <div class="model-badge" id="top-model-badge" title="Configure Model">
-                            <span id="current-model-name">ollama / llama3.2</span>
-                        </div>
-                        <div class="memory-status-badge" id="top-memory-badge" title="Continuous Topic Memory Active">
-                            <span>🧠 Memory Store</span>
-                        </div>
+                    <div class="chat-topbar-left">
+                        <span class="top-thread-title" id="chat-thread-title">Hey</span>
+                        <button class="icon-btn" id="rename-thread-header-btn" title="Rename Thread" style="font-size: 12px;">✏️</button>
                     </div>
 
-                    <div class="chat-top-actions">
-                        <button class="quick-action-pill" id="india-news-pill">🇮🇳 India News</button>
-                        <button class="quick-action-pill" id="youtube-summary-pill">📺 YouTube Summary</button>
-                        <button class="quick-action-pill" id="summarize-doc-pill">Summarize this doc</button>
-                        <button class="icon-btn" id="open-workspace-drawer-btn" title="Workspace Vault Documents">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button class="quick-action-pill" id="india-news-pill">
+                            <span>🇮🇳</span> <span>India News</span>
+                        </button>
+                        <button class="quick-action-pill" id="youtube-summary-pill">
+                            <span>🎥</span> <span>YouTube Summary</span>
+                        </button>
+                        <button class="quick-action-pill" id="export-thread-md-btn" title="Export as Markdown">
+                            <span>💾</span> <span>Export</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Chat Messages Stream -->
+                <!-- Chat Scroll Stream -->
                 <div class="chat-scroll-area" id="chat-messages-container"></div>
 
-                <!-- Floating Input Wrapper -->
+                <!-- Floating Chat Input -->
                 <div class="chat-input-wrapper">
                     <!-- Tools Popover -->
                     <div class="tools-popover" id="tools-popover">
-                        <div class="popover-item" id="tool-opt-yt">
-                            <span>📺</span> Summarize YouTube Video
+                        <div class="popover-item" id="tool-agent-research">
+                            <span>🧭</span> <span>@agent Multi-Agent Research</span>
                         </div>
-                        <div class="popover-item" id="tool-opt-india">
-                            <span>🇮🇳</span> India News & Affairs Digest
+                        <div class="popover-item" id="tool-india-news">
+                            <span>🇮🇳</span> <span>Live India Headlines & Tech</span>
                         </div>
-                        <div class="popover-item" id="tool-opt-re">
-                            <span>🔬</span> Reverse Engineer Binary / Code
+                        <div class="popover-item" id="tool-yt-summarize">
+                            <span>🎥</span> <span>Summarize YouTube Video</span>
                         </div>
-                        <div class="popover-item" id="tool-opt-agent">
-                            <span>🧭</span> Multi-Agent Research Mission
+                        <div class="popover-item" id="tool-reverse-engineer">
+                            <span>🔬</span> <span>/re Reverse-Engineer Target</span>
                         </div>
-                        <div class="popover-item" id="tool-opt-video">
-                            <span>🎙️</span> Ingest Video / Audio Lecture
-                        </div>
-                        <div class="popover-item" id="tool-opt-mcp">
-                            <span>⚡</span> Execute MCP Tool Call
-                        </div>
-                        <div class="popover-item" id="tool-opt-memory">
-                            <span>🧠</span> Persistent Memory & Chat History
-                        </div>
-                        <div class="popover-item" id="tool-opt-doc">
-                            <span>📎</span> Upload Document to Vault
+                        <div class="popover-item" id="tool-digest">
+                            <span>🌍</span> <span>Curated 6-Month Digest</span>
                         </div>
                     </div>
 
-                    <textarea 
-                        id="chat-textarea" 
-                        class="chat-textarea" 
-                        rows="1" 
-                        placeholder="Ask general questions, paste a YouTube link for instant summary, /india for live news..."
+                    <textarea
+                        class="chat-textarea"
+                        id="chat-textarea"
+                        placeholder="Ask anything across India news, YouTube summaries, reverse engineering, or world knowledge..."
+                        rows="1"
                     ></textarea>
 
                     <div class="chat-input-bottom-bar">
-                        <button class="tools-pill-btn" id="toggle-tools-btn">
-                            <span class="tools-dot"></span>
-                            <span>Tools</span>
-                        </button>
-
-                        <div class="input-actions-right">
-                            <button class="input-action-btn" id="mic-btn" title="Transcribe Audio/Lecture">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button class="tools-pill-btn" id="toggle-tools-btn">
+                                <span class="tools-dot"></span>
+                                <span>Tools</span>
                             </button>
                             <input type="file" id="inline-file-input" style="display: none;" />
-                            <button class="input-action-btn" id="attach-file-btn" title="Attach Document to Workspace">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            <button class="icon-btn" id="attach-file-btn" title="Attach file to workspace">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                             </button>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <!-- Voice Input Button -->
+                            <button class="voice-rec-btn" id="voice-dictation-btn" title="Voice Input (Speech-to-Text)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            </button>
+
                             <button class="send-btn" id="send-chat-btn" title="Send message">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                             </button>
                         </div>
                     </div>
@@ -1283,60 +1448,94 @@
         </div>
     </div>
 
-    <!-- MODAL 1: Persistent Chat Memory Inspector -->
-    <div class="modal-overlay" id="memory-modal">
-        <div class="modal-card" style="max-width: 660px;">
-            <div class="modal-header">
-                <div class="modal-title"><span>🧠</span> Persistent Chat Memory (chat_history.json)</div>
-                <button class="icon-btn" onclick="closeModal('memory-modal')">✕</button>
+    <!-- SPOTLIGHT COMMAND PALETTE MODAL (Ctrl+K) -->
+    <div class="spotlight-overlay" id="spotlight-overlay">
+        <div class="spotlight-modal">
+            <div class="spotlight-input-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="spotlight-input" class="spotlight-input" placeholder="Type a command or search action..." />
+                <button class="icon-btn" onclick="closeSpotlight()">✕</button>
             </div>
-            <div class="modal-body">
-                <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
-                    All past and current chats are continuously recorded to <code>data/memory/chat_history.json</code> and indexed into ChromaDB. When you ask questions on the same topic, Marat automatically recalls prior conclusions to build deep institutional memory.
-                </p>
-                
-                <div style="display: flex; gap: 8px; margin: 4px 0 10px 0;">
-                    <a href="/api/memory/export" download="marat_chat_history.json" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                        <span>⬇</span> Export Chat History (.json)
-                    </a>
-                    <button class="btn btn-secondary" onclick="document.getElementById('import-memory-file').click()">
-                        <span>⬆</span> Import Memory File
-                    </button>
-                    <input type="file" id="import-memory-file" style="display: none;" accept=".json" />
+            <div class="spotlight-results" id="spotlight-results">
+                <div class="spotlight-item" onclick="executeCommand('india')">
+                    <div class="spotlight-item-left"><span>🇮🇳</span> <span>Breaking India News & ISRO Updates</span></div>
+                    <span class="spotlight-badge">Action</span>
                 </div>
-
-                <h4 style="font-size: 12.5px; font-weight: 600; margin-top: 6px;">Recent Conversation Topics in Memory:</h4>
-                <div id="memory-records-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto;">
-                    <!-- Populated dynamically -->
+                <div class="spotlight-item" onclick="executeCommand('youtube')">
+                    <div class="spotlight-item-left"><span>🎥</span> <span>Summarize YouTube Lecture URL</span></div>
+                    <span class="spotlight-badge">Action</span>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('memory-modal')">Close</button>
+                <div class="spotlight-item" onclick="executeCommand('digest')">
+                    <div class="spotlight-item-left"><span>🌍</span> <span>Curated Global 6-Month Knowledge Digest</span></div>
+                    <span class="spotlight-badge">Briefing</span>
+                </div>
+                <div class="spotlight-item" onclick="executeCommand('re')">
+                    <div class="spotlight-item-left"><span>🔬</span> <span>Reverse-Engineer Local Target / Binary</span></div>
+                    <span class="spotlight-badge">REA</span>
+                </div>
+                <div class="spotlight-item" onclick="executeCommand('vault')">
+                    <div class="spotlight-item-left"><span>📖</span> <span>Open Workspace Document Vault</span></div>
+                    <span class="spotlight-badge">Vault</span>
+                </div>
+                <div class="spotlight-item" onclick="executeCommand('export')">
+                    <div class="spotlight-item-left"><span>💾</span> <span>Export Current Dossier (Markdown)</span></div>
+                    <span class="spotlight-badge">Export</span>
+                </div>
+                <div class="spotlight-item" onclick="executeCommand('voice')">
+                    <div class="spotlight-item-left"><span>🎙️</span> <span>Toggle Voice Dictation</span></div>
+                    <span class="spotlight-badge">Voice</span>
+                </div>
+                <div class="spotlight-item" onclick="executeCommand('settings')">
+                    <div class="spotlight-item-left"><span>⚙️</span> <span>LLM Model & Provider Settings</span></div>
+                    <span class="spotlight-badge">Config</span>
+                </div>
+                <div class="spotlight-item" onclick="executeCommand('toggle_theme')">
+                    <div class="spotlight-item-left"><span>🎨</span> <span>Cycle Theme (Warm / Dark / Cyber)</span></div>
+                    <span class="spotlight-badge">Theme</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: YouTube Video Summarizer -->
-    <div class="modal-overlay" id="yt-modal">
-        <div class="modal-card" style="max-width: 580px;">
+    <!-- MODAL: Curated Knowledge Digest -->
+    <div class="modal-overlay" id="digest-modal">
+        <div class="modal-card" style="max-width: 680px;">
             <div class="modal-header">
-                <div class="modal-title"><span>📺</span> YouTube Video Summarizer</div>
+                <div class="modal-title"><span>🌍</span> Curated Intelligence Digest</div>
+                <button class="icon-btn" onclick="closeModal('digest-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px;">
+                    Pre-synthesized world knowledge from the last 6 months across India technology, space exploration, frontier AI, and reverse engineering.
+                </p>
+                <div class="digest-grid" id="digest-cards-container"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('digest-modal')">Close</button>
+                <button class="btn btn-primary" id="digest-insert-chat-btn">Discuss in Current Thread</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: YouTube Summarizer -->
+    <div class="modal-overlay" id="yt-modal">
+        <div class="modal-card" style="max-width: 620px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>🎥</span> YouTube Video Ingestion & Summarizer</div>
                 <button class="icon-btn" onclick="closeModal('yt-modal')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
-                    Paste any public YouTube video link. Marat extracts captions/transcripts, generates timestamped chapters, highlights core concepts, and indexes the entire video into your workspace memory.
-                </p>
                 <div class="form-group">
                     <label class="form-label">YouTube Video URL</label>
-                    <input type="text" id="yt-video-url" class="form-input" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." />
+                    <input type="text" id="yt-video-url" class="form-input" placeholder="https://www.youtube.com/watch?v=..." />
                 </div>
-                <div class="form-group" style="margin-top: 8px;">
-                    <label class="form-label">Custom Focus / Question (Optional)</label>
-                    <input type="text" id="yt-video-focus" class="form-input" placeholder="e.g. Focus on technical architecture, equations, or key conclusions" />
+                <div class="form-group">
+                    <label class="form-label">Focus Area / Prompt (Optional)</label>
+                    <input type="text" id="yt-video-focus" class="form-input" placeholder="e.g. Focus on technical architecture & benchmarks" />
                 </div>
-                <div id="yt-status-area" style="display: none; margin-top: 10px; font-size: 12px; color: var(--text-secondary); padding: 8px 10px; background: #fbfbfa; border: 1px solid var(--border-subtle); border-radius: 6px;">
-                    <span id="yt-status-text">Fetching transcript and synthesizing summary...</span>
+                <div id="yt-status-area" style="display: none; font-size: 12px; color: var(--text-secondary);">
+                    <div class="loading-dots"><span></span><span></span><span></span></div>
+                    <span id="yt-status-text" style="margin-left: 6px;">Extracting transcript & synthesizing summary...</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1346,75 +1545,51 @@
         </div>
     </div>
 
-    <!-- MODAL: India News & National Affairs -->
+    <!-- MODAL: India Breaking News -->
     <div class="modal-overlay" id="india-news-modal">
-        <div class="modal-card" style="max-width: 660px;">
+        <div class="modal-card" style="max-width: 720px;">
             <div class="modal-header">
-                <div class="modal-title"><span>🇮🇳</span> India News & Current Affairs</div>
+                <div class="modal-title"><span>🇮🇳</span> India Live News & Geopolitical Intelligence</div>
                 <button class="icon-btn" onclick="closeModal('india-news-modal')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px;">
-                    Live national, economic, technological, and governance intelligence from India.
-                </p>
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <button class="btn btn-secondary" id="refresh-india-news-btn">🔄 Refresh Breaking News</button>
-                    <button class="btn btn-secondary" id="send-india-digest-btn">💬 Send Briefing to Chat</button>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="india-news-search-input" class="form-input" style="flex: 1;" placeholder="Search topic (e.g. ISRO, IndiaAI, Economy, Semiconductors)" value="India top news today" />
+                    <button class="btn btn-primary" id="refresh-india-news-btn">Search</button>
                 </div>
-                <div id="india-news-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto;">
-                    <p style="font-size: 12px; color: var(--text-light);">Loading latest India headlines...</p>
-                </div>
+                <div id="india-news-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('india-news-modal')">Close</button>
+                <button class="btn btn-primary" id="send-india-digest-btn">Send Digest to Chat</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: Create Workspace -->
-    <div class="modal-overlay" id="new-ws-modal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div class="modal-title"><span>📁</span> New Workspace</div>
-                <button class="icon-btn" onclick="closeModal('new-ws-modal')">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Workspace Name</label>
-                    <input type="text" id="new-ws-name" class="form-input" placeholder="e.g. Finance Workflows" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <input type="text" id="new-ws-desc" class="form-input" placeholder="Isolated departmental memory vault" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">System Prompt</label>
-                    <textarea id="new-ws-prompt" class="form-textarea" rows="3" placeholder="You are Mara, an analytical research companion..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('new-ws-modal')">Cancel</button>
-                <button class="btn btn-primary" id="save-new-ws-btn">Create Workspace</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 3: Document Vault Drawer -->
+    <!-- MODAL: Document Vault Drawer -->
     <div class="modal-overlay" id="docs-modal">
-        <div class="modal-card" style="max-width: 660px;">
+        <div class="modal-card" style="max-width: 720px;">
             <div class="modal-header">
                 <div class="modal-title"><span>📖</span> Workspace Documents Vault</div>
                 <button class="icon-btn" onclick="closeModal('docs-modal')">✕</button>
             </div>
             <div class="modal-body">
+                <!-- Dropzone -->
                 <div class="dropzone" id="doc-dropzone">
                     <p style="font-weight: 500; margin-bottom: 2px;">Click or Drag & Drop documents here</p>
-                    <p style="font-size: 11px; color: var(--text-light);">Supports PDF, Markdown, Code, CSV, Text</p>
+                    <p style="font-size: 11px; color: var(--text-light);">Supports PDF, Markdown, Python/Code, CSV, Text</p>
                     <input type="file" id="modal-file-input" style="display: none;" multiple />
                 </div>
 
-                <div style="margin-top: 8px;">
-                    <h4 style="font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">Indexed Documents in Workspace:</h4>
+                <!-- Semantic Search in Vault -->
+                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                    <input type="text" id="vault-search-input" class="form-input" style="flex: 1;" placeholder="Semantic query across indexed documents..." />
+                    <button class="btn btn-secondary" id="vault-search-btn">Search Vault</button>
+                </div>
+                <div id="vault-search-results" style="display: none; font-size: 12px; max-height: 140px; overflow-y: auto; background: var(--card-subtle-bg); padding: 8px; border-radius: 6px; border: 1px solid var(--border-subtle);"></div>
+
+                <!-- Document Table -->
+                <div style="margin-top: 6px;">
                     <table class="docs-table">
                         <thead>
                             <tr>
@@ -1422,6 +1597,7 @@
                                 <th>Type</th>
                                 <th>Chunks</th>
                                 <th>Size</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="workspace-docs-tbody"></tbody>
@@ -1434,9 +1610,9 @@
         </div>
     </div>
 
-    <!-- MODAL 4: Reverse Engineering Lab -->
+    <!-- MODAL: Reverse Engineering Lab -->
     <div class="modal-overlay" id="re-modal">
-        <div class="modal-card" style="max-width: 720px;">
+        <div class="modal-card" style="max-width: 740px;">
             <div class="modal-header">
                 <div class="modal-title"><span>🔬</span> Reverse-Engineer-Anything Lab</div>
                 <button class="icon-btn" onclick="closeModal('re-modal')">✕</button>
@@ -1456,7 +1632,7 @@
                 </div>
 
                 <div id="re-result-area" style="display: none; margin-top: 8px; font-size: 12.5px;">
-                    <div id="re-summary-card" style="background: #fbfbfa; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; margin-bottom: 10px;"></div>
+                    <div id="re-summary-card" style="background: var(--card-subtle-bg); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; margin-bottom: 10px;"></div>
                     <button class="btn btn-primary" id="re-send-to-thread-btn" style="width: 100%;">Insert Findings into Current Thread</button>
                 </div>
             </div>
@@ -1466,7 +1642,51 @@
         </div>
     </div>
 
-    <!-- MODAL 5: MCP Hypervisor -->
+    <!-- MODAL: Global Settings -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title"><span>⚙️</span> Marat Model & Provider Settings</div>
+                <button class="icon-btn" onclick="closeModal('settings-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">LLM Provider</label>
+                    <select id="settings-provider" class="form-select">
+                        <option value="ollama">Ollama (Local / Zero Cost)</option>
+                        <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+                        <option value="anthropic">Anthropic (Claude 3.5)</option>
+                        <option value="groq">Groq (Ultra-Fast)</option>
+                        <option value="lmstudio">LMStudio (Local Inference)</option>
+                        <option value="localai">LocalAI / vLLM</option>
+                        <option value="openrouter">OpenRouter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model Name</label>
+                    <input type="text" id="settings-model" class="form-input" value="llama3.2" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Base URL</label>
+                    <input type="text" id="settings-base-url" class="form-input" value="http://localhost:11434/v1" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">API Key (Cloud Providers)</label>
+                    <input type="password" id="settings-api-key" class="form-input" placeholder="Leave empty to keep existing key" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Temperature (0.0 = Deterministic, 0.7 = Creative)</label>
+                    <input type="number" id="settings-temperature" class="form-input" min="0" max="1" step="0.05" value="0.2" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
+                <button class="btn btn-primary" id="save-settings-btn">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: MCP Hypervisor -->
     <div class="modal-overlay" id="mcp-modal">
         <div class="modal-card" style="max-width: 620px;">
             <div class="modal-header">
@@ -1482,42 +1702,51 @@
         </div>
     </div>
 
-    <!-- MODAL 6: Global Settings -->
-    <div class="modal-overlay" id="settings-modal">
+    <!-- MODAL: Memory Modal -->
+    <div class="modal-overlay" id="memory-modal">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <div class="modal-title"><span>🧠</span> Continuous Topic Memory Ledger</div>
+                <button class="icon-btn" onclick="closeModal('memory-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 8px;">
+                    <a href="/api/memory/export" class="btn btn-secondary" download>Export Memory (JSON)</a>
+                    <button class="btn btn-secondary" onclick="document.getElementById('import-memory-file').click()">Import Memory</button>
+                    <input type="file" id="import-memory-file" style="display: none;" accept=".json" />
+                </div>
+                <div id="memory-records-list" style="max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('memory-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: New Workspace -->
+    <div class="modal-overlay" id="new-ws-modal">
         <div class="modal-card">
             <div class="modal-header">
-                <div class="modal-title"><span>⚙️</span> Marat Settings</div>
-                <button class="icon-btn" onclick="closeModal('settings-modal')">✕</button>
+                <div class="modal-title"><span>📁</span> New Workspace</div>
+                <button class="icon-btn" onclick="closeModal('new-ws-modal')">✕</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="form-label">LLM Provider</label>
-                    <select id="settings-provider" class="form-select">
-                        <option value="ollama">Ollama (Local / Zero Cost)</option>
-                        <option value="lmstudio">LMStudio (Local Inference)</option>
-                        <option value="localai">LocalAI / vLLM</option>
-                        <option value="groq">Groq (Ultra-Fast)</option>
-                        <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
-                        <option value="anthropic">Anthropic (Claude 3.5)</option>
-                        <option value="openrouter">OpenRouter</option>
-                    </select>
+                    <label class="form-label">Workspace Name</label>
+                    <input type="text" id="new-ws-name" class="form-input" placeholder="e.g. Project Apollo" />
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Model Name</label>
-                    <input type="text" id="settings-model" class="form-input" value="llama3.2:3b" />
+                    <label class="form-label">Description</label>
+                    <input type="text" id="new-ws-desc" class="form-input" placeholder="What is this workspace for?" />
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Base URL</label>
-                    <input type="text" id="settings-base-url" class="form-input" value="http://localhost:11434/v1" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">API Key (if cloud)</label>
-                    <input type="password" id="settings-api-key" class="form-input" placeholder="ollama" />
+                    <label class="form-label">System Prompt</label>
+                    <textarea id="new-ws-prompt" class="form-textarea" rows="2" placeholder="You are Mara, assisting on..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
-                <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+                <button class="btn btn-secondary" onclick="closeModal('new-ws-modal')">Cancel</button>
+                <button class="btn btn-primary" id="save-new-ws-btn">Create Workspace</button>
             </div>
         </div>
     </div>
@@ -1529,39 +1758,144 @@
         let activeThread = null;
         let currentMessages = [];
         let isProcessing = false;
+        let currentSpeechSynth = null;
+        let isSpeechRecognitionActive = false;
+        let speechRecognitionInstance = null;
 
         // DOM Elements
         const sidebar = document.getElementById('sidebar');
         const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
         const activeWsNameEl = document.getElementById('active-ws-name');
         const threadTreeList = document.getElementById('thread-tree-list');
+        const threadSearchInput = document.getElementById('thread-search-input');
         const otherWorkspacesList = document.getElementById('other-workspaces-list');
         const chatMessagesContainer = document.getElementById('chat-messages-container');
         const chatTextarea = document.getElementById('chat-textarea');
         const sendChatBtn = document.getElementById('send-chat-btn');
+        const chatThreadTitle = document.getElementById('chat-thread-title');
         const toolsPopover = document.getElementById('tools-popover');
         const toggleToolsBtn = document.getElementById('toggle-tools-btn');
-        const topModelBadge = document.getElementById('top-model-badge');
         const currentModelName = document.getElementById('current-model-name');
         const topMemoryBadge = document.getElementById('top-memory-badge');
+        const themeSelector = document.getElementById('theme-selector');
+        const voiceDictationBtn = document.getElementById('voice-dictation-btn');
 
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+        function openSpotlight() {
+            document.getElementById('spotlight-overlay').classList.add('open');
+            document.getElementById('spotlight-input').value = '';
+            document.getElementById('spotlight-input').focus();
+        }
+        function closeSpotlight() {
+            document.getElementById('spotlight-overlay').classList.remove('open');
+        }
+
         async function init() {
-            await loadSystemStatus();
+            initTheme();
+            initSpeechRecognition();
+            await loadSettings();
             await loadWorkspaces();
             await loadMemoryStatus();
             setupEventListeners();
         }
 
-        async function loadSystemStatus() {
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('marat-theme') || 'theme-warm';
+            document.body.className = savedTheme;
+            themeSelector.value = savedTheme;
+            themeSelector.addEventListener('change', (e) => {
+                document.body.className = e.target.value;
+                localStorage.setItem('marat-theme', e.target.value);
+            });
+        }
+
+        function cycleTheme() {
+            const themes = ['theme-warm', 'theme-dark', 'theme-cyber'];
+            const current = localStorage.getItem('marat-theme') || 'theme-warm';
+            const nextIdx = (themes.indexOf(current) + 1) % themes.length;
+            const nextTheme = themes[nextIdx];
+            document.body.className = nextTheme;
+            themeSelector.value = nextTheme;
+            localStorage.setItem('marat-theme', nextTheme);
+        }
+
+        // Speech Recognition (Dictation)
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                voiceDictationBtn.style.display = 'none';
+                return;
+            }
+            speechRecognitionInstance = new SpeechRecognition();
+            speechRecognitionInstance.continuous = false;
+            speechRecognitionInstance.interimResults = true;
+
+            speechRecognitionInstance.onstart = () => {
+                isSpeechRecognitionActive = true;
+                voiceDictationBtn.classList.add('recording');
+            };
+
+            speechRecognitionInstance.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript;
+                }
+                chatTextarea.value = transcript;
+                updateSendButton();
+            };
+
+            speechRecognitionInstance.onend = () => {
+                isSpeechRecognitionActive = false;
+                voiceDictationBtn.classList.remove('recording');
+            };
+
+            speechRecognitionInstance.onerror = (e) => {
+                console.warn('Speech error:', e);
+                isSpeechRecognitionActive = false;
+                voiceDictationBtn.classList.remove('recording');
+            };
+
+            voiceDictationBtn.addEventListener('click', () => {
+                if (isSpeechRecognitionActive) {
+                    speechRecognitionInstance.stop();
+                } else {
+                    speechRecognitionInstance.start();
+                }
+            });
+        }
+
+        // Text-to-Speech (Audio Synthesizer)
+        function toggleTTS(text, btnEl) {
+            if (!window.speechSynthesis) return alert('Speech synthesis not supported in this browser.');
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                document.querySelectorAll('.tts-btn').forEach(b => b.classList.remove('speaking'));
+                return;
+            }
+
+            const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[#*`_~]/g, '');
+            const utter = new SpeechSynthesisUtterance(cleanText);
+            btnEl.classList.add('speaking');
+
+            utter.onend = () => btnEl.classList.remove('speaking');
+            utter.onerror = () => btnEl.classList.remove('speaking');
+            window.speechSynthesis.speak(utter);
+        }
+
+        async function loadSettings() {
             try {
-                const res = await fetch('/health');
+                const res = await fetch('/api/settings');
                 const data = await res.json();
-                currentModelName.textContent = `${data.provider} / ${data.model}`;
+                currentModelName.textContent = `${data.llm_provider} / ${data.llm_model}`;
+                document.getElementById('settings-provider').value = data.llm_provider;
+                document.getElementById('settings-model').value = data.llm_model;
+                document.getElementById('settings-base-url').value = data.llm_base_url;
+                document.getElementById('settings-temperature').value = data.temperature;
             } catch (e) {
-                console.warn('Health check:', e);
+                console.warn('Settings load error:', e);
             }
         }
 
@@ -1599,7 +1933,7 @@
                 if (ws.id !== activeWorkspace.id) {
                     const card = document.createElement('div');
                     card.className = 'other-ws-card';
-                    card.innerHTML = `<span class="ws-drag-handle">⠿</span> <span>${escapeHtml(ws.name)}</span>`;
+                    card.innerHTML = `<span style="color: var(--text-light)">📁</span> <span>${escapeHtml(ws.name)}</span>`;
                     card.onclick = () => selectWorkspace(ws);
                     otherWorkspacesList.appendChild(card);
                 }
@@ -1612,14 +1946,19 @@
             await loadThreads(ws.id);
         }
 
-        async function loadThreads(workspaceId) {
+        async function loadThreads(workspaceId, filterQuery = '') {
             try {
                 const res = await fetch(`/api/workspaces/${workspaceId}/threads`);
-                const threads = await res.json();
+                let threads = await res.json();
+
+                if (filterQuery) {
+                    threads = threads.filter(t => t.name.toLowerCase().includes(filterQuery.toLowerCase()));
+                }
 
                 threadTreeList.innerHTML = '';
                 if (!threads || threads.length === 0) {
                     activeThread = null;
+                    chatThreadTitle.textContent = 'New Session';
                     renderMessages([]);
                     return;
                 }
@@ -1627,12 +1966,18 @@
                 threads.forEach((th, idx) => {
                     const node = document.createElement('div');
                     const isActive = (!activeThread && idx === 0) || (activeThread && activeThread.id === th.id);
-                    if (isActive) activeThread = th;
+                    if (isActive) {
+                        activeThread = th;
+                        chatThreadTitle.textContent = th.name;
+                    }
 
                     node.className = `thread-node ${isActive ? 'active' : ''}`;
                     node.innerHTML = `
                         <span style="overflow: hidden; text-overflow: ellipsis;">${escapeHtml(th.name)}</span>
-                        <button class="delete-thread-btn" title="Delete Thread" onclick="event.stopPropagation(); deleteThread('${th.id}')">✕</button>
+                        <div class="thread-btn-group">
+                            <button class="thread-action-mini" title="Rename" onclick="event.stopPropagation(); renameThread('${th.id}')">✏️</button>
+                            <button class="thread-action-mini" title="Delete" onclick="event.stopPropagation(); deleteThread('${th.id}')">✕</button>
+                        </div>
                     `;
                     node.onclick = () => selectThread(th);
                     threadTreeList.appendChild(node);
@@ -1648,12 +1993,42 @@
 
         async function selectThread(th) {
             activeThread = th;
+            chatThreadTitle.textContent = th.name;
             document.querySelectorAll('.thread-node').forEach(el => el.classList.remove('active'));
             const nodes = document.querySelectorAll('.thread-node');
             nodes.forEach(node => {
                 if (node.textContent.includes(th.name)) node.classList.add('active');
             });
             await loadMessages(th.id);
+        }
+
+        async function renameThread(threadId) {
+            const currentName = activeThread ? activeThread.name : 'Thread';
+            const newName = prompt('New thread name:', currentName);
+            if (!newName || newName.trim() === '') return;
+            try {
+                const res = await fetch(`/api/threads/${threadId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: newName.trim() })
+                });
+                const updated = await res.json();
+                chatThreadTitle.textContent = updated.name;
+                await loadThreads(activeWorkspace.id);
+            } catch (e) {
+                alert('Rename error: ' + e);
+            }
+        }
+
+        async function deleteThread(threadId) {
+            if (!confirm('Delete this conversation thread?')) return;
+            try {
+                await fetch(`/api/threads/${threadId}`, { method: 'DELETE' });
+                activeThread = null;
+                await loadThreads(activeWorkspace.id);
+            } catch (e) {
+                alert('Delete error: ' + e);
+            }
         }
 
         async function loadMessages(threadId) {
@@ -1666,17 +2041,6 @@
             }
         }
 
-        async function deleteThread(threadId) {
-            if (!confirm('Delete this thread?')) return;
-            try {
-                await fetch(`/api/threads/${threadId}`, { method: 'DELETE' });
-                activeThread = null;
-                await loadThreads(activeWorkspace.id);
-            } catch (e) {
-                alert('Delete error: ' + e);
-            }
-        }
-
         function renderMessages(messages) {
             chatMessagesContainer.innerHTML = '';
 
@@ -1686,30 +2050,18 @@
                         <div class="empty-mascot">🐾</div>
                         <div class="empty-title">What would you like to explore today?</div>
                         <div class="quick-starters">
-                            <button class="starter-btn" onclick="sendQuickPrompt('Summarize recent global events')">Summarize recent global events</button>
-                            <button class="starter-btn" onclick="sendQuickPrompt('/re ./src')">Reverse Engineer src/</button>
-                            <button class="starter-btn" onclick="sendQuickPrompt('@agent Analyze model architectures')">Deep Research on Models</button>
-                            <button class="starter-btn" onclick="sendQuickPrompt('Tell me about SpaceX Mechazilla booster catch')">SpaceX Mechazilla Catch</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('What are today\\'s top breaking news and tech headlines in India?')">🇮🇳 India Breaking News</button>
+                            <button class="starter-btn" onclick="openModal('yt-modal')">🎥 Summarize YouTube Video</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('/re ./src')">🔬 Reverse Engineer src/</button>
+                            <button class="starter-btn" onclick="sendQuickPrompt('@agent What are the biggest frontier AI breakthroughs in the last 6 months?')">🌍 6-Month AI Breakthroughs</button>
+                            <button class="starter-btn" onclick="openSpotlight()">⚡ Command Palette (Ctrl+K)</button>
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            const hasAgent = messages.some(m => m.metadata && (m.metadata.type === 'agent_research' || m.metadata.type === 'reverse_engineering'));
-            if (hasAgent) {
-                const callout = document.createElement('div');
-                callout.className = 'agent-status-callout';
-                callout.style.maxWidth = '820px';
-                callout.style.margin = '0 auto';
-                callout.innerHTML = `
-                    <span>🐾</span>
-                    <span>@agent: Swapping over to agent execution loop. Continuous topic memory online.</span>
-                `;
-                chatMessagesContainer.appendChild(callout);
-            }
-
-            messages.forEach(msg => {
+            messages.forEach((msg, idx) => {
                 const row = document.createElement('div');
                 row.className = `message-row ${msg.role}`;
 
@@ -1732,7 +2084,7 @@
                             <div class="agent-steps-bar">
                                 <span class="step-badge">🔬 Binary Inspector</span>
                                 <span class="step-badge">⚡ Section Entropy</span>
-                                <span class="step-badge">📡 IPC & Endpoints</span>
+                                <span class="step-badge">📡 Endpoints & ASAR</span>
                             </div>
                         `;
                     }
@@ -1755,9 +2107,14 @@
                     const parsedBody = marked.parse(msg.content);
                     row.innerHTML = `
                         <div class="assistant-container">
-                            ${memoryTag}
+                            <div class="assistant-header-row">
+                                ${memoryTag || '<div></div>'}
+                                <button class="tts-btn" onclick="toggleTTS('${escapeQuotes(msg.content)}', this)" title="Read Aloud">
+                                    <span>🔊</span> <span>Listen</span>
+                                </button>
+                            </div>
                             ${stepsHtml}
-                            <div class="assistant-body">${parsedBody}</div>
+                            <div class="assistant-body" id="msg-body-${idx}">${parsedBody}</div>
                             ${sourcesHtml}
                         </div>
                     `;
@@ -1766,7 +2123,43 @@
                 chatMessagesContainer.appendChild(row);
             });
 
+            // Decorate code blocks with copy headers
+            decorateCodeBlocks();
+
             chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
+        function decorateCodeBlocks() {
+            document.querySelectorAll('.assistant-body pre').forEach((pre) => {
+                if (pre.parentElement.classList.contains('code-block-wrapper')) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block-wrapper';
+
+                const header = document.createElement('div');
+                header.className = 'code-block-header';
+
+                const codeEl = pre.querySelector('code');
+                const langMatch = codeEl ? codeEl.className.match(/language-(\w+)/) : null;
+                const lang = langMatch ? langMatch[1] : 'code';
+
+                header.innerHTML = `
+                    <span>${lang}</span>
+                    <button class="copy-code-btn">📋 Copy</button>
+                `;
+
+                const copyBtn = header.querySelector('.copy-code-btn');
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(pre.innerText).then(() => {
+                        copyBtn.innerHTML = '✓ Copied!';
+                        setTimeout(() => copyBtn.innerHTML = '📋 Copy', 2000);
+                    });
+                });
+
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+            });
         }
 
         async function sendMessage(text, mode = 'chat', targetPath = '') {
@@ -1786,9 +2179,8 @@
             thinkingRow.className = 'message-row assistant';
             thinkingRow.id = 'thinking-indicator-row';
             thinkingRow.innerHTML = `
-                <div class="agent-status-callout">
-                    <span>🐾</span>
-                    <span>Mara is reasoning</span>
+                <div class="agent-steps-bar" style="background: var(--card-subtle-bg); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <span>🐾 Mara is synthesizing</span>
                     <div class="loading-dots"><span></span><span></span><span></span></div>
                 </div>
             `;
@@ -1807,44 +2199,176 @@
                         target_path: targetPath,
                     })
                 });
-
                 const data = await res.json();
-                const ind = document.getElementById('thinking-indicator-row');
-                if (ind) ind.remove();
-
-                if (data.thread_id && (!activeThread || activeThread.id !== data.thread_id)) {
+                if (data.thread_id && activeThread && activeThread.id !== data.thread_id) {
                     await loadThreads(activeWorkspace.id);
                 }
-
-                if (data.assistant_message) {
-                    currentMessages.push(data.assistant_message);
-                    renderMessages(currentMessages);
-                }
-
+                await loadMessages(data.thread_id || (activeThread ? activeThread.id : ''));
                 await loadMemoryStatus();
-            } catch (e) {
-                const ind = document.getElementById('thinking-indicator-row');
-                if (ind) ind.remove();
-                alert('Chat error: ' + e);
+            } catch (err) {
+                currentMessages.push({
+                    role: 'assistant',
+                    content: `Mara: I encountered an issue connecting to the inference engine: ${err}. Please ensure Ollama or your chosen API provider is active!`
+                });
+                renderMessages(currentMessages);
             } finally {
+                const thinkEl = document.getElementById('thinking-indicator-row');
+                if (thinkEl) thinkEl.remove();
                 isProcessing = false;
+                updateSendButton();
             }
         }
 
         function sendQuickPrompt(promptText) {
-            chatTextarea.value = promptText;
             sendMessage(promptText);
         }
 
+        function updateSendButton() {
+            if (chatTextarea.value.trim().length > 0) {
+                sendChatBtn.classList.add('active');
+            } else {
+                sendChatBtn.classList.remove('active');
+            }
+        }
+
+        // Spotlight Command Execution
+        function executeCommand(action) {
+            closeSpotlight();
+            switch (action) {
+                case 'india':
+                    openModal('india-news-modal');
+                    loadIndiaNews();
+                    break;
+                case 'youtube':
+                    openModal('yt-modal');
+                    break;
+                case 'digest':
+                    openModal('digest-modal');
+                    loadKnowledgeDigest();
+                    break;
+                case 're':
+                    openModal('re-modal');
+                    break;
+                case 'vault':
+                    openModal('docs-modal');
+                    loadWorkspaceDocs();
+                    break;
+                case 'export':
+                    if (activeThread) {
+                        window.open(`/api/threads/${activeThread.id}/export?format=markdown`, '_blank');
+                    }
+                    break;
+                case 'voice':
+                    if (voiceDictationBtn) voiceDictationBtn.click();
+                    break;
+                case 'settings':
+                    openModal('settings-modal');
+                    break;
+                case 'toggle_theme':
+                    cycleTheme();
+                    break;
+            }
+        }
+
+        async function loadKnowledgeDigest() {
+            try {
+                const res = await fetch('/api/knowledge/digest');
+                const data = await res.json();
+                const container = document.getElementById('digest-cards-container');
+                container.innerHTML = '';
+                data.cards.forEach(c => {
+                    const el = document.createElement('div');
+                    el.className = 'digest-card';
+                    el.innerHTML = `
+                        <div class="digest-card-top">
+                            <span class="digest-card-domain">${c.domain}</span>
+                            <span class="digest-card-tag">${c.tag}</span>
+                        </div>
+                        <div class="digest-card-summary">${c.summary}</div>
+                    `;
+                    container.appendChild(el);
+                });
+            } catch (e) {
+                console.warn('Digest load error:', e);
+            }
+        }
+
+        async function loadIndiaNews(query = 'India top news today') {
+            const list = document.getElementById('india-news-list');
+            list.innerHTML = '<div style="font-size: 12px; color: var(--text-muted);">Fetching live Indian headlines...</div>';
+            try {
+                const res = await fetch(`/api/news/india?q=${encodeURIComponent(query)}&limit=7`);
+                const data = await res.json();
+                list.innerHTML = '';
+                if (!data.articles || data.articles.length === 0) {
+                    list.innerHTML = '<div style="font-size: 12px; color: var(--text-muted);">No live headlines returned for this query.</div>';
+                    return;
+                }
+                data.articles.forEach(art => {
+                    const row = document.createElement('div');
+                    row.style.background = 'var(--card-subtle-bg)';
+                    row.style.padding = '9px 12px';
+                    row.style.borderRadius = '6px';
+                    row.style.border = '1px solid var(--border-subtle)';
+                    row.innerHTML = `
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">
+                            <a href="${escapeHtml(art.url)}" target="_blank" style="color: inherit; text-decoration: none;">${escapeHtml(art.title)}</a>
+                        </div>
+                        <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4;">${escapeHtml(art.snippet)}</div>
+                    `;
+                    list.appendChild(row);
+                });
+            } catch (err) {
+                list.innerHTML = `<div style="color: #ef4444; font-size: 12px;">Failed to fetch news: ${err}</div>`;
+            }
+        }
+
+        async function loadWorkspaceDocs() {
+            if (!activeWorkspace) return;
+            const tbody = document.getElementById('workspace-docs-tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light)">Loading documents...</td></tr>';
+            try {
+                const res = await fetch(`/api/workspaces/${activeWorkspace.id}/documents`);
+                const docs = await res.json();
+                tbody.innerHTML = '';
+                if (!docs || docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light)">No documents indexed yet.</td></tr>';
+                    return;
+                }
+                docs.forEach(d => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 500; color: var(--text-main);">${escapeHtml(d.filename)}</td>
+                        <td>${escapeHtml(d.file_type)}</td>
+                        <td>${d.chunks_count}</td>
+                        <td>${formatBytes(d.file_size)}</td>
+                        <td>
+                            <button class="icon-btn" title="Delete document" onclick="deleteDocument('${d.id}')" style="color: #ef4444;">🗑️</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error('Docs error:', e);
+            }
+        }
+
+        async function deleteDocument(docId) {
+            if (!confirm('Delete document and purge from ChromaDB vector vault?')) return;
+            try {
+                await fetch(`/api/workspaces/${activeWorkspace.id}/documents/${docId}`, { method: 'DELETE' });
+                await loadWorkspaceDocs();
+            } catch (e) {
+                alert('Delete failed: ' + e);
+            }
+        }
+
         function setupEventListeners() {
+            // Textarea auto-height and input tracking
             chatTextarea.addEventListener('input', () => {
                 chatTextarea.style.height = 'auto';
-                chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 150) + 'px';
-                if (chatTextarea.value.trim().length > 0) {
-                    sendChatBtn.classList.add('active');
-                } else {
-                    sendChatBtn.classList.remove('active');
-                }
+                chatTextarea.style.height = `${chatTextarea.scrollHeight}px`;
+                updateSendButton();
             });
 
             chatTextarea.addEventListener('keydown', (e) => {
@@ -1854,208 +2378,214 @@
                 }
             });
 
-            sendChatBtn.addEventListener('click', () => {
-                sendMessage(chatTextarea.value);
+            sendChatBtn.addEventListener('click', () => sendMessage(chatTextarea.value));
+
+            // Keyboard shortcut for Spotlight (Ctrl+K or Cmd+K)
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    openSpotlight();
+                } else if (e.key === 'Escape') {
+                    closeSpotlight();
+                    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+                }
             });
 
+            document.getElementById('spotlight-trigger-btn').addEventListener('click', openSpotlight);
+
+            // Spotlight filter input
+            document.getElementById('spotlight-input').addEventListener('input', (e) => {
+                const q = e.target.value.toLowerCase();
+                document.querySelectorAll('.spotlight-item').forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    item.style.display = text.includes(q) ? 'flex' : 'none';
+                });
+            });
+
+            // Thread filter in sidebar
+            threadSearchInput.addEventListener('input', (e) => {
+                loadThreads(activeWorkspace.id, e.target.value);
+            });
+
+            // Quick Action Pills
+            document.getElementById('india-news-pill').addEventListener('click', () => {
+                openModal('india-news-modal');
+                loadIndiaNews();
+            });
+
+            document.getElementById('youtube-summary-pill').addEventListener('click', () => openModal('yt-modal'));
+
+            document.getElementById('export-thread-md-btn').addEventListener('click', () => {
+                if (!activeThread) return alert('Select or start a thread first');
+                window.open(`/api/threads/${activeThread.id}/export?format=markdown`, '_blank');
+            });
+
+            document.getElementById('rename-thread-header-btn').addEventListener('click', () => {
+                if (activeThread) renameThread(activeThread.id);
+            });
+
+            // Tools Popover
             toggleToolsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toolsPopover.classList.toggle('open');
             });
 
-            document.addEventListener('click', () => {
-                toolsPopover.classList.remove('open');
+            document.addEventListener('click', (e) => {
+                if (!toolsPopover.contains(e.target) && e.target !== toggleToolsBtn) {
+                    toolsPopover.classList.remove('open');
+                }
             });
 
-            // Tools popover
-            document.getElementById('tool-opt-yt').addEventListener('click', () => openModal('yt-modal'));
-            document.getElementById('tool-opt-india').addEventListener('click', () => {
-                openModal('india-news-modal');
-                loadIndiaNews();
-            });
-            document.getElementById('tool-opt-re').addEventListener('click', () => openModal('re-modal'));
-            document.getElementById('tool-opt-agent').addEventListener('click', () => {
+            document.getElementById('tool-agent-research').addEventListener('click', () => {
+                toolsPopover.classList.remove('open');
                 chatTextarea.value = '@agent ';
                 chatTextarea.focus();
-            });
-            document.getElementById('tool-opt-video').addEventListener('click', () => openModal('yt-modal'));
-            document.getElementById('tool-opt-mcp').addEventListener('click', () => {
-                openModal('mcp-modal');
-                loadMcpServers();
-            });
-            document.getElementById('tool-opt-memory').addEventListener('click', () => {
-                openModal('memory-modal');
-                renderMemoryRecords();
-            });
-            document.getElementById('tool-opt-doc').addEventListener('click', () => {
-                openModal('docs-modal');
-                loadWorkspaceDocs();
+                updateSendButton();
             });
 
-            // Topbar Actions
-            document.getElementById('india-news-pill').addEventListener('click', () => {
+            document.getElementById('tool-india-news').addEventListener('click', () => {
+                toolsPopover.classList.remove('open');
                 openModal('india-news-modal');
                 loadIndiaNews();
             });
-            document.getElementById('youtube-summary-pill').addEventListener('click', () => openModal('yt-modal'));
-            document.getElementById('summarize-doc-pill').addEventListener('click', () => {
-                sendMessage('Summarize this doc');
+
+            document.getElementById('tool-yt-summarize').addEventListener('click', () => {
+                toolsPopover.classList.remove('open');
+                openModal('yt-modal');
             });
+
+            document.getElementById('tool-reverse-engineer').addEventListener('click', () => {
+                toolsPopover.classList.remove('open');
+                openModal('re-modal');
+            });
+
+            document.getElementById('tool-digest').addEventListener('click', () => {
+                toolsPopover.classList.remove('open');
+                openModal('digest-modal');
+                loadKnowledgeDigest();
+            });
+
+            // Sidebar & Modals
+            toggleSidebarBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+            document.getElementById('open-new-ws-btn').addEventListener('click', () => openModal('new-ws-modal'));
             document.getElementById('open-workspace-drawer-btn').addEventListener('click', () => {
                 openModal('docs-modal');
                 loadWorkspaceDocs();
             });
-            topModelBadge.addEventListener('click', () => openModal('settings-modal'));
-            topMemoryBadge.addEventListener('click', () => {
-                openModal('memory-modal');
-                renderMemoryRecords();
+            document.getElementById('create-thread-btn').addEventListener('click', async () => {
+                const name = prompt('New thread name:', 'New Thread');
+                if (!name) return;
+                const res = await fetch(`/api/workspaces/${activeWorkspace.id}/threads`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                const th = await res.json();
+                await loadThreads(activeWorkspace.id);
+                selectThread(th);
             });
 
-            // YouTube Summarizer Modal Actions
+            document.getElementById('new-thread-btn-inline').addEventListener('click', () => {
+                document.getElementById('create-thread-btn').click();
+            });
+
+            // Footer triggers
+            document.getElementById('footer-digest-btn').addEventListener('click', () => {
+                openModal('digest-modal');
+                loadKnowledgeDigest();
+            });
+            document.getElementById('footer-india-news-btn').addEventListener('click', () => {
+                openModal('india-news-modal');
+                loadIndiaNews();
+            });
+            document.getElementById('footer-yt-btn').addEventListener('click', () => openModal('yt-modal'));
+            document.getElementById('footer-re-btn').addEventListener('click', () => openModal('re-modal'));
+            document.getElementById('footer-docs-btn').addEventListener('click', () => {
+                openModal('docs-modal');
+                loadWorkspaceDocs();
+            });
+            document.getElementById('footer-mcp-btn').addEventListener('click', () => openModal('mcp-modal'));
+
+            topModelBadge.addEventListener('click', () => openModal('settings-modal'));
+            topMemoryBadge.addEventListener('click', () => openModal('memory-modal'));
+            document.getElementById('sidebar-settings-btn').addEventListener('click', () => openModal('settings-modal'));
+
+            // File uploads
+            document.getElementById('attach-file-btn').addEventListener('click', () => document.getElementById('inline-file-input').click());
+            document.getElementById('inline-file-input').addEventListener('change', async (e) => {
+                if (!e.target.files.length) return;
+                await uploadFileToWorkspace(e.target.files[0]);
+                e.target.value = '';
+            });
+
+            document.getElementById('doc-dropzone').addEventListener('click', () => document.getElementById('modal-file-input').click());
+            document.getElementById('modal-file-input').addEventListener('change', async (e) => {
+                for (let file of e.target.files) {
+                    await uploadFileToWorkspace(file);
+                }
+                e.target.value = '';
+                await loadWorkspaceDocs();
+            });
+
+            // Vault Semantic Search
+            document.getElementById('vault-search-btn').addEventListener('click', async () => {
+                const q = document.getElementById('vault-search-input').value.trim();
+                if (!q) return;
+                const container = document.getElementById('vault-search-results');
+                container.style.display = 'block';
+                container.innerHTML = 'Searching vector collection...';
+                try {
+                    const res = await fetch(`/api/workspaces/${activeWorkspace.id}/search`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q, k: 3 })
+                    });
+                    const d = await res.json();
+                    container.innerHTML = '';
+                    if (!d.results || d.results.length === 0) {
+                        container.innerHTML = 'No semantic matches found.';
+                        return;
+                    }
+                    d.results.forEach(r => {
+                        const div = document.createElement('div');
+                        div.style.marginBottom = '6px';
+                        div.innerHTML = `<strong>${escapeHtml(r.metadata.filename || 'Doc')}</strong> (${r.distance ? 'dist: ' + r.distance.toFixed(3) : ''}): <br/>${escapeHtml(r.text.substring(0, 180))}...`;
+                        container.appendChild(div);
+                    });
+                } catch (err) {
+                    container.innerHTML = 'Error: ' + err;
+                }
+            });
+
+            // YouTube modal actions
             document.getElementById('start-yt-summarize-btn').addEventListener('click', async () => {
                 const url = document.getElementById('yt-video-url').value.trim();
                 const focus = document.getElementById('yt-video-focus').value.trim();
-                if (!url) return alert('Please enter a YouTube video URL');
-
-                const statusArea = document.getElementById('yt-status-area');
-                const statusText = document.getElementById('yt-status-text');
+                if (!url) return alert('Enter a YouTube URL');
                 const btn = document.getElementById('start-yt-summarize-btn');
-
-                statusArea.style.display = 'block';
-                statusText.textContent = 'Extracting captions/audio & synthesizing summary...';
+                const statusArea = document.getElementById('yt-status-area');
                 btn.disabled = true;
-
+                statusArea.style.display = 'block';
                 try {
                     const res = await fetch('/api/video/summarize', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url: url, focus: focus, workspace_id: activeWorkspace ? activeWorkspace.id : 'default' })
+                        body: JSON.stringify({ url, focus, workspace_id: activeWorkspace.id })
                     });
                     const data = await res.json();
                     if (data.status === 'success') {
                         closeModal('yt-modal');
                         document.getElementById('yt-video-url').value = '';
-                        document.getElementById('yt-video-focus').value = '';
-                        // Send query into active thread to register in chat history
                         await sendMessage(`Summarize YouTube Video: ${url}`);
                     } else {
-                        alert('Summarization failed: ' + (data.detail || data.message || JSON.stringify(data)));
+                        alert('Summarization error: ' + (data.detail || data.message));
                     }
-                } catch (err) {
-                    alert('Request error: ' + err);
+                } catch (e) {
+                    alert('Error: ' + e);
                 } finally {
-                    statusArea.style.display = 'none';
                     btn.disabled = false;
+                    statusArea.style.display = 'none';
                 }
-            });
-
-            // India News Modal Actions
-            document.getElementById('refresh-india-news-btn').addEventListener('click', () => loadIndiaNews());
-            document.getElementById('send-india-digest-btn').addEventListener('click', () => {
-                closeModal('india-news-modal');
-                sendMessage('Provide a comprehensive briefing on breaking news, economy, technology (IndiaAI/semiconductors), and governance in India.');
-            });
-
-            // Sidebar Controls
-            toggleSidebarBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-            document.getElementById('open-new-ws-btn').addEventListener('click', () => openModal('new-ws-modal'));
-            document.getElementById('save-new-ws-btn').addEventListener('click', async () => {
-                const name = document.getElementById('new-ws-name').value.trim();
-                const desc = document.getElementById('new-ws-desc').value.trim();
-                const prompt = document.getElementById('new-ws-prompt').value.trim();
-                if (!name) return alert('Enter a workspace name');
-                try {
-                    const res = await fetch('/api/workspaces', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, description: desc, system_prompt: prompt })
-                    });
-                    const newWs = await res.json();
-                    closeModal('new-ws-modal');
-                    await loadWorkspaces();
-                    selectWorkspace(newWs);
-                } catch (e) {
-                    alert('Error creating workspace: ' + e);
-                }
-            });
-
-            document.getElementById('create-thread-btn').addEventListener('click', async () => {
-                const threadName = prompt('Thread name:', 'New Thread');
-                if (!threadName) return;
-                try {
-                    const res = await fetch(`/api/workspaces/${activeWorkspace.id}/threads`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: threadName })
-                    });
-                    const th = await res.json();
-                    await loadThreads(activeWorkspace.id);
-                    selectThread(th);
-                } catch (e) {
-                    alert('Error creating thread: ' + e);
-                }
-            });
-
-            document.getElementById('sidebar-upload-btn').addEventListener('click', () => {
-                openModal('docs-modal');
-                loadWorkspaceDocs();
-            });
-            document.getElementById('sidebar-settings-btn').addEventListener('click', () => openModal('settings-modal'));
-
-            // Footer Buttons
-            document.getElementById('footer-memory-btn').addEventListener('click', () => {
-                openModal('memory-modal');
-                renderMemoryRecords();
-            });
-            document.getElementById('footer-mcp-btn').addEventListener('click', () => {
-                openModal('mcp-modal');
-                loadMcpServers();
-            });
-            document.getElementById('footer-docs-btn').addEventListener('click', () => {
-                openModal('docs-modal');
-                loadWorkspaceDocs();
-            });
-            document.getElementById('footer-re-btn').addEventListener('click', () => openModal('re-modal'));
-            document.getElementById('footer-settings-btn').addEventListener('click', () => openModal('settings-modal'));
-
-            // File Uploads
-            const attachBtn = document.getElementById('attach-file-btn');
-            const inlineFileInput = document.getElementById('inline-file-input');
-            attachBtn.addEventListener('click', () => inlineFileInput.click());
-            inlineFileInput.addEventListener('change', async (e) => {
-                if (!e.target.files.length) return;
-                await uploadFileToWorkspace(e.target.files[0]);
-                inlineFileInput.value = '';
-            });
-
-            const docDropzone = document.getElementById('doc-dropzone');
-            const modalFileInput = document.getElementById('modal-file-input');
-            docDropzone.addEventListener('click', () => modalFileInput.click());
-            modalFileInput.addEventListener('change', async (e) => {
-                for (let file of e.target.files) {
-                    await uploadFileToWorkspace(file);
-                }
-                modalFileInput.value = '';
-                await loadWorkspaceDocs();
-            });
-
-            // Memory Import
-            const importInput = document.getElementById('import-memory-file');
-            importInput.addEventListener('change', async (e) => {
-                if (!e.target.files.length) return;
-                const file = e.target.files[0];
-                const formData = new FormData();
-                formData.append('file', file);
-                try {
-                    const res = await fetch('/api/memory/import', { method: 'POST', body: formData });
-                    const d = await res.json();
-                    alert(`Imported ${d.imported_records} turns into persistent memory!`);
-                    await loadMemoryStatus();
-                    await renderMemoryRecords();
-                } catch (err) {
-                    alert('Import failed: ' + err);
-                }
-                importInput.value = '';
             });
 
             // Reverse Engineering
@@ -2071,7 +2601,11 @@
                         body: JSON.stringify({ target_path: target, workspace_id: activeWorkspace.id })
                     });
                     const data = await res.json();
-                    renderReResult(data);
+                    document.getElementById('re-result-area').style.display = 'block';
+                    document.getElementById('re-summary-card').innerHTML = `
+                        <strong>Format:</strong> ${escapeHtml(data.format || 'Unknown')}<br/>
+                        <strong>Summary:</strong> ${escapeHtml(data.summary || '')}
+                    `;
                 } catch (e) {
                     alert('Inspection failed: ' + e);
                 } finally {
@@ -2085,12 +2619,53 @@
                 sendMessage(`/re ${target}`, 'reverse_engineer', target);
             });
 
-            // Settings Save
-            document.getElementById('save-settings-btn').addEventListener('click', () => {
+            // Settings save
+            document.getElementById('save-settings-btn').addEventListener('click', async () => {
                 const prov = document.getElementById('settings-provider').value;
-                const model = document.getElementById('settings-model').value;
-                currentModelName.textContent = `${prov} / ${model}`;
-                closeModal('settings-modal');
+                const model = document.getElementById('settings-model').value.trim();
+                const baseUrl = document.getElementById('settings-base-url').value.trim();
+                const apiKey = document.getElementById('settings-api-key').value.trim();
+                const temp = parseFloat(document.getElementById('settings-temperature').value);
+
+                try {
+                    const payload = {
+                        llm_provider: prov,
+                        llm_model: model,
+                        llm_base_url: baseUrl,
+                        temperature: isNaN(temp) ? 0.2 : temp,
+                    };
+                    if (apiKey) payload.llm_api_key = apiKey;
+
+                    const res = await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const d = await res.json();
+                    if (d.status === 'success') {
+                        currentModelName.textContent = `${d.llm_provider} / ${d.llm_model}`;
+                        closeModal('settings-modal');
+                    }
+                } catch (e) {
+                    alert('Failed to save settings: ' + e);
+                }
+            });
+
+            // Digest insert
+            document.getElementById('digest-insert-chat-btn').addEventListener('click', () => {
+                closeModal('digest-modal');
+                sendMessage('Please synthesize a briefing connecting recent Indian technological milestones (ISRO, IndiaAI, semiconductors) with global 6-month AI and quantum developments.');
+            });
+
+            // India news refresh
+            document.getElementById('refresh-india-news-btn').addEventListener('click', () => {
+                const q = document.getElementById('india-news-search-input').value.trim();
+                loadIndiaNews(q || 'India top news today');
+            });
+
+            document.getElementById('send-india-digest-btn').addEventListener('click', () => {
+                closeModal('india-news-modal');
+                sendMessage('Provide a comprehensive briefing on breaking national news, technology (IndiaAI, semiconductors), and economy in India today.');
             });
         }
 
@@ -2102,150 +2677,10 @@
                     method: 'POST',
                     body: formData
                 });
-                const data = await res.json();
-                alert(`Indexed ${file.name} (${data.indexed_chunks} chunks stored in ChromaDB vault)`);
-            } catch (e) {
-                alert('Upload failed: ' + e);
-            }
-        }
-
-        async function loadWorkspaceDocs() {
-            const tbody = document.getElementById('workspace-docs-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-light);">Loading documents...</td></tr>';
-            try {
-                const res = await fetch(`/api/workspaces/${activeWorkspace.id}/documents`);
-                const docs = await res.json();
-                tbody.innerHTML = '';
-                if (!docs || docs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-light);">No documents in this workspace.</td></tr>';
-                    return;
-                }
-                docs.forEach(doc => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td style="font-weight: 500;">${escapeHtml(doc.filename)}</td>
-                        <td><code>${escapeHtml(doc.file_type)}</code></td>
-                        <td>${doc.chunks_count}</td>
-                        <td>${(doc.file_size / 1024).toFixed(1)} KB</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="4" style="color: red;">Error: ${e}</td></tr>`;
-            }
-        }
-
-        async function renderMemoryRecords() {
-            const list = document.getElementById('memory-records-list');
-            list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">Loading conversation memory...</p>';
-            try {
-                const res = await fetch('/api/memory');
-                const data = await res.json();
-                list.innerHTML = '';
-                if (!data.recent_turns || data.recent_turns.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">No stored conversation turns yet. Send messages to begin recording memory!</p>';
-                    return;
-                }
-                data.recent_turns.slice().reverse().forEach(rec => {
-                    const card = document.createElement('div');
-                    card.className = 'memory-record-card';
-                    const dateStr = new Date(rec.timestamp * 1000).toLocaleString();
-                    card.innerHTML = `
-                        <div class="memory-record-topic">${escapeHtml(rec.user_message)}</div>
-                        <div class="memory-record-preview">${escapeHtml(rec.assistant_message)}</div>
-                        <div style="font-size: 10.5px; color: var(--text-light); display: flex; justify-content: space-between;">
-                            <span>${dateStr}</span>
-                            <span>Thread: ${escapeHtml(rec.thread_name || 'General')}</span>
-                        </div>
-                    `;
-                    list.appendChild(card);
-                });
-            } catch (e) {
-                list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to load memory: ${e}</p>`;
-            }
-        }
-
-        async function loadIndiaNews() {
-            const list = document.getElementById('india-news-list');
-            list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">Fetching live Indian headlines & intelligence...</p>';
-            try {
-                const res = await fetch('/api/news/india');
-                const data = await res.json();
-                list.innerHTML = '';
-                if (!data.articles || data.articles.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">No news articles returned.</p>';
-                    return;
-                }
-                data.articles.forEach(art => {
-                    const card = document.createElement('div');
-                    card.style.background = '#fbfbfa';
-                    card.style.border = '1px solid var(--border-subtle)';
-                    card.style.borderRadius = '6px';
-                    card.style.padding = '8px 10px';
-                    card.innerHTML = `
-                        <div style="font-weight: 600; font-size: 12.5px; color: var(--text-main); margin-bottom: 2px;">
-                            <a href="${escapeHtml(art.url)}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">${escapeHtml(art.title)}</a>
-                        </div>
-                        <div style="color: var(--text-secondary); font-size: 11.5px; line-height: 1.4;">${escapeHtml(art.snippet)}</div>
-                    `;
-                    list.appendChild(card);
-                });
-            } catch (e) {
-                list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to load India news: ${e}</p>`;
-            }
-        }
-
-        function renderReResult(data) {
-            const area = document.getElementById('re-result-area');
-            const card = document.getElementById('re-summary-card');
-            area.style.display = 'block';
-
-            let extra = '';
-            if (data.data && data.data.ipc_channels) {
-                extra += `<p style="margin-top: 4px;"><b>Discovered Electron IPC Channels:</b> ${data.data.ipc_channels.length}</p>`;
-            }
-            if (data.data && data.data.api_endpoints) {
-                extra += `<p style="margin-top: 2px;"><b>Discovered API Endpoints:</b> ${data.data.api_endpoints.length}</p>`;
-            }
-
-            card.innerHTML = `
-                <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">${escapeHtml(data.file_name)} [${data.format}]</div>
-                <div style="color: var(--text-secondary); font-size: 12px;">${escapeHtml(data.summary)}</div>
-                ${extra}
-            `;
-        }
-
-        async function loadMcpServers() {
-            const list = document.getElementById('mcp-servers-list');
-            list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">Querying MCP servers...</p>';
-            try {
-                const res = await fetch('/api/mcp/servers');
-                const servers = await res.json();
-                list.innerHTML = '';
-                if (!servers || servers.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-light); font-size: 11.5px;">No MCP servers registered.</p>';
-                    return;
-                }
-                servers.forEach(s => {
-                    const row = document.createElement('div');
-                    row.style.background = '#fbfbfa';
-                    row.style.border = '1px solid var(--border-subtle)';
-                    row.style.borderRadius = '6px';
-                    row.style.padding = '8px 10px';
-                    row.style.display = 'flex';
-                    row.style.justifyContent = 'space-between';
-                    row.style.alignItems = 'center';
-                    row.innerHTML = `
-                        <div>
-                            <div style="font-weight: 600; font-size: 12.5px;">${escapeHtml(s.name)}</div>
-                            <div style="color: var(--text-light); font-size: 11px; font-family: monospace;">${escapeHtml(s.command)} ${s.args.join(' ')}</div>
-                        </div>
-                        <span style="font-size: 10.5px; padding: 2px 7px; border-radius: 4px; background: var(--pastel-green-bg); color: var(--pastel-green-text); font-weight: 500;">Ready</span>
-                    `;
-                    list.appendChild(row);
-                });
-            } catch (e) {
-                list.innerHTML = `<p style="color: red; font-size: 11.5px;">Failed to query MCP servers: ${e}</p>`;
+                const d = await res.json();
+                alert(`Uploaded '${d.document.filename}' into '${activeWorkspace.name}' (${d.indexed_chunks} vector chunks indexed).`);
+            } catch (err) {
+                alert('Upload failed: ' + err);
             }
         }
 
@@ -2259,7 +2694,21 @@
                 .replace(/'/g, '&#039;');
         }
 
-        init();
+        function escapeQuotes(str) {
+            if (!str) return '';
+            return String(str).replace(/'/g, "\\'").replace(/\n/g, ' ');
+        }
+
+        function formatBytes(bytes, decimals = 1) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

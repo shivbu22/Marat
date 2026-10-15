@@ -288,11 +288,49 @@ class WorkspaceManager:
             conn.commit()
         return thread
 
+    def get_document(self, document_id: str) -> WorkspaceDocument | None:
+        with self._get_conn() as conn:
+            row = conn.execute("SELECT * FROM workspace_documents WHERE id = ?", (document_id,)).fetchone()
+            if row:
+                d = dict(row)
+                meta_json = d.pop("metadata_json", "{}")
+                d["metadata"] = json.loads(meta_json or "{}")
+                return WorkspaceDocument(**d)
+        return None
+
+    def delete_document(self, document_id: str) -> tuple[bool, str | None, str | None]:
+        """Delete a document record and decrement the workspace documents_count.
+        Returns (success, workspace_id, filename).
+        """
+        doc = self.get_document(document_id)
+        if not doc:
+            return False, None, None
+
+        with self._get_conn() as conn:
+            conn.execute("DELETE FROM workspace_documents WHERE id = ?", (document_id,))
+            conn.execute(
+                "UPDATE workspaces SET documents_count = MAX(0, documents_count - 1), updated_at = ? WHERE id = ?",
+                (time.time(), doc.workspace_id),
+            )
+            conn.commit()
+            return True, doc.workspace_id, doc.filename
+
     def get_thread(self, thread_id: str) -> WorkspaceThread | None:
         with self._get_conn() as conn:
             row = conn.execute("SELECT * FROM workspace_threads WHERE id = ?", (thread_id,)).fetchone()
             if row:
                 return WorkspaceThread(**dict(row))
+        return None
+
+    def update_thread(self, thread_id: str, name: str) -> WorkspaceThread | None:
+        with self._get_conn() as conn:
+            res = conn.execute(
+                "UPDATE workspace_threads SET name = ?, updated_at = ? WHERE id = ?",
+                (name, time.time(), thread_id),
+            )
+            conn.commit()
+            if res.rowcount > 0:
+                return self.get_thread(thread_id)
         return None
 
     def delete_thread(self, thread_id: str) -> bool:

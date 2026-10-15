@@ -211,6 +211,16 @@ class ResearchRAG:
         except Exception:
             return []
 
+    def delete_document_chunks(self, filename: str, collection_name: str | None = None) -> int:
+        col = self._get_target_collection(collection_name)
+        if col is None:
+            return 0
+        try:
+            col.delete(where={"filename": filename})
+            return 1
+        except Exception:
+            return 0
+
 
 # Singleton
 _rag: ResearchRAG | None = None

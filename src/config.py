@@ -79,3 +79,13 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def update_settings(updates: dict[str, any]) -> Settings:
+    """Update settings singleton attributes at runtime."""
+    s = get_settings()
+    for k, v in updates.items():
+        if hasattr(s, k) and v is not None and v != "":
+            setattr(s, k, v)
+    return s
+

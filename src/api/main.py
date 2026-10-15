@@ -108,6 +108,23 @@ class ThreadCreateRequest(BaseModel):
     name: str = Field(default="New Thread", min_length=1, max_length=100)
 
 
+class ThreadUpdateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=150)
+
+
+class SettingsUpdateRequest(BaseModel):
+    llm_provider: str | None = None
+    llm_model: str | None = None
+    llm_base_url: str | None = None
+    llm_api_key: str | None = None
+    temperature: float | None = None
+
+
+class WorkspaceSearchRequest(BaseModel):
+    query: str = Field(..., min_length=1)
+    k: int = 5
+
+
 class ChatMessageRequest(BaseModel):
     workspace_id: str = "default"
     thread_id: str | None = None
@@ -259,6 +276,42 @@ async def upload_document(workspace_id: str, file: UploadFile = File(...)):
     }
 
 
+@app.delete("/api/workspaces/{workspace_id}/documents/{document_id}")
+async def delete_workspace_document(workspace_id: str, document_id: str):
+    mgr = get_workspace_manager()
+    rag = get_rag()
+    ws = mgr.get_workspace(workspace_id)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+
+    success, _, filename = mgr.delete_document(document_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    if filename and ws.vector_collection:
+        rag.delete_document_chunks(filename, collection_name=ws.vector_collection)
+
+    return {"status": "deleted", "document_id": document_id, "filename": filename}
+
+
+@app.post("/api/workspaces/{workspace_id}/search")
+async def search_workspace_documents(workspace_id: str, req: WorkspaceSearchRequest):
+    mgr = get_workspace_manager()
+    rag = get_rag()
+    ws = mgr.get_workspace(workspace_id)
+    if not ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    results = rag.search(req.query, k=req.k, collection_name=ws.vector_collection)
+    return {
+        "status": "ok",
+        "workspace_id": workspace_id,
+        "query": req.query,
+        "count": len(results),
+        "results": results,
+    }
+
+
+
 # ---------------------------------------------------------------------------
 # Threads & Chat Endpoints (AnythingLLM Feature)
 # ---------------------------------------------------------------------------
@@ -294,6 +347,63 @@ async def delete_thread(thread_id: str):
     if not success:
         raise HTTPException(status_code=404, detail="Thread not found")
     return {"status": "deleted", "id": thread_id}
+
+
+@app.patch("/api/threads/{thread_id}")
+async def rename_thread(thread_id: str, req: ThreadUpdateRequest):
+    mgr = get_workspace_manager()
+    th = mgr.update_thread(thread_id, req.name)
+    if not th:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    return th
+
+
+@app.get("/api/threads/{thread_id}/export")
+async def export_thread(thread_id: str, format: str = "markdown"):
+    mgr = get_workspace_manager()
+    thread = mgr.get_thread(thread_id)
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    messages = mgr.list_messages(thread_id, limit=500)
+
+    if format.lower() == "json":
+        return JSONResponse(
+            content={
+                "thread_id": thread.id,
+                "thread_name": thread.name,
+                "workspace_id": thread.workspace_id,
+                "messages": [m.model_dump() for m in messages],
+            },
+            headers={"Content-Disposition": f'attachment; filename="marat_{thread.name.replace(" ", "_")}.json"'},
+        )
+
+    lines = [
+        f"# MARAT Intelligence Dossier: {thread.name}",
+        f"*Generated on {time.strftime('%Y-%m-%d %H:%M:%S')}*",
+        "",
+        "---",
+        "",
+    ]
+    for m in messages:
+        sender = "👤 **User**" if m.role == "user" else "🐾 **Mara (MARAT Intelligence)**"
+        lines.append(f"### {sender}")
+        lines.append(m.content)
+        if m.metadata and m.metadata.get("sources"):
+            lines.append("")
+            lines.append("**Sources Consulted:**")
+            for src in m.metadata["sources"]:
+                lines.append(f"- {src}")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+
+    md_content = "\n".join(lines)
+    return HTMLResponse(
+        content=md_content,
+        media_type="text/markdown",
+        headers={"Content-Disposition": f'attachment; filename="marat_{thread.name.replace(" ", "_")}.md"'},
+    )
+
 
 
 @app.post("/api/chat")
@@ -868,3 +978,66 @@ async def stream_research(req: ResearchRequest):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Global Settings & Curated Knowledge Digest
+# ---------------------------------------------------------------------------
+@app.get("/api/settings")
+async def get_settings_endpoint():
+    cur_s = get_settings()
+    masked_key = ""
+    if cur_s.llm_api_key and cur_s.llm_api_key != "ollama":
+        k = cur_s.llm_api_key
+        masked_key = k[:3] + "..." + k[-3:] if len(k) > 6 else "***"
+    return {
+        "status": "ok",
+        "llm_provider": cur_s.llm_provider,
+        "llm_model": cur_s.llm_model,
+        "llm_base_url": cur_s.llm_base_url,
+        "llm_api_key_set": bool(cur_s.llm_api_key and cur_s.llm_api_key != "ollama"),
+        "llm_api_key_masked": masked_key,
+        "temperature": cur_s.temperature,
+        "rag_enabled": cur_s.rag_enabled,
+    }
+
+
+@app.post("/api/settings")
+async def update_settings_endpoint(req: SettingsUpdateRequest):
+    from ..config import update_settings
+
+    updates = req.model_dump(exclude_unset=True)
+    updated = update_settings(updates)
+    return {
+        "status": "success",
+        "llm_provider": updated.llm_provider,
+        "llm_model": updated.llm_model,
+        "llm_base_url": updated.llm_base_url,
+        "temperature": updated.temperature,
+    }
+
+
+@app.get("/api/knowledge/digest")
+async def get_knowledge_digest():
+    """Returns curated intelligence cards across domains (India, World 6M, RE)."""
+    return {
+        "status": "ok",
+        "cards": [
+            {
+                "domain": "🇮🇳 India Technology & Space",
+                "tag": "ISRO / DPI / AI",
+                "summary": "Chandrayaan-3 and Gaganyaan human spaceflight preparations, Aditya-L1 solar observation, IndiaAI mission allocating 10,000 GPUs, national semiconductor fab buildout in Gujarat & Assam, and global expansion of UPI digital public rails.",
+            },
+            {
+                "domain": "🌐 Global 6-Month AI Horizon",
+                "tag": "Reasoning & Frontier Labs",
+                "summary": "Emergence of deep reasoning test-time compute scaling (o1/o3 architectures), multimodal open-weights proliferation (Llama 3.3, DeepSeek-V3), quantum error correction milestones at Quantinuum & Google, and autonomous agent hypervisors.",
+            },
+            {
+                "domain": "🔬 Reverse Engineering Arsenal",
+                "tag": "Binary & APK Inspection",
+                "summary": "Automated unpacking of Electron ASAR bundles, PE/ELF section entropy & suspicious import detection, Android APK manifest/permission auditing, WebAssembly binary opcode decompilation, and MCP tool orchestration.",
+            },
+        ],
+    }
+
